@@ -66,6 +66,7 @@ protocol FileStorageServiceProtocol: Sendable {
     func loadVehicles() async -> [Vehicle]
     func saveVehicle(_ vehicle: Vehicle) async
     func saveDocument(image: UIImage, for vehicleId: UUID) async
+    func saveDocument(fileURL: URL, for vehicleId: UUID) async
     func deleteVehicle(_ vehicleId: UUID) async
     func deleteDocument(_ document: Document, for vehicleId: UUID) async
     func updateVehicle(_ vehicleId: UUID, with updatedVehicle: Vehicle) async
@@ -100,6 +101,12 @@ extension FileStorageService: FileStorageServiceProtocol {
     func saveDocument(image: UIImage, for vehicleId: UUID) async {
         await Task { [self] in
             saveDocument(image: image, for: vehicleId)
+        }.value
+    }
+    
+    func saveDocument(fileURL: URL, for vehicleId: UUID) async {
+        await Task { [self] in
+            saveDocument(fileURL: fileURL, for: vehicleId)
         }.value
     }
     

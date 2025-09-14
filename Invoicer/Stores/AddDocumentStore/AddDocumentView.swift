@@ -7,6 +7,7 @@
 
 import SwiftUI
 import ComposableArchitecture
+import UniformTypeIdentifiers
 
 struct AddDocumentView: View {
     @Bindable var store: StoreOf<AddDocumentStore>
@@ -14,7 +15,7 @@ struct AddDocumentView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 20) {
-                if let image = store.capturedImage {
+                if let image = store.capturedImage, store.documentSource == .camera {
                     // Photo preview
                     VStack(spacing: 16) {
                         Text("Document Preview")
@@ -32,29 +33,95 @@ struct AddDocumentView: View {
                         }
                         .foregroundColor(.blue)
                     }
-                } else {
-                    // No photo taken yet
+                } else if let fileName = store.selectedFileName, store.documentSource == .file {
+                    // File preview
                     VStack(spacing: 16) {
-                        Image(systemName: "camera.fill")
-                            .imageScale(.large)
-                            .font(.system(size: 60))
-                            .foregroundStyle(.tint)
-                        
-                        Text("Take a Photo")
+                        Text("Fichier Sélectionné")
                             .font(.headline)
                         
-                        Text("Capture a document photo to add to this vehicle")
+                        VStack(spacing: 12) {
+                            Image(systemName: "doc.fill")
+                                .font(.system(size: 60))
+                                .foregroundColor(.blue)
+                            
+                            Text(fileName)
+                                .font(.title2)
+                                .fontWeight(.semibold)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal)
+                        }
+                        .padding()
+                        .background(Color.gray.opacity(0.1))
+                        .cornerRadius(12)
+                        
+                        Button("Choisir un Autre Fichier") {
+                            store.send(.showFilePicker)
+                        }
+                        .foregroundColor(.blue)
+                    }
+                } else {
+                    // No document selected yet
+                    VStack(spacing: 20) {
+                        Text("Ajouter un Document")
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                        
+                        Text("Choisissez comment ajouter votre document")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
                         
-                        Button("Open Camera") {
-                            store.send(.showCamera)
+                        VStack(spacing: 16) {
+                            // Camera option
+                            Button(action: {
+                                store.send(.showCamera)
+                            }) {
+                                HStack(spacing: 12) {
+                                    Image(systemName: "camera.fill")
+                                        .font(.title2)
+                                        .foregroundColor(.white)
+                                    
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text("Prendre une Photo")
+                                            .font(.headline)
+                                            .foregroundColor(.white)
+                                        Text("Utiliser l'appareil photo")
+                                            .font(.subheadline)
+                                            .foregroundColor(.white.opacity(0.8))
+                                    }
+                                    
+                                    Spacer()
+                                }
+                                .padding()
+                                .background(Color.blue)
+                                .cornerRadius(12)
+                            }
+                            
+                            // File picker option
+                            Button(action: {
+                                store.send(.showFilePicker)
+                            }) {
+                                HStack(spacing: 12) {
+                                    Image(systemName: "folder.fill")
+                                        .font(.title2)
+                                        .foregroundColor(.white)
+                                    
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text("Importer un Fichier")
+                                            .font(.headline)
+                                            .foregroundColor(.white)
+                                        Text("Depuis le stockage ou iCloud")
+                                            .font(.subheadline)
+                                            .foregroundColor(.white.opacity(0.8))
+                                    }
+                                    
+                                    Spacer()
+                                }
+                                .padding()
+                                .background(Color.green)
+                                .cornerRadius(12)
+                            }
                         }
-                        .padding()
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
                     }
                 }
                 
@@ -74,7 +141,7 @@ struct AddDocumentView: View {
                     Button("Save") {
                         store.send(.saveDocument)
                     }
-                    .disabled(store.capturedImage == nil || store.isLoading)
+                    .disabled((store.capturedImage == nil && store.selectedFileURL == nil) || store.isLoading)
                 }
             }
         }
@@ -86,39 +153,47 @@ struct AddDocumentView: View {
                 store.send(.imageCapture(image))
             }
         }
+        .sheet(isPresented: .init(
+            get: { store.showFilePicker },
+            set: { _ in store.send(.hideFilePicker) }
+        )) {
+            FilePickerView { url in
+                store.send(.fileSelected(url))
+            }
+        }
     }
 }
 
-struct CameraView: UIViewControllerRepresentable {
-    let onImageCapture: (UIImage?) -> Void
+
+struct FilePickerView: UIViewControllerRepresentable {
+    let onFileSelected: (URL?) -> Void
     
-    func makeUIViewController(context: Context) -> UIImagePickerController {
-        let picker = UIImagePickerController()
-        picker.sourceType = .camera
+    func makeUIViewController(context: Context) -> UIDocumentPickerViewController {
+        let picker = UIDocumentPickerViewController(forOpeningContentTypes: [.pdf, .jpeg, .png, .text, .plainText])
+        picker.allowsMultipleSelection = false
         picker.delegate = context.coordinator
         return picker
     }
     
-    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
+    func updateUIViewController(_ uiViewController: UIDocumentPickerViewController, context: Context) {}
     
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
     }
     
-    class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
-        let parent: CameraView
+    class Coordinator: NSObject, UIDocumentPickerDelegate {
+        let parent: FilePickerView
         
-        init(_ parent: CameraView) {
+        init(_ parent: FilePickerView) {
             self.parent = parent
         }
         
-        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-            let image = info[.originalImage] as? UIImage
-            parent.onImageCapture(image)
+        func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+            parent.onFileSelected(urls.first)
         }
         
-        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-            parent.onImageCapture(nil)
+        func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
+            parent.onFileSelected(nil)
         }
     }
 }

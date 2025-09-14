@@ -10,7 +10,10 @@ import ComposableArchitecture
 
 struct VehicleView: View {
     @Bindable var store: StoreOf<VehicleStore>
-    
+    let gap: CGFloat = 40          // distance voulue entre les points
+        let circleSize: CGFloat = 12
+        let lineWidth: CGFloat = 2
+        let leftColumnWidth: CGFloat = 40
     var body: some View {
         NavigationView {
             VStack(spacing: 20) {
@@ -57,29 +60,125 @@ struct VehicleView: View {
                     }
                     .padding()
                 } else {
-                    List(store.vehicle.documents) { document in
-                        Button(action: {
-                            store.send(.showDocumentDetail(document.id))
-                        }) {
-                            HStack {
-                                Image(systemName: "doc.fill")
-                                    .foregroundColor(.blue)
-                                VStack(alignment: .leading) {
-                                    Text("Document")
-                                        .font(.headline)
-                                    Text(document.createdAt, style: .date)
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
+                    ScrollView {
+                        VStack(spacing: 0) {
+                            ForEach(Array(store.vehicle.documents.enumerated()), id: \.element.id) { index, document in
+                                Button(action: {
+                                    store.send(.showDocumentDetail(document.id))
+                                }) {
+                                    HStack(alignment: .center, spacing: 12) {
+                                        // Timeline column
+                                        VStack(spacing: 0) {
+                                            // Top half (except for first)
+                                            if index != 0 {
+                                                Rectangle()
+                                                    .fill(Color.gray)
+                                                    .frame(width: lineWidth, height: gap / 2)
+                                                    .fixedSize()
+                                            } else {
+                                                Spacer().frame(height: gap / 2)
+                                            }
+
+                                            // Circle
+                                            Circle()
+                                                .fill(Color.blue)
+                                                .frame(width: circleSize, height: circleSize)
+
+                                            // Bottom half (except for last)
+                                            if index != store.vehicle.documents.count - 1 {
+                                                Rectangle()
+                                                    .fill(Color.gray)
+                                                    .frame(width: lineWidth, height: gap / 2)
+                                                    .fixedSize()
+                                            } else {
+                                                Spacer().frame(height: gap / 2)
+                                            }
+                                        }
+                                        .frame(width: leftColumnWidth, alignment: .top)
+                                        .padding(.top, 0)
+
+                                        // Document content
+                                        HStack {
+                                            Image(systemName: getDocumentIcon(for: document.fileURL))
+                                                .foregroundColor(.blue)
+                                                .font(.title2)
+                                            
+                                            VStack(alignment: .leading, spacing: 4) {
+                                                Text("Document")
+                                                    .font(.headline)
+                                                    .foregroundColor(.primary)
+                                                Text(document.createdAt, style: .date)
+                                                    .font(.caption)
+                                                    .foregroundColor(.secondary)
+                                            }
+                                            
+                                            Spacer()
+                                            
+                                            Image(systemName: "chevron.right")
+                                                .foregroundColor(.gray)
+                                                .font(.caption)
+                                        }
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .padding(.vertical, 8)
+                                    }
                                 }
-                                Spacer()
-                                Image(systemName: "chevron.right")
-                                    .foregroundColor(.gray)
-                                    .font(.caption)
+                                .buttonStyle(PlainButtonStyle())
                             }
                         }
-                        .buttonStyle(PlainButtonStyle())
-                        .padding(.vertical, 4)
+                        .padding()
                     }
+//                        ScrollView {
+//                            VStack(spacing: 0) {
+//                            ForEach(store.vehicle.documents) { document in
+//                                Button(action: {
+//                                    store.send(.showDocumentDetail(document.id))
+//                                }) {
+//                                    HStack {
+//                                        Color.black
+//                                            .frame(maxWidth: 2, maxHeight: .infinity)
+//                                        
+//                                        Image(systemName: "doc.fill")
+//                                            .foregroundColor(.blue)
+//                                        VStack(alignment: .leading) {
+//                                            Text("Document")
+//                                                .font(.headline)
+//                                            Text(document.createdAt, style: .date)
+//                                                .font(.caption)
+//                                                .foregroundColor(.secondary)
+//                                        }
+//                                        Spacer()
+//                                        Image(systemName: "chevron.right")
+//                                            .foregroundColor(.gray)
+//                                            .font(.caption)
+//                                    }
+//                                }
+////                                .buttonStyle(PlainButtonStyle())
+//                            }
+//                        }
+//                    }
+//                    List(store.vehicle.documents) { document in
+//                        Button(action: {
+//                            store.send(.showDocumentDetail(document.id))
+//                        }) {
+//                            HStack {
+//                                Image(systemName: "doc.fill")
+//                                    .foregroundColor(.blue)
+//                                VStack(alignment: .leading) {
+//                                    Text("Document")
+//                                        .font(.headline)
+//                                    Text(document.createdAt, style: .date)
+//                                        .font(.caption)
+//                                        .foregroundColor(.secondary)
+//                                }
+//                                Spacer()
+//                                Image(systemName: "chevron.right")
+//                                    .foregroundColor(.gray)
+//                                    .font(.caption)
+//                            }
+//                        }
+//                        .buttonStyle(PlainButtonStyle())
+//                        .padding(.vertical, 4)
+//                    }
                 }
                 
                 Spacer()
@@ -99,8 +198,8 @@ struct VehicleView: View {
                 .padding()
             }
             .padding()
-            .navigationTitle("Vehicle Details")
-            .navigationBarTitleDisplayMode(.inline)
+//            .navigationTitle("Vehicle Details")
+//            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Back") {
@@ -128,16 +227,44 @@ struct VehicleView: View {
             AddDocumentView(store: addDocumentStore)
         }
         .sheet(item: $store.scope(state: \.documentDetail, action: \.documentDetail)) { documentDetailStore in
-            DocumentDetailView(store: documentDetailStore)
+            DocumentDetailCoordinatorView(store: documentDetailStore)
         }
         .sheet(item: $store.scope(state: \.editVehicle, action: \.editVehicle)) { editVehicleStore in
             EditVehicleView(store: editVehicleStore)
         }
     }
+    
+    private func getDocumentIcon(for filePath: String) -> String {
+        let url = URL(fileURLWithPath: filePath)
+        let pathExtension = url.pathExtension.lowercased()
+        
+        switch pathExtension {
+        case "pdf":
+            return "doc.richtext.fill"
+        case "jpg", "jpeg", "png", "gif", "bmp", "tiff", "heic", "heif":
+            return "photo.fill"
+        case "txt", "text", "md":
+            return "doc.text.fill"
+        case "json", "xml":
+            return "doc.badge.gearshape.fill"
+        case "csv":
+            return "tablecells.fill"
+        default:
+            return "doc.fill"
+        }
+    }
 }
 
 #Preview {
-    VehicleView(store: Store(initialState: VehicleStore.State(vehicle: Vehicle(name: "Test Car", currentMileage: "50000", registrationDate: "2020-01-01", licensePlate: "ABC-123"))) {
+    VehicleView(store:
+                    Store(initialState:
+                            VehicleStore.State(vehicle:
+                                                Vehicle(name: "Test Car",
+                                                        currentMileage: "50000",
+                                                        registrationDate: "2020-01-01",
+                                                        licensePlate: "ABC-123",
+                                                        documents: [.init(fileURL: ""),
+                                                                    .init(fileURL: "")]))) {
         VehicleStore()
     })
 }

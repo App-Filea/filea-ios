@@ -6,12 +6,15 @@
 //
 
 import SwiftUI
+import ComposableArchitecture
 
 @main
 struct InvoicerApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            AppView(store: Store(initialState: AppStore.State()) {
+                AppStore()
+            })
         }
     }
 }

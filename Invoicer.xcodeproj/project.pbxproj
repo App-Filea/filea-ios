@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		3F07416E2E6C7C5A00F18229 /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = 3F07416D2E6C7C5A00F18229 /* ComposableArchitecture */; };
+		3F0741702E6C7C5D00F18229 /* SharingGRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 3F07416F2E6C7C5D00F18229 /* SharingGRDB */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		3F0741432E6C714D00F18229 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +57,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3F0741702E6C7C5D00F18229 /* SharingGRDB in Frameworks */,
+				3F07416E2E6C7C5A00F18229 /* ComposableArchitecture in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -78,6 +85,7 @@
 				3F0741362E6C714B00F18229 /* Invoicer */,
 				3F0741452E6C714D00F18229 /* InvoicerTests */,
 				3F07414F2E6C714D00F18229 /* InvoicerUITests */,
+				3F07416C2E6C7C5A00F18229 /* Frameworks */,
 				3F0741352E6C714B00F18229 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -90,6 +98,13 @@
 				3F07414C2E6C714D00F18229 /* InvoicerUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		3F07416C2E6C7C5A00F18229 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -112,6 +127,8 @@
 			);
 			name = Invoicer;
 			packageProductDependencies = (
+				3F07416D2E6C7C5A00F18229 /* ComposableArchitecture */,
+				3F07416F2E6C7C5D00F18229 /* SharingGRDB */,
 			);
 			productName = Invoicer;
 			productReference = 3F0741342E6C714B00F18229 /* Invoicer.app */;
@@ -195,6 +212,11 @@
 			);
 			mainGroup = 3F07412B2E6C714B00F18229;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				3F07415F2E6C738200F18229 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */,
+				3F0741602E6C73A700F18229 /* XCRemoteSwiftPackageReference "sharing-grdb" */,
+				3F0741652E6C76BE00F18229 /* XCRemoteSwiftPackageReference "supabase-swift" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 3F0741352E6C714B00F18229 /* Products */;
 			projectDirPath = "";
@@ -322,6 +344,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Besoin de la camera stp";
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -378,6 +401,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Besoin de la camera stp";
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -416,10 +440,11 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,7";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				XROS_DEPLOYMENT_TARGET = 2.5;
 			};
 			name = Debug;
@@ -455,10 +480,11 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,7";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				XROS_DEPLOYMENT_TARGET = 2.5;
 			};
 			name = Release;
@@ -593,6 +619,46 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		3F07415F2E6C738200F18229 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/swift-composable-architecture.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.22.2;
+			};
+		};
+		3F0741602E6C73A700F18229 /* XCRemoteSwiftPackageReference "sharing-grdb" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/sharing-grdb";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.7.0;
+			};
+		};
+		3F0741652E6C76BE00F18229 /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/supabase/supabase-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.5.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		3F07416D2E6C7C5A00F18229 /* ComposableArchitecture */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3F07415F2E6C738200F18229 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */;
+			productName = ComposableArchitecture;
+		};
+		3F07416F2E6C7C5D00F18229 /* SharingGRDB */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3F0741602E6C73A700F18229 /* XCRemoteSwiftPackageReference "sharing-grdb" */;
+			productName = SharingGRDB;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 3F07412C2E6C714B00F18229 /* Project object */;
 }

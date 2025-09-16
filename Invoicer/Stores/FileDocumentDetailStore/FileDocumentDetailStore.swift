@@ -40,6 +40,7 @@ struct FileDocumentDetailStore {
         case requestDeletion
         case documentDeleted
         case goBack
+        case showEditDocument
     }
     
     @Dependency(\.fileStorageService) var fileStorageService
@@ -166,6 +167,9 @@ struct FileDocumentDetailStore {
             case .goBack:
                 print("🔙 [FileDocumentDetailStore] Retour à la vue précédente")
                 return .none
+                
+            case .showEditDocument:
+                return .none // This will be handled by the parent coordinator
             }
         }
     }

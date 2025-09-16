@@ -8,6 +8,115 @@
 import Foundation
 import os.log
 import SwiftUI
+import Dependencies
+
+extension DependencyValues {
+    var fileStorageService: FileStorageServiceProtocol {
+        get { self[FileStorageServiceKey.self] }
+        set { self[FileStorageServiceKey.self] = newValue }
+    }
+}
+
+private enum FileStorageServiceKey: DependencyKey {
+    static let liveValue: FileStorageServiceProtocol = FileStorageService()
+}
+
+protocol FileStorageServiceProtocol: Sendable {
+    func initializeStorage() async
+    func openVehiclesFolder() async
+    func loadVehicles() async -> [Vehicle]
+    func saveVehicle(_ vehicle: Vehicle) async
+    func saveDocument(image: UIImage, for vehicleId: UUID, name: String, date: Date, mileage: String, type: DocumentType) async
+    func saveDocument(fileURL: URL, for vehicleId: UUID, name: String, date: Date, mileage: String, type: DocumentType) async
+    func deleteVehicle(_ vehicleId: UUID) async
+    func deleteDocument(_ document: Document, for vehicleId: UUID) async
+    func updateVehicle(_ vehicleId: UUID, with updatedVehicle: Vehicle) async
+    func updateDocument(_ document: Document, for vehicleId: UUID) async
+    func replaceDocumentPhoto(_ documentId: UUID, in vehicleId: UUID, with newImage: UIImage) async
+}
+
+extension FileStorageService: FileStorageServiceProtocol {
+    func initializeStorage() async {
+        await Task {
+            self.initializeStorage()
+        }.value
+    }
+    
+    func openVehiclesFolder() async {
+        await Task {
+            self.openVehiclesFolder()
+        }.value
+    }
+    
+    func loadVehicles() async -> [Vehicle] {
+        await Task {
+            self.loadVehicles()
+        }.value
+    }
+    
+    func saveVehicle(_ vehicle: Vehicle) async {
+        await Task {
+            self.saveVehicle(vehicle)
+        }.value
+    }
+    
+    func saveDocument(image: UIImage, for vehicleId: UUID, name: String, date: Date, mileage: String, type: DocumentType) async {
+        await Task {
+            self.saveDocument(
+                image: image,
+                for: vehicleId,
+                name: name,
+                date: date,
+                mileage: mileage,
+                type: type
+            )
+        }.value
+    }
+    
+    func saveDocument(fileURL: URL, for vehicleId: UUID, name: String, date: Date, mileage: String, type: DocumentType) async {
+        await Task {
+            self.saveDocument(
+                fileURL: fileURL,
+                for: vehicleId,
+                name: name,
+                date: date,
+                mileage: mileage,
+                type: type
+            )
+        }.value
+    }
+    
+    func deleteVehicle(_ vehicleId: UUID) async {
+        await Task {
+            self.deleteVehicle(vehicleId)
+        }.value
+    }
+    
+    func deleteDocument(_ document: Document, for vehicleId: UUID) async {
+        await Task {
+            self.deleteDocument(document, for: vehicleId)
+        }.value
+    }
+    
+    func updateVehicle(_ vehicleId: UUID, with updatedVehicle: Vehicle) async {
+        await Task {
+            self.updateVehicle(vehicleId, with: updatedVehicle)
+        }.value
+    }
+    
+    func updateDocument(_ document: Document, for vehicleId: UUID) async {
+        await Task {
+            self.updateDocument(document, for: vehicleId)
+        }.value
+    }
+    
+    func replaceDocumentPhoto(_ documentId: UUID, in vehicleId: UUID, with newImage: UIImage) async {
+        await Task {
+            self.replaceDocumentPhoto(documentId, in: vehicleId, with: newImage)
+        }.value
+    }
+}
+
 
 final class FileStorageService: @unchecked Sendable {
     private let logger = Logger(subsystem: "com.invoicer.nbarb.Invoicer", category: "FileStorage")
@@ -210,7 +319,7 @@ final class FileStorageService: @unchecked Sendable {
     }
     
     
-    func saveDocument(image: UIImage, for vehicleId: UUID) {
+    func saveDocument(image: UIImage, for vehicleId: UUID, name: String, date: Date, mileage: String, type: DocumentType) {
         logger.info("💾 Sauvegarde d'un document image pour le véhicule: \(vehicleId)")
         
         // Find the vehicle to get its folder name
@@ -240,8 +349,14 @@ final class FileStorageService: @unchecked Sendable {
             try imageData.write(to: imageFileURL)
             logger.info("📄 Image sauvegardée à: \(imageFileURL.path)")
             
-            // Create document object
-            let document = Document(fileURL: imageFileURL.path)
+            // Create document object with metadata
+            let document = Document(
+                fileURL: imageFileURL.path,
+                name: name,
+                date: date,
+                mileage: mileage,
+                type: type
+            )
             
             // Add document to vehicle
             vehicles[vehicleIndex].documents.append(document)
@@ -258,7 +373,7 @@ final class FileStorageService: @unchecked Sendable {
         }
     }
     
-    func saveDocument(fileURL: URL, for vehicleId: UUID) {
+    func saveDocument(fileURL: URL, for vehicleId: UUID, name: String, date: Date, mileage: String, type: DocumentType) {
         logger.info("💾 Sauvegarde d'un fichier document pour le véhicule: \(vehicleId)")
         logger.info("📄 Fichier source: \(fileURL.lastPathComponent)")
         
@@ -304,8 +419,14 @@ final class FileStorageService: @unchecked Sendable {
             try FileManager.default.copyItem(at: fileURL, to: destinationFileURL)
             logger.info("📄 Fichier copié vers: \(destinationFileURL.path)")
             
-            // Create document object
-            let document = Document(fileURL: destinationFileURL.path)
+            // Create document object with metadata
+            let document = Document(
+                fileURL: destinationFileURL.path,
+                name: name,
+                date: date,
+                mileage: mileage,
+                type: type
+            )
             
             // Add document to vehicle
             vehicles[vehicleIndex].documents.append(document)
@@ -594,6 +715,38 @@ final class FileStorageService: @unchecked Sendable {
         } catch {
             logger.error("💥 Erreur lors du remplacement de la photo: \(error.localizedDescription)")
             logger.error("🔍 Détails: oldFileURL=\(oldFileURL.path), newFileURL=\(newFileURL.path)")
+        }
+    }
+    
+    func updateDocument(_ document: Document, for vehicleId: UUID) {
+        logger.info("📝 Mise à jour du document \(document.id) pour le véhicule: \(vehicleId)")
+        
+        // Load current vehicles
+        var vehicles = loadVehicles()
+        
+        guard let vehicleIndex = vehicles.firstIndex(where: { $0.id == vehicleId }) else {
+            logger.error("❌ Véhicule non trouvé avec l'ID: \(vehicleId)")
+            return
+        }
+        
+        guard let documentIndex = vehicles[vehicleIndex].documents.firstIndex(where: { $0.id == document.id }) else {
+            logger.error("❌ Document non trouvé avec l'ID: \(document.id)")
+            return
+        }
+        
+        // Update the document
+        vehicles[vehicleIndex].documents[documentIndex] = document
+        
+        do {
+            // Save updated vehicles list
+            let jsonData = try JSONEncoder().encode(vehicles)
+            try jsonData.write(to: vehiclesFileURL)
+            
+            logger.info("✅ Document mis à jour avec succès")
+            logger.info("📊 Nom: \(document.name), Type: \(document.type.displayName)")
+            
+        } catch {
+            logger.error("❌ Erreur lors de la mise à jour du document: \(error.localizedDescription)")
         }
     }
     

@@ -18,6 +18,8 @@ struct DocumentDetailCoordinatorStore {
         var documentType: DocumentType = .unknown
         var photoDocumentDetail: PhotoDocumentDetailStore.State?
         var fileDocumentDetail: FileDocumentDetailStore.State?
+        var isLoading = false
+        @Shared(.vehicles) var vehicles: [Vehicle] = []
         
         enum DocumentType: Equatable {
             case photo
@@ -31,12 +33,15 @@ struct DocumentDetailCoordinatorStore {
         case documentTypeDetected(State.DocumentType)
         case photoDocumentDetail(PhotoDocumentDetailStore.Action)
         case fileDocumentDetail(FileDocumentDetailStore.Action)
+        case showEditDocument
+        case editDocumentLoaded(Document)
         case requestDeletion(UUID)
         case documentDeleted
         case goBack
     }
     
     @Dependency(\.fileStorageService) var fileStorageService
+    @Dependency(\.dismiss) var dismiss
     
     var body: some ReducerOf<Self> {
         Reduce { state, action in
@@ -94,6 +99,11 @@ struct DocumentDetailCoordinatorStore {
                     await send(.documentDeleted)
                 }
                 
+            case .photoDocumentDetail(.showEditDocument):
+                return .run { send in
+                    await send(.showEditDocument)
+                }
+                
             case .photoDocumentDetail(.goBack):
                 print("🔙 [DocumentDetailCoordinator] Retour depuis photo store")
                 return .run { send in
@@ -112,6 +122,11 @@ struct DocumentDetailCoordinatorStore {
                     await send(.documentDeleted)
                 }
                 
+            case .fileDocumentDetail(.showEditDocument):
+                return .run { send in
+                    await send(.showEditDocument)
+                }
+                
             case .fileDocumentDetail(.goBack):
                 print("🔙 [DocumentDetailCoordinator] Retour depuis file store")
                 return .run { send in
@@ -125,16 +140,50 @@ struct DocumentDetailCoordinatorStore {
                 return .none
                 
             case .requestDeletion(let documentId):
-                print("📤 [DocumentDetailCoordinator] Transmission de la demande de fermeture puis suppression")
-                return .none
+                print("🗑️ [DocumentDetailCoordinator] Début de la suppression du document: \(documentId)")
+                return .run { [vehicleId = state.vehicleId] send in
+                    let vehicles = await fileStorageService.loadVehicles()
+                    if let vehicle = vehicles.first(where: { $0.id == vehicleId }),
+                       let document = vehicle.documents.first(where: { $0.id == documentId }) {
+                        await fileStorageService.deleteDocument(document, for: vehicleId)
+                        await send(.documentDeleted)
+                    }
+                }
                 
             case .documentDeleted:
-                print("🗑️ [DocumentDetailCoordinator] Document supprimé, transmission de l'événement")
+                print("🗑️ [DocumentDetailCoordinator] Document supprimé, mise à jour réactive")
+                // Recharger le véhicule pour mettre à jour la liste des documents
+                return .run { [vehicleId = state.vehicleId, vehicles = state.$vehicles] send in
+                    let updatedVehicles = await fileStorageService.loadVehicles()
+                    if let updatedVehicle = updatedVehicles.first(where: { $0.id == vehicleId }) {
+                        await vehicles.withLock { vehicles in
+                            if let index = vehicles.firstIndex(where: { $0.id == vehicleId }) {
+                                vehicles[index] = updatedVehicle
+                            }
+                        }
+                    }
+                    await dismiss()
+                }
+                
+            case .showEditDocument:
+                state.isLoading = true
+                return .run { [vehicleId = state.vehicleId, documentId = state.documentId] send in
+                    let vehicles = await fileStorageService.loadVehicles()
+                    if let vehicle = vehicles.first(where: { $0.id == vehicleId }),
+                       let document = vehicle.documents.first(where: { $0.id == documentId }) {
+                        await send(.editDocumentLoaded(document))
+                    }
+                }
+                
+            case .editDocumentLoaded(let document):
+                state.isLoading = false
                 return .none
                 
             case .goBack:
                 print("🔙 [DocumentDetailCoordinator] Retour à la vue précédente")
-                return .none
+                return .run { _ in
+                    await dismiss()
+                }
             }
         }
         .ifLet(\.photoDocumentDetail, action: \.photoDocumentDetail) {

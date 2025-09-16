@@ -7,14 +7,29 @@
 
 import Foundation
 
+enum DocumentType: String, Codable, CaseIterable {
+    case carteGrise = "Carte grise"
+    case facture = "Facture"
+    
+    var displayName: String {
+        return self.rawValue
+    }
+}
+
 struct Document: Codable, Equatable, Identifiable {
     let id: UUID
     var fileURL: String
-    let createdAt: Date
+    var name: String
+    var date: Date
+    var mileage: String
+    var type: DocumentType
     
-    init(fileURL: String) {
+    init(fileURL: String, name: String, date: Date, mileage: String, type: DocumentType) {
         self.id = UUID()
         self.fileURL = fileURL
-        self.createdAt = Date()
+        self.name = name
+        self.date = date
+        self.mileage = mileage
+        self.type = type
     }
 }

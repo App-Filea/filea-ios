@@ -14,6 +14,7 @@ struct AddVehicleStore {
     struct State: Equatable {
         var vehicle = Vehicle()
         var isLoading = false
+        @Shared(.vehicles) var vehicles: [Vehicle] = []
     }
     
     enum Action: Equatable, BindableAction {
@@ -24,6 +25,7 @@ struct AddVehicleStore {
     }
     
     @Dependency(\.fileStorageService) var fileStorageService
+    @Dependency(\.dismiss) var dismiss
     
     var body: some ReducerOf<Self> {
         BindingReducer()
@@ -42,10 +44,16 @@ struct AddVehicleStore {
                 
             case .vehicleSaved:
                 state.isLoading = false
-                return .none
+                // Ajouter le véhicule à la liste partagée pour mise à jour réactive
+                state.$vehicles.withLock { $0.append(state.vehicle) }
+                return .run { _ in
+                    await dismiss()
+                }
                 
             case .goBack:
-                return .none
+                return .run { _ in
+                    await dismiss()
+                }
             }
         }
     }

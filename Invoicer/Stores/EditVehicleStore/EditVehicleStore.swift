@@ -18,6 +18,8 @@ struct EditVehicleStore {
         var registrationDate: String
         var licensePlate: String
         var isLoading = false
+        @Shared(.vehicles) var vehicles: [Vehicle] = []
+        var updatedVehicle: Vehicle?
         
         init(vehicle: Vehicle) {
             self.originalVehicle = vehicle
@@ -25,6 +27,17 @@ struct EditVehicleStore {
             self.currentMileage = vehicle.currentMileage
             self.registrationDate = vehicle.registrationDate
             self.licensePlate = vehicle.licensePlate
+        }
+        
+        // Computed property pour avoir le véhicule avec les changements actuels
+        var vehicle: Vehicle {
+            updatedVehicle ?? Vehicle(
+                name: name,
+                currentMileage: currentMileage,
+                registrationDate: registrationDate,
+                licensePlate: licensePlate,
+                documents: originalVehicle.documents
+            )
         }
     }
     
@@ -36,6 +49,7 @@ struct EditVehicleStore {
     }
     
     @Dependency(\.fileStorageService) var fileStorageService
+    @Dependency(\.dismiss) var dismiss
     
     var body: some ReducerOf<Self> {
         BindingReducer()
@@ -62,10 +76,29 @@ struct EditVehicleStore {
                 
             case .vehicleUpdated:
                 state.isLoading = false
-                return .none
+                // Créer le véhicule mis à jour et le stocker
+                let updatedVehicle = Vehicle(
+                    name: state.name,
+                    currentMileage: state.currentMileage,
+                    registrationDate: state.registrationDate,
+                    licensePlate: state.licensePlate,
+                    documents: state.originalVehicle.documents
+                )
+                state.updatedVehicle = updatedVehicle
+                // Mettre à jour la liste partagée
+                state.$vehicles.withLock { vehicles in
+                    if let index = vehicles.firstIndex(where: { $0.id == state.originalVehicle.id }) {
+                        vehicles[index] = updatedVehicle
+                    }
+                }
+                return .run { _ in
+                    await dismiss()
+                }
                 
             case .goBack:
-                return .none
+                return .run { _ in
+                    await dismiss()
+                }
             }
         }
     }

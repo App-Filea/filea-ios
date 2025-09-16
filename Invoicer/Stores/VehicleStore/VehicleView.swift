@@ -100,16 +100,34 @@ struct VehicleView: View {
                                         // Document content
                                         HStack {
                                             Image(systemName: getDocumentIcon(for: document.fileURL))
-                                                .foregroundColor(.blue)
+                                                .foregroundColor(getDocumentColor(for: document.type))
                                                 .font(.title2)
                                             
                                             VStack(alignment: .leading, spacing: 4) {
-                                                Text("Document")
+                                                Text(document.name)
                                                     .font(.headline)
                                                     .foregroundColor(.primary)
-                                                Text(document.createdAt, style: .date)
-                                                    .font(.caption)
-                                                    .foregroundColor(.secondary)
+                                                    .lineLimit(1)
+                                                
+                                                HStack(spacing: 8) {
+                                                    Text(document.type.displayName)
+                                                        .font(.caption)
+                                                        .padding(.horizontal, 8)
+                                                        .padding(.vertical, 2)
+                                                        .background(getDocumentColor(for: document.type).opacity(0.2))
+                                                        .foregroundColor(getDocumentColor(for: document.type))
+                                                        .cornerRadius(8)
+                                                    
+                                                    Text(document.date, style: .date)
+                                                        .font(.caption)
+                                                        .foregroundColor(.secondary)
+                                                    
+                                                    if !document.mileage.isEmpty {
+                                                        Text("\(document.mileage) km")
+                                                            .font(.caption)
+                                                            .foregroundColor(.secondary)
+                                                    }
+                                                }
                                             }
                                             
                                             Spacer()
@@ -223,15 +241,6 @@ struct VehicleView: View {
                 store.send(.loadVehicleData)
             }
         }
-        .sheet(item: $store.scope(state: \.addDocument, action: \.addDocument)) { addDocumentStore in
-            AddDocumentView(store: addDocumentStore)
-        }
-        .sheet(item: $store.scope(state: \.documentDetail, action: \.documentDetail)) { documentDetailStore in
-            DocumentDetailCoordinatorView(store: documentDetailStore)
-        }
-        .sheet(item: $store.scope(state: \.editVehicle, action: \.editVehicle)) { editVehicleStore in
-            EditVehicleView(store: editVehicleStore)
-        }
     }
     
     private func getDocumentIcon(for filePath: String) -> String {
@@ -253,6 +262,15 @@ struct VehicleView: View {
             return "doc.fill"
         }
     }
+    
+    private func getDocumentColor(for type: DocumentType) -> Color {
+        switch type {
+        case .carteGrise:
+            return .orange
+        case .facture:
+            return .blue
+        }
+    }
 }
 
 #Preview {
@@ -263,8 +281,10 @@ struct VehicleView: View {
                                                         currentMileage: "50000",
                                                         registrationDate: "2020-01-01",
                                                         licensePlate: "ABC-123",
-                                                        documents: [.init(fileURL: ""),
-                                                                    .init(fileURL: "")]))) {
+                                                        documents: [
+                                                            .init(fileURL: "/path/to/document1.jpg", name: "Carte grise", date: Date(), mileage: "45000", type: .carteGrise),
+                                                            .init(fileURL: "/path/to/document2.pdf", name: "Facture révision", date: Date(), mileage: "50000", type: .facture)
+                                                        ]))) {
         VehicleStore()
     })
 }

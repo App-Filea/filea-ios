@@ -22,26 +22,54 @@ struct PhotoDocumentDetailView: View {
                         VStack(spacing: 16) {
                             // Document info
                             VStack(alignment: .leading, spacing: 8) {
-                                Text("Détails du Document Photo")
-                                    .font(.headline)
-                                
                                 HStack {
-                                    Text("Créé le:")
-                                        .fontWeight(.medium)
-                                    Text(document.createdAt, style: .date)
+                                    Text("Détails du Document Photo")
+                                        .font(.headline)
+                                    
+                                    Spacer()
+                                    
+                                    Button("Éditer") {
+                                        store.send(.showEditDocument)
+                                    }
+                                    .foregroundColor(.blue)
+                                    .disabled(store.isLoading)
                                 }
                                 
                                 HStack {
-                                    Text("Heure:")
+                                    Text("Nom:")
                                         .fontWeight(.medium)
-                                    Text(document.createdAt, style: .time)
+                                    Text(document.name)
+                                        .foregroundColor(.primary)
+                                }
+                                
+                                HStack {
+                                    Text("Date:")
+                                        .fontWeight(.medium)
+                                    Text(document.date, style: .date)
+                                }
+                                
+                                HStack {
+                                    Text("Kilométrage:")
+                                        .fontWeight(.medium)
+                                    Text(document.mileage.isEmpty ? "Non renseigné" : "\(document.mileage) km")
+                                        .foregroundColor(document.mileage.isEmpty ? .secondary : .primary)
                                 }
                                 
                                 HStack {
                                     Text("Type:")
                                         .fontWeight(.medium)
+                                    Text(document.type.displayName)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 2)
+                                        .background(getDocumentColor(for: document.type).opacity(0.2))
+                                        .foregroundColor(getDocumentColor(for: document.type))
+                                        .cornerRadius(8)
+                                        
+                                    Spacer()
+                                    
                                     Text("Photo")
-                                        .foregroundColor(.blue)
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
                                 }
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -115,6 +143,15 @@ struct PhotoDocumentDetailView: View {
             CameraView { image in
                 store.send(.imageCapture(image))
             }
+        }
+    }
+    
+    private func getDocumentColor(for type: DocumentType) -> Color {
+        switch type {
+        case .carteGrise:
+            return .orange
+        case .facture:
+            return .blue
         }
     }
 }

@@ -26,15 +26,34 @@ struct DocumentDetailView: View {
                                     .font(.headline)
                                 
                                 HStack {
-                                    Text("Created:")
+                                    Text("Nom:")
                                         .fontWeight(.medium)
-                                    Text(document.createdAt, style: .date)
+                                    Text(document.name)
+                                        .foregroundColor(.primary)
                                 }
                                 
                                 HStack {
-                                    Text("Time:")
+                                    Text("Date:")
                                         .fontWeight(.medium)
-                                    Text(document.createdAt, style: .time)
+                                    Text(document.date, style: .date)
+                                }
+                                
+                                HStack {
+                                    Text("Kilométrage:")
+                                        .fontWeight(.medium)
+                                    Text(document.mileage.isEmpty ? "Non renseigné" : "\(document.mileage) km")
+                                        .foregroundColor(document.mileage.isEmpty ? .secondary : .primary)
+                                }
+                                
+                                HStack {
+                                    Text("Type:")
+                                        .fontWeight(.medium)
+                                    Text(document.type.displayName)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 2)
+                                        .background(getDocumentColor(for: document.type).opacity(0.2))
+                                        .foregroundColor(getDocumentColor(for: document.type))
+                                        .cornerRadius(8)
                                 }
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -110,6 +129,15 @@ struct DocumentDetailView: View {
             CameraView { image in
                 store.send(.imageCapture(image))
             }
+        }
+    }
+    
+    private func getDocumentColor(for type: DocumentType) -> Color {
+        switch type {
+        case .carteGrise:
+            return .orange
+        case .facture:
+            return .blue
         }
     }
 }

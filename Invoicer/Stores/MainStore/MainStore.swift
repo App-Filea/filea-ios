@@ -12,13 +12,11 @@ import Foundation
 struct MainStore {
     @ObservableState
     struct State: Equatable {
-        var vehicles: [Vehicle] = []
-        @Presents var addVehicle: AddVehicleStore.State?
+        @Shared(.vehicles) var vehicles: [Vehicle] = []
         @Presents var vehicleDetail: VehicleStore.State?
     }
     
     enum Action: Equatable {
-        case addVehicle(PresentationAction<AddVehicleStore.Action>)
         case vehicleDetail(PresentationAction<VehicleStore.Action>)
         case loadVehicles
         case vehiclesLoaded([Vehicle])
@@ -33,47 +31,27 @@ struct MainStore {
             switch action {
             case .loadVehicles:
                 return .run { send in
-                    let vehicles = await fileStorageService.loadVehicles()
-                    await send(.vehiclesLoaded(vehicles))
+                    let loadedVehicles = await fileStorageService.loadVehicles()
+                    await send(.vehiclesLoaded(loadedVehicles))
                 }
                 
             case .vehiclesLoaded(let vehicles):
-                state.vehicles = vehicles
-                return .none
-                
-            case .showAddVehicle:
-                state.addVehicle = AddVehicleStore.State()
+                state.$vehicles.withLock { $0 = vehicles }
                 return .none
                 
             case .showVehicleDetail(let vehicle):
                 state.vehicleDetail = VehicleStore.State(vehicle: vehicle)
                 return .none
                 
-            case .addVehicle(.presented(.vehicleSaved)):
-                state.addVehicle = nil
-                return .run { send in
-                    await send(.loadVehicles)
-                }
-                
-            case .addVehicle(.presented(.goBack)):
-                state.addVehicle = nil
-                return .none
-                
             case .vehicleDetail(.presented(.goBack)):
                 state.vehicleDetail = nil
-                return .run { send in
-                    await send(.loadVehicles)
-                }
-                
-            case .addVehicle:
                 return .none
                 
             case .vehicleDetail:
                 return .none
+                
+            default: return .none
             }
-        }
-        .ifLet(\.$addVehicle, action: \.addVehicle) {
-            AddVehicleStore()
         }
         .ifLet(\.$vehicleDetail, action: \.vehicleDetail) {
             VehicleStore()

@@ -91,33 +91,54 @@ struct FileDocumentDetailView: View {
     @ViewBuilder
     private func documentInfoSection(document: Document) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Détails du Document")
-                .font(.headline)
+            HStack {
+                Text("Détails du Document")
+                    .font(.headline)
+                
+                Spacer()
+                
+                Button("Éditer") {
+                    store.send(.showEditDocument)
+                }
+                .foregroundColor(.blue)
+                .disabled(store.isLoading)
+            }
             
             HStack {
                 Text("Nom:")
                     .fontWeight(.medium)
-                Text(URL(fileURLWithPath: document.fileURL).lastPathComponent)
+                Text(document.name)
                     .foregroundColor(.primary)
             }
             
             HStack {
-                Text("Créé le:")
+                Text("Date:")
                     .fontWeight(.medium)
-                Text(document.createdAt, style: .date)
+                Text(document.date, style: .date)
             }
             
             HStack {
-                Text("Heure:")
+                Text("Kilométrage:")
                     .fontWeight(.medium)
-                Text(document.createdAt, style: .time)
+                Text(document.mileage.isEmpty ? "Non renseigné" : "\(document.mileage) km")
+                    .foregroundColor(document.mileage.isEmpty ? .secondary : .primary)
             }
             
             HStack {
                 Text("Type:")
                     .fontWeight(.medium)
+                Text(document.type.displayName)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 2)
+                    .background(getDocumentColor(for: document.type).opacity(0.2))
+                    .foregroundColor(getDocumentColor(for: document.type))
+                    .cornerRadius(8)
+                    
+                Spacer()
+                
                 Text(fileTypeDescription(for: document.fileURL))
-                    .foregroundColor(.green)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
             }
             
             if let fileData = store.fileData {
@@ -273,6 +294,15 @@ struct FileDocumentDetailView: View {
             return "rectangle.on.rectangle.angled.fill"
         default:
             return "doc.fill"
+        }
+    }
+    
+    private func getDocumentColor(for type: DocumentType) -> Color {
+        switch type {
+        case .carteGrise:
+            return .orange
+        case .facture:
+            return .blue
         }
     }
 }

@@ -15,6 +15,7 @@ struct MainView: View {
         VStack(spacing: 20) {
             if store.vehicles.isEmpty {
                 VStack(spacing: 16) {
+                    Spacer()
                     Image(systemName: "car.fill")
                         .imageScale(.large)
                         .foregroundStyle(.tint)
@@ -23,6 +24,7 @@ struct MainView: View {
                     Text("Commencez par ajouter votre premier véhicule")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
+                    Spacer()
                 }
                 .padding()
             } else {
@@ -68,12 +70,23 @@ struct MainView: View {
             }
         }
         .navigationTitle("Mes Véhicules")
+        .navigationBarTitleDisplayMode(.large)
         .navigationBarBackButtonHidden()
     }
 }
 
-#Preview {
-    MainView(store: Store(initialState: MainStore.State()) {
-        MainStore()
-    })
+#Preview("Empty list"){
+    NavigationView {
+        MainView(store: Store(initialState: MainStore.State()) {
+            MainStore()
+        })
+    }
+}
+
+#Preview("1 vehicle") {
+    NavigationView {
+        MainView(store: Store(initialState: MainStore.State(vehicles: [.init(name: "test", currentMileage: "0", registrationDate: "0", licensePlate: "0", documents: [])])) {
+            MainStore()
+        })
+    }
 }

@@ -258,7 +258,7 @@ final class FileStorageService: @unchecked Sendable {
                 
                 if validDocuments.count != vehicle.documents.count {
                     vehicles[vehicleIndex].documents = validDocuments
-                    logger.info("🔧 Nettoyé \(vehicle.documents.count - validDocuments.count) référence(s) orpheline(s) pour '\(vehicle.name)'")
+                    logger.info("🔧 Nettoyé \(vehicle.documents.count - validDocuments.count) référence(s) orpheline(s) pour '\(vehicle.brand)' '\(vehicle.model)'")
                 }
             }
             
@@ -278,11 +278,11 @@ final class FileStorageService: @unchecked Sendable {
     }
     
     func saveVehicle(_ vehicle: Vehicle) {
-        logger.info("💾 Sauvegarde du véhicule: \(vehicle.name)")
+        logger.info("💾 Sauvegarde du véhicule: \(vehicle.brand) \(vehicle.model)")
         
         // First, create the vehicle directory
         guard createVehicleDirectory(for: vehicle) else {
-            logger.error("❌ Échec de la création du dossier pour le véhicule '\(vehicle.name)'")
+            logger.error("❌ Échec de la création du dossier pour le véhicule '\(vehicle.brand)' '\(vehicle.model)'")
             return
         }
         
@@ -292,7 +292,7 @@ final class FileStorageService: @unchecked Sendable {
         do {
             let jsonData = try JSONEncoder().encode(vehicles)
             try jsonData.write(to: vehiclesFileURL)
-            logger.info("✅ Véhicule '\(vehicle.name)' sauvegardé avec succès")
+            logger.info("✅ Véhicule '\(vehicle.brand)' '\(vehicle.model)' sauvegardé avec succès")
             logger.info("📊 Total de véhicules: \(vehicles.count)")
         } catch {
             logger.error("❌ Erreur lors de la sauvegarde du véhicule: \(error.localizedDescription)")
@@ -300,19 +300,19 @@ final class FileStorageService: @unchecked Sendable {
     }
     
     private func createVehicleDirectory(for vehicle: Vehicle) -> Bool {
-        let vehicleDirectoryURL = vehiclesDirectory.appendingPathComponent(vehicle.name)
+        let vehicleDirectoryURL = vehiclesDirectory.appendingPathComponent("\(vehicle.brand)\(vehicle.model)")
         let fileManager = FileManager.default
         
         if fileManager.fileExists(atPath: vehicleDirectoryURL.path) {
-            logger.info("📁 Le dossier pour '\(vehicle.name)' existe déjà à: \(vehicleDirectoryURL.path)")
+            logger.info("📁 Le dossier pour '\(vehicle.brand)' '\(vehicle.model)' existe déjà à: \(vehicleDirectoryURL.path)")
             return true
         } else {
             do {
                 try fileManager.createDirectory(at: vehicleDirectoryURL, withIntermediateDirectories: true)
-                logger.info("📁 Dossier pour '\(vehicle.name)' créé avec succès à: \(vehicleDirectoryURL.path)")
+                logger.info("📁 Dossier pour '\(vehicle.brand)' '\(vehicle.model)' créé avec succès à: \(vehicleDirectoryURL.path)")
                 return true
             } catch {
-                logger.error("❌ Erreur lors de la création du dossier pour '\(vehicle.name)': \(error.localizedDescription)")
+                logger.error("❌ Erreur lors de la création du dossier pour '\(vehicle.brand)' '\(vehicle.model)': \(error.localizedDescription)")
                 return false
             }
         }
@@ -336,7 +336,7 @@ final class FileStorageService: @unchecked Sendable {
         dateFormatter.dateFormat = "yyyy-MM-dd_HH-mm-ss"
         let filename = "document_\(dateFormatter.string(from: Date())).jpg"
         
-        let vehicleDirectoryURL = vehiclesDirectory.appendingPathComponent(vehicle.name)
+        let vehicleDirectoryURL = vehiclesDirectory.appendingPathComponent("\(vehicle.brand)\(vehicle.model)")
         let imageFileURL = vehicleDirectoryURL.appendingPathComponent(filename)
         
         // Save image to disk
@@ -403,7 +403,7 @@ final class FileStorageService: @unchecked Sendable {
             filename = "\(baseName)_\(timestamp).\(fileExtension)"
         }
         
-        let vehicleDirectoryURL = vehiclesDirectory.appendingPathComponent(vehicle.name)
+        let vehicleDirectoryURL = vehiclesDirectory.appendingPathComponent("\(vehicle.brand)\(vehicle.model)")
         let destinationFileURL = vehicleDirectoryURL.appendingPathComponent(filename)
         
         do {
@@ -453,14 +453,14 @@ final class FileStorageService: @unchecked Sendable {
         }
         
         let vehicle = vehicles[vehicleIndex]
-        let vehicleDirectoryURL = vehiclesDirectory.appendingPathComponent(vehicle.name)
+        let vehicleDirectoryURL = vehiclesDirectory.appendingPathComponent("\(vehicle.brand)\(vehicle.model)")
         
         // Delete vehicle directory and all its contents
         let fileManager = FileManager.default
         if fileManager.fileExists(atPath: vehicleDirectoryURL.path) {
             do {
                 try fileManager.removeItem(at: vehicleDirectoryURL)
-                logger.info("🗂️ Dossier du véhicule '\(vehicle.name)' supprimé avec succès")
+                logger.info("🗂️ Dossier du véhicule '\(vehicle.brand)' '\(vehicle.model)' supprimé avec succès")
             } catch {
                 logger.error("❌ Erreur lors de la suppression du dossier: \(error.localizedDescription)")
             }
@@ -473,7 +473,7 @@ final class FileStorageService: @unchecked Sendable {
         do {
             let jsonData = try JSONEncoder().encode(vehicles)
             try jsonData.write(to: vehiclesFileURL)
-            logger.info("✅ Véhicule '\(vehicle.name)' supprimé du JSON avec succès")
+            logger.info("✅ Véhicule '\(vehicle.brand)' '\(vehicle.model)' supprimé du JSON avec succès")
             logger.info("📊 Véhicules restants: \(vehicles.count)")
         } catch {
             logger.error("❌ Erreur lors de la sauvegarde du fichier JSON: \(error.localizedDescription)")
@@ -517,7 +517,7 @@ final class FileStorageService: @unchecked Sendable {
             let jsonData = try JSONEncoder().encode(vehicles)
             try jsonData.write(to: vehiclesFileURL)
             logger.info("✅ Document supprimé du JSON avec succès")
-            logger.info("📊 Documents restants pour '\(vehicle.name)': \(vehicles[vehicleIndex].documents.count)")
+            logger.info("📊 Documents restants pour '\(vehicle.brand)' '\(vehicle.model)': \(vehicles[vehicleIndex].documents.count)")
         } catch {
             logger.error("❌ Erreur lors de la sauvegarde du fichier JSON: \(error.localizedDescription)")
         }
@@ -533,15 +533,17 @@ final class FileStorageService: @unchecked Sendable {
         }
         
         let oldVehicle = vehicles[vehicleIndex]
-        let oldVehicleDirectoryURL = vehiclesDirectory.appendingPathComponent(oldVehicle.name)
-        let newVehicleDirectoryURL = vehiclesDirectory.appendingPathComponent(updatedVehicle.name)
+        let oldVehicleDirectoryURL = vehiclesDirectory.appendingPathComponent("\(oldVehicle.brand)\(oldVehicle.model)")
+        let newVehicleDirectoryURL = vehiclesDirectory.appendingPathComponent("\(updatedVehicle.brand)\(updatedVehicle.model)")
         
         // If the name changed, rename the directory
         let fileManager = FileManager.default
-        if oldVehicle.name != updatedVehicle.name && fileManager.fileExists(atPath: oldVehicleDirectoryURL.path) {
+        if oldVehicle.brand != updatedVehicle.brand &&
+            oldVehicle.brand != updatedVehicle.brand &&
+            fileManager.fileExists(atPath: oldVehicleDirectoryURL.path) {
             do {
                 try fileManager.moveItem(at: oldVehicleDirectoryURL, to: newVehicleDirectoryURL)
-                logger.info("📁 Dossier renommé de '\(oldVehicle.name)' vers '\(updatedVehicle.name)'")
+                logger.info("📁 Dossier renommé de '\(oldVehicle.brand)' '\(oldVehicle.model)' vers '\(updatedVehicle.brand)' '\(updatedVehicle.model)'")
             } catch {
                 logger.error("❌ Erreur lors du renommage du dossier: \(error.localizedDescription)")
                 return
@@ -549,16 +551,17 @@ final class FileStorageService: @unchecked Sendable {
         }
         
         // Update the vehicle properties while preserving ID and documents
-        vehicles[vehicleIndex].name = updatedVehicle.name
-        vehicles[vehicleIndex].currentMileage = updatedVehicle.currentMileage
+        vehicles[vehicleIndex].brand = updatedVehicle.brand
+        vehicles[vehicleIndex].model = updatedVehicle.model
+        vehicles[vehicleIndex].mileage = updatedVehicle.mileage
         vehicles[vehicleIndex].registrationDate = updatedVehicle.registrationDate
-        vehicles[vehicleIndex].licensePlate = updatedVehicle.licensePlate
+        vehicles[vehicleIndex].plate = updatedVehicle.plate
         
         // Save updated vehicles list
         do {
             let jsonData = try JSONEncoder().encode(vehicles)
             try jsonData.write(to: vehiclesFileURL)
-            logger.info("✅ Véhicule '\(updatedVehicle.name)' mis à jour avec succès")
+            logger.info("✅ Véhicule '\(updatedVehicle.brand)' '\(updatedVehicle.model)' mis à jour avec succès")
         } catch {
             logger.error("❌ Erreur lors de la sauvegarde du fichier JSON: \(error.localizedDescription)")
         }
@@ -576,7 +579,7 @@ final class FileStorageService: @unchecked Sendable {
             return
         }
         
-        logger.info("✅ Véhicule trouvé: '\(vehicles[vehicleIndex].name)' avec \(vehicles[vehicleIndex].documents.count) document(s)")
+        logger.info("✅ Véhicule trouvé: '\(vehicles[vehicleIndex].brand)' '\(vehicles[vehicleIndex].model)' avec \(vehicles[vehicleIndex].documents.count) document(s)")
         
         guard let documentIndex = vehicles[vehicleIndex].documents.firstIndex(where: { $0.id == documentId }) else {
             logger.error("❌ Document non trouvé avec l'ID: \(documentId)")
@@ -597,7 +600,7 @@ final class FileStorageService: @unchecked Sendable {
         let uniqueId = UUID().uuidString.prefix(8) // Add 8 chars from UUID for extra uniqueness
         let filename = "document_\(timestamp)_\(uniqueId).jpg"
         
-        let vehicleDirectoryURL = vehiclesDirectory.appendingPathComponent(vehicle.name)
+        let vehicleDirectoryURL = vehiclesDirectory.appendingPathComponent("\(vehicle.brand)\(vehicle.model)")
         let newFileURL = vehicleDirectoryURL.appendingPathComponent(filename)
         
         logger.info("🆕 Nouveau fichier: \(newFileURL.path)")

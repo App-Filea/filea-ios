@@ -13,29 +13,32 @@ struct EditVehicleStore {
     @ObservableState
     struct State: Equatable {
         let originalVehicle: Vehicle
-        var name: String
-        var currentMileage: String
+        var brand: String
+        var model: String
+        var mileage: String
         var registrationDate: String
-        var licensePlate: String
+        var plate: String
         var isLoading = false
         @Shared(.vehicles) var vehicles: [Vehicle] = []
         var updatedVehicle: Vehicle?
         
         init(vehicle: Vehicle) {
             self.originalVehicle = vehicle
-            self.name = vehicle.name
-            self.currentMileage = vehicle.currentMileage
+            self.brand = vehicle.brand
+            self.model = vehicle.model
+            self.mileage = vehicle.mileage
             self.registrationDate = vehicle.registrationDate
-            self.licensePlate = vehicle.licensePlate
+            self.plate = vehicle.plate
         }
         
         // Computed property pour avoir le véhicule avec les changements actuels
         var vehicle: Vehicle {
             updatedVehicle ?? Vehicle(
-                name: name,
-                currentMileage: currentMileage,
+                brand: brand,
+                model: model,
+                mileage: mileage,
                 registrationDate: registrationDate,
-                licensePlate: licensePlate,
+                plate: plate,
                 documents: originalVehicle.documents
             )
         }
@@ -62,10 +65,11 @@ struct EditVehicleStore {
             case .updateVehicle:
                 state.isLoading = true
                 let updatedVehicle = Vehicle(
-                    name: state.name,
-                    currentMileage: state.currentMileage,
+                    brand: state.brand,
+                    model: state.model,
+                    mileage: state.mileage,
                     registrationDate: state.registrationDate,
-                    licensePlate: state.licensePlate,
+                    plate: state.plate,
                     documents: state.originalVehicle.documents
                 )
                 
@@ -78,10 +82,11 @@ struct EditVehicleStore {
                 state.isLoading = false
                 // Créer le véhicule mis à jour et le stocker
                 let updatedVehicle = Vehicle(
-                    name: state.name,
-                    currentMileage: state.currentMileage,
+                    brand: state.brand,
+                    model: state.model,
+                    mileage: state.mileage,
                     registrationDate: state.registrationDate,
-                    licensePlate: state.licensePlate,
+                    plate: state.plate,
                     documents: state.originalVehicle.documents
                 )
                 state.updatedVehicle = updatedVehicle

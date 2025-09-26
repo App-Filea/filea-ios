@@ -15,41 +15,75 @@ struct VehicleView: View {
     
     var body: some View {
         ZStack(alignment: .bottom) {
-            VStack(spacing: 0) {
+            VStack(spacing: 16) {
                 // Vehicle info section
-                VStack(alignment: .leading, spacing: 16) {
-                    VStack(alignment: .leading, spacing: 0) {
-                        Text(store.vehicle.name)
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
-                        Text(store.vehicle.licensePlate)
-                            .foregroundStyle(Color.green)
-                            .font(.system(size: 14, weight: .semibold))
-                    }
-                    Grid(alignment: .leading, horizontalSpacing: 64, verticalSpacing: 16) {
-                        GridRow {
-                            infoCell(label: "Brand", value: "Lexus")
-                            
-                            infoCell(label: "Model", value: "CT200H")
-                            
-                            infoCell(label: "Year", value: yearString(from: store.vehicle.registrationDate))
-                        }
+                VStack(alignment: .leading, spacing: 4) {
+                    
+                    HStack(alignment: .firstTextBaseline) {
+                        Text(store.vehicle.brand.uppercased())
+                            .bodyXLargeBlack()
+                        Text(store.vehicle.model)
+                            .bodyDefaultLight()
+                        Spacer()
                         
-                        GridRow {
-//                            infoCell(label: "Engine", value: "2500")
-                            
-//                            infoCell(label: "Power", value: "136")
-                            
-                            infoCell(label: "Mileage", value: "\(store.vehicle.currentMileage) KM")
-                                .gridCellColumns(2)
-                        }
+                        Text(store.vehicle.plate)
+                            .bodySmallRegular()
+                            .foregroundStyle(.secondary)
+                            .padding(6)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 4)
+                                    .stroke(.secondary, lineWidth: 0.5)
+                            )
+                            .alignmentGuide(.firstTextBaseline) { d in
+                                d[.bottom]
+                            }
                     }
-                    .frame(maxWidth: .infinity)
+                    HStack(spacing: 4) {
+                        Text("2011"/*vehicle.registrationDate*/)
+                        Text("-")
+                        Text("\(store.vehicle.mileage)km")
+                        Spacer()
+                    }
+                    .bodyDefaultLight()
+                    .foregroundStyle(.secondary)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding([.horizontal, .bottom], 16)
+                .padding(.horizontal, 16)
+                
+                VStack(spacing: 10) {
+                    HStack {
+                        Button(action: { store.send(.showEditVehicle) }) {
+                            Label("Modifier", systemImage: "pencil")
+                        }
+                        .foregroundStyle(Color.blue)
+                        .frame(maxWidth: .infinity)
+                        .padding(12)
+                        .background(Color.blue.quinary)
+                        .cornerRadius(8)
+                        
+                        Spacer()
+                        Button(role: .destructive, action: { store.send(.deleteVehicle) }) {
+                            Label("Supprimer", systemImage: "trash")
+                        }
+                        .foregroundStyle(Color.red)
+                        .frame(maxWidth: .infinity)
+                        .padding(12)
+                        .background(Color.red.quinary)
+                        .cornerRadius(8)
+                    }
+                    
+                    Button(role: .destructive, action: { store.send(.showAddDocument) }) {
+                        Label("Ajouter un nouveau document", systemImage: "plus.circle")
+                    }
+                    .foregroundStyle(Color.black.secondary)
+                    .frame(maxWidth: .infinity)
+                    .padding(12)
+                    .background(Color.gray.quinary)
+                    .cornerRadius(8)
+                }
+                .padding(.horizontal, 16)
+                
                 Divider()
-                Spacer()
+                
                 // Documents section
                 if store.vehicle.documents.isEmpty {
                     VStack(spacing: 16) {
@@ -96,24 +130,25 @@ struct VehicleView: View {
                                                 .padding(4)
                                                 .background(getDocumentColor(for: document.type))
                                                 .clipShape(Capsule())
-                                            Spacer()
                                             Image(systemName: getDocumentIcon(for: document.fileURL))
                                                 .font(.caption2)
                                                 .padding(6)
                                                 .background(getDocumentColor(for: document.type))
                                                 .clipShape(Circle())
+                                            Spacer()
                                         }
                                         Text(document.name)
-                                            .font(.headline)
+                                            .bodyDefaultSemibold()
+                                            .foregroundStyle(.primary)
                                         HStack {
                                             Text("\(document.mileage) KM")
-                                                .font(.caption)
-                                                .italic()
+                                                .bodySmallRegular()
+                                                .foregroundStyle(.secondary)
                                             Spacer()
                                             // Affichage formaté de la date
                                             Text(formattedDate(document.date))
-                                                .font(.caption)
-                                                .italic()
+                                                .bodySmallRegular()
+                                                .foregroundStyle(.secondary)
                                         }
                                     }
                                     .padding(10)
@@ -129,42 +164,10 @@ struct VehicleView: View {
                             }
                         }
                         .padding(.horizontal, 16)
-                        .padding(.vertical, 8)
                     }
                 }
             }
             .background(Color.gray.opacity(0.1))
-            
-            Button(action: {
-                store.send(.showAddDocument)
-            }) {
-                HStack {
-                    Image(systemName: "plus")
-                    Text("Add Document")
-                }
-                .padding()
-                .background(Color.blue)
-                .foregroundColor(.white)
-                .cornerRadius(10)
-            }
-            .padding()
-        }
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Menu {
-                    Button(action: { store.send(.showEditVehicle) }) {
-                        Label("Modifier", systemImage: "pencil")
-                    }
-                    
-                    Button(role: .destructive, action: { store.send(.deleteVehicle) }) {
-                        Label("Supprimer", systemImage: "trash")
-                    }
-                }
-                label: {
-                    Label("Add", systemImage: "line.3.horizontal.circle")
-                }
-                .menuStyle(RedMenu())
-            }
         }
         .onAppear {
             store.send(.loadVehicleData)
@@ -233,10 +236,11 @@ struct VehicleView: View {
         VehicleView(store:
                         Store(initialState:
                                 VehicleStore.State(vehicle:
-                                                    Vehicle(name: "Test Car",
-                                                            currentMileage: "122000",
+                                                    Vehicle(brand: "Lexus",
+                                                            model: "CT200h",
+                                                            mileage: "122000",
                                                             registrationDate: "2020-01-01",
-                                                            licensePlate: "ABC-123",
+                                                            plate: "ABC-123",
                                                             documents: [
                                                                 .init(fileURL: "/path/to/document1.jpg", name: "Carte grise", date: Date(), mileage: "45000", type: .carteGrise),
                                                                 .init(fileURL: "/path/to/document2.pdf", name: "Facture révision", date: Date(), mileage: "50000", type: .facture),

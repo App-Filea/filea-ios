@@ -13,7 +13,6 @@ struct AddDocumentView: View {
     @Bindable var store: StoreOf<AddDocumentStore>
     
     var body: some View {
-        NavigationView {
             VStack(spacing: 20) {
                 switch store.currentStep {
                 case .selectFile:
@@ -51,8 +50,7 @@ struct AddDocumentView: View {
                     .disabled(isNextButtonDisabled)
                 }
             }
-        }
-        .sheet(isPresented: .init(
+        .fullScreenCover(isPresented: .init(
             get: { store.showCamera },
             set: { _ in store.send(.hideCamera) }
         )) {
@@ -60,7 +58,7 @@ struct AddDocumentView: View {
                 store.send(.imageCapture(image))
             }
         }
-        .sheet(isPresented: .init(
+        .fullScreenCover(isPresented: .init(
             get: { store.showFilePicker },
             set: { _ in store.send(.hideFilePicker) }
         )) {
@@ -324,7 +322,9 @@ struct FilePickerView: UIViewControllerRepresentable {
 }
 
 #Preview {
-    AddDocumentView(store: Store(initialState: AddDocumentStore.State(vehicleId: UUID())) {
-        AddDocumentStore()
-    })
+    NavigationView {
+        AddDocumentView(store: Store(initialState: AddDocumentStore.State(vehicleId: UUID())) {
+            AddDocumentStore()
+        })
+    }
 }

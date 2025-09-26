@@ -10,73 +10,122 @@ import ComposableArchitecture
 
 struct EditVehicleView: View {
     @Bindable var store: StoreOf<EditVehicleStore>
-    
+    @State var openDateSheet: Bool = false
+    @State var date: Date = .now
     var body: some View {
-        NavigationView {
-            Form {
-                Section(header: Text("Vehicle Information")) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Name")
-                            .font(.headline)
-                        TextField("Enter vehicle name", text: $store.name)
-                            .textFieldStyle(.roundedBorder)
-                    }
-                    
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Current Mileage")
-                            .font(.headline)
-                        TextField("Enter current mileage", text: $store.currentMileage)
-                            .textFieldStyle(.roundedBorder)
-                            .keyboardType(.numberPad)
-                    }
-                    
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Registration Date")
-                            .font(.headline)
-                        TextField("Enter registration date", text: $store.registrationDate)
-                            .textFieldStyle(.roundedBorder)
-                    }
-                    
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("License Plate")
-                            .font(.headline)
-                        TextField("Enter license plate", text: $store.licensePlate)
-                            .textFieldStyle(.roundedBorder)
-                    }
-                }
-            }
-            .navigationTitle("Edit Vehicle")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        store.send(.goBack)
-                    }
-                    .disabled(store.isLoading)
-                }
-                
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    if store.isLoading {
-                        ProgressView()
-                            .controlSize(.mini)
-                    } else {
-                        Button("Save") {
-                            store.send(.updateVehicle)
+        ZStack {
+            Color.gray.opacity(0.1)
+                .ignoresSafeArea()
+            VStack {
+                ScrollView {
+                    VStack(spacing: 16) {
+                        textField("Marque", text: $store.brand)
+                        textField("Modèle", text: $store.model)
+                        textField("Plaque d'immatriculation", text: $store.plate)
+                        
+                        HStack(alignment: .bottom) {
+                            textField("Kilométrage actuel", text: $store.mileage)
+                                .keyboardType(.numberPad)
+                            
+                            Text("KM")
+                                .font(.body.bold())
+                                .padding(10)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(Color.gray.opacity(0.1))
+                                )
                         }
-                        .disabled(store.name.isEmpty || 
-                                 store.currentMileage.isEmpty || 
-                                 store.registrationDate.isEmpty || 
-                                 store.licensePlate.isEmpty)
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Date de mise en circulation")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(.gray)
+                            
+                            Text($store.registrationDate.wrappedValue)
+                                .frame(maxWidth: .infinity, minHeight: 20, alignment: .leading)
+                                .font(.body.bold()) // texte en gras
+                                .padding(10)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(Color.gray.opacity(0.1))
+                                )
+                                .onTapGesture {
+                                    openDateSheet = true
+                                }
+                        }
+                        Spacer()
                     }
+                    .padding()
+                    VStack {
+                        Button(action: { store.send(.updateVehicle) }) {
+                            Text("Sauvegarder")
+                                .frame(maxWidth: .infinity, minHeight: 60)
+                                .foregroundStyle(Color.black)
+                                .background(Color.white.opacity(0.8))
+                                .cornerRadius(12)
+                                .shadow( color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
+                        }
+                        
+                        Button(action: { store.send(.goBack) }) {
+                            Text("Annuler")
+                                .frame(maxWidth: .infinity, minHeight: 60)
+                                .foregroundStyle(Color.red)
+                                .background(Color.red.opacity(0.2))
+                                .cornerRadius(12)
+                                .shadow( color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
+                        }
+                    }
+                    .padding()
                 }
             }
+        }
+        .navigationTitle("Modifier mon véhicule")
+        .navigationBarTitleDisplayMode(.large)
+        .sheet(isPresented: $openDateSheet) {
+            VStack(spacing: 0) {
+                HStack {
+                    Button(action: {
+                        openDateSheet = false
+                    }) {
+                        Text("Annuler")
+                    }
+                    Spacer()
+                    Button(action: {
+                        store.registrationDate = date.ISO8601Format()
+                        openDateSheet = false
+                    }) {
+                        Text("Sauvegarder")
+                    }
+                }
+                DatePicker("", selection: $date, displayedComponents: .date)
+                    .datePickerStyle(.graphical)
+                    .presentationDetents([.medium])
+                    .interactiveDismissDisabled(true)
+            }
+            .padding(.horizontal)
+        }
+    }
+    
+    private func textField(_ marker: String, text: Binding<String>) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(marker)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(.gray)
+            
+            TextField("", text: text)
+                .font(.body.bold()) // texte en gras
+                .padding(10)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color.gray.opacity(0.1))
+                )
         }
     }
 }
 
 #Preview {
     EditVehicleView(store: Store(initialState: EditVehicleStore.State(
-        vehicle: Vehicle(name: "Test Car", currentMileage: "50000", registrationDate: "2020-01-01", licensePlate: "ABC-123")
+        vehicle: Vehicle(brand: "Test Car", model: "", mileage: "50000", registrationDate: "2020-01-01", plate: "ABC-123")
     )) {
         EditVehicleStore()
     })

@@ -41,7 +41,7 @@ struct MainView: View {
                                     Spacer()
                                     
                                     Text(vehicle.plate)
-                                        .bodySmallRegular()
+                                        .bodyXSmallRegular()
                                         .foregroundStyle(.secondary)
                                         .padding(6)
                                         .overlay(
@@ -62,7 +62,7 @@ struct MainView: View {
                                         Text("Voir les détails")
                                         Image(systemName: "arrow.right")
                                     }
-                                    .bodySmallSemibold()
+                                    .bodyXSmallSemibold()
                                     .foregroundStyle(.primary)
                                 }
                                 .bodyDefaultLight()

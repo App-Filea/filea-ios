@@ -61,8 +61,8 @@ struct PhotoDocumentDetailView: View {
                                     Text(document.type.displayName)
                                         .padding(.horizontal, 8)
                                         .padding(.vertical, 2)
-                                        .background(getDocumentColor(for: document.type).opacity(0.2))
-                                        .foregroundColor(getDocumentColor(for: document.type))
+//                                        .background(getDocumentColor(for: document.type).opacity(0.2))
+//                                        .foregroundColor(getDocumentColor(for: document.type))
                                         .cornerRadius(8)
                                         
                                     Spacer()
@@ -143,15 +143,6 @@ struct PhotoDocumentDetailView: View {
             CameraView { image in
                 store.send(.imageCapture(image))
             }
-        }
-    }
-    
-    private func getDocumentColor(for type: DocumentType) -> Color {
-        switch type {
-        case .carteGrise:
-            return .orange
-        case .facture:
-            return .blue
         }
     }
 }

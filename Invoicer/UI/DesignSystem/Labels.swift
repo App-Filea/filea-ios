@@ -52,18 +52,15 @@ struct TitleScreen: ViewModifier {
 //    }
 //}
 //
-//struct TitleGroup: ViewModifier {
-//
-//    func body(content: Content) -> some View {
-//        content
-//            .kerning(0.21)
-//            .accessibleFont(.titleGroup())
-//            .foregroundColor(NewEvelityColors.Colors.contentPrimary)
-//            .fixedSize(horizontal: false, vertical: true)
-//            .multilineTextAlignment(.center)
-//    }
-//}
-//
+struct TitleGroup: ViewModifier {
+
+    func body(content: Content) -> some View {
+        content
+            .font(.subheadline)
+            .fontWeight(.semibold)
+    }
+}
+
 //struct BodyDefaultBold: ViewModifier {
 //
 //    func body(content: Content) -> some View {
@@ -114,6 +111,14 @@ struct BodyDefaultSemibold: ViewModifier {
     }
 }
 
+struct BodyDefaultRegular: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .font(.body)
+            .fontWeight(.regular)
+    }
+}
+
 struct BodyDefaultLight: ViewModifier {
     func body(content: Content) -> some View {
         content
@@ -122,7 +127,15 @@ struct BodyDefaultLight: ViewModifier {
     }
 }
 
-struct BodySmallSemibold: ViewModifier {
+struct BodySmallRegular: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .font(.subheadline)
+            .fontWeight(.regular)
+    }
+}
+
+struct BodyXSmallSemibold: ViewModifier {
     func body(content: Content) -> some View {
         content
             .font(.caption)
@@ -130,11 +143,28 @@ struct BodySmallSemibold: ViewModifier {
     }
 }
 
-struct BodySmallRegular: ViewModifier {
+struct BodyXSmallRegular: ViewModifier {
     func body(content: Content) -> some View {
         content
             .font(.caption)
             .fontWeight(.regular)
+    }
+}
+
+struct TitleLarge: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .font(.largeTitle)
+            .fontWeight(.bold)
+            .kerning(-0.5)
+    }
+}
+
+struct BodySmallSemibold: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .font(.subheadline)
+            .fontWeight(.semibold)
     }
 }
 
@@ -263,9 +293,9 @@ extension View {
 //    public func titleBody() -> some View {
 //        return self.modifier(TitleBody())
 //    }
-//    public func titleGroup() -> some View {
-//        return self.modifier(TitleGroup())
-//    }
+    public func titleGroup() -> some View {
+        return self.modifier(TitleGroup())
+    }
 //    public func bodyDefaultBold() -> some View {
 //        return self.modifier(BodyDefaultBold())
 //    }
@@ -281,14 +311,26 @@ extension View {
     public func bodyDefaultSemibold() -> some View {
         return self.modifier(BodyDefaultSemibold())
     }
+    public func bodyDefaultRegular() -> some View {
+        return self.modifier(BodyDefaultRegular())
+    }
     public func bodyDefaultLight() -> some View {
         return self.modifier(BodyDefaultLight())
     }
-    public func bodySmallSemibold() -> some View {
-        return self.modifier(BodySmallSemibold())
-    }
     public func bodySmallRegular() -> some View {
         return self.modifier(BodySmallRegular())
+    }
+    public func bodyXSmallSemibold() -> some View {
+        return self.modifier(BodyXSmallSemibold())
+    }
+    public func bodyXSmallRegular() -> some View {
+        return self.modifier(BodyXSmallRegular())
+    }
+    public func titleLarge() -> some View {
+        return self.modifier(TitleLarge())
+    }
+    public func bodySmallSemibold() -> some View {
+        return self.modifier(BodySmallSemibold())
     }
 //    public func bodyLargeMedium() -> some View {
 //        return self.modifier(BodyLargeMedium())

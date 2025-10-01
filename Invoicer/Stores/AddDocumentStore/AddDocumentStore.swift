@@ -28,7 +28,7 @@ struct AddDocumentStore {
         var documentName: String = ""
         var documentDate: Date = Date()
         var documentMileage: String = ""
-        var documentType: DocumentType = .facture
+        var documentType: DocumentType = .entretien
         
         enum DocumentSource: Equatable {
             case none

@@ -26,19 +26,7 @@ struct AddDocumentView: View {
                 Spacer()
             }
             .padding()
-            .navigationTitle(navigationTitle)
-            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button(store.currentStep == .selectFile ? "Annuler" : "Retour") {
-                        if store.currentStep == .selectFile {
-                            store.send(.goBack)
-                        } else {
-                            store.send(.previousStep)
-                        }
-                    }
-                }
-                
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(nextButtonTitle) {
                         if store.currentStep == .metadata {
@@ -72,10 +60,9 @@ struct AddDocumentView: View {
     
     @ViewBuilder
     private func selectFileView() -> some View {
-        VStack(spacing: 20) {
+        VStack(alignment: .leading, spacing: 20) {
             Text("Ajouter un Document")
-                .font(.title2)
-                .fontWeight(.semibold)
+                .titleScreen()
             
             Text("Choisissez comment ajouter votre document")
                 .font(.subheadline)
@@ -321,9 +308,27 @@ struct FilePickerView: UIViewControllerRepresentable {
     }
 }
 
-#Preview {
+#Preview("Select file") {
     NavigationView {
-        AddDocumentView(store: Store(initialState: AddDocumentStore.State(vehicleId: UUID())) {
+        AddDocumentView(store: Store(initialState: AddDocumentStore.State(vehicleId: UUID(), currentStep: .selectFile)) {
+            AddDocumentStore()
+        })
+    }
+}
+
+#Preview("preview") {
+    NavigationView {
+        AddDocumentView(store: Store(initialState: AddDocumentStore.State(vehicleId: UUID(),
+                                                                          capturedImage: UIImage(systemName: "trash"),
+                                                                          documentSource: .camera, currentStep: .preview)) {
+            AddDocumentStore()
+        })
+    }
+}
+
+#Preview("metadata") {
+    NavigationView {
+        AddDocumentView(store: Store(initialState: AddDocumentStore.State(vehicleId: UUID(), currentStep: .metadata)) {
             AddDocumentStore()
         })
     }

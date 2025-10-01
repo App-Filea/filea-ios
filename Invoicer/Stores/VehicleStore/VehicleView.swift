@@ -10,81 +10,114 @@ import ComposableArchitecture
 
 struct VehicleView: View {
     @Bindable var store: StoreOf<VehicleStore>
+    @State private var activeTab: VehicleSegmentedTab = .documents
+    
     let circleSize: CGFloat = 12
     let lineWidth: CGFloat = 2
     
     var body: some View {
-        ZStack(alignment: .bottom) {
-            VStack(spacing: 16) {
-                // Vehicle info section
-                VStack(alignment: .leading, spacing: 4) {
+        ZStack(alignment: .top) {
+            Color.gray.opacity(0.1)
+                .ignoresSafeArea()
+            VStack(spacing: 0) {
+                VStack(spacing: 16) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack(alignment: .firstTextBaseline) {
+                            Text(store.vehicle.brand.uppercased())
+                                .bodyXLargeBlack()
+                            Text(store.vehicle.model)
+                                .bodyDefaultLight()
+                            Spacer()
+                            
+                            Text(store.vehicle.plate)
+                                .bodyXSmallRegular()
+                                .foregroundStyle(.secondary)
+                                .padding(6)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 4)
+                                        .stroke(.secondary, lineWidth: 0.5)
+                                )
+                                .alignmentGuide(.firstTextBaseline) { d in
+                                    d[.bottom]
+                                }
+                        }
+                        HStack(spacing: 4) {
+                            Text("2011"/*vehicle.registrationDate*/)
+                            Text("-")
+                            Text("\(store.vehicle.mileage)km")
+                            Spacer()
+                        }
+                        .bodyDefaultLight()
+                        .foregroundStyle(.secondary)
+                    }
+                    .padding(.horizontal, 16)
                     
-                    HStack(alignment: .firstTextBaseline) {
-                        Text(store.vehicle.brand.uppercased())
-                            .bodyXLargeBlack()
-                        Text(store.vehicle.model)
-                            .bodyDefaultLight()
-                        Spacer()
-                        
-                        Text(store.vehicle.plate)
-                            .bodySmallRegular()
-                            .foregroundStyle(.secondary)
-                            .padding(6)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 4)
-                                    .stroke(.secondary, lineWidth: 0.5)
-                            )
-                            .alignmentGuide(.firstTextBaseline) { d in
-                                d[.bottom]
+                    VStack(spacing: 10) {
+                        HStack(spacing: 8) {
+                            Button(action: { store.send(.showEditVehicle) }) {
+                                VStack(alignment: .leading) {
+                                    Image(systemName: "pencil.circle")
+                                        .font(.largeTitle)
+                                    Spacer()
+                                    Text("Modifier")
+                                        .bodyDefaultSemibold()
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                }
                             }
-                    }
-                    HStack(spacing: 4) {
-                        Text("2011"/*vehicle.registrationDate*/)
-                        Text("-")
-                        Text("\(store.vehicle.mileage)km")
-                        Spacer()
-                    }
-                    .bodyDefaultLight()
-                    .foregroundStyle(.secondary)
-                }
-                .padding(.horizontal, 16)
-                
-                VStack(spacing: 10) {
-                    HStack {
-                        Button(action: { store.send(.showEditVehicle) }) {
-                            Label("Modifier", systemImage: "pencil")
+                            .foregroundStyle(Color.blue)
+                            .frame(maxWidth: .infinity, maxHeight: 100)
+                            .padding(12)
+                            .background(Color.blue.quinary)
+                            .cornerRadius(8)
+                            
+                            Button(action: { store.send(.deleteVehicle) }) {
+                                VStack(alignment: .leading) {
+                                    Image(systemName: "trash.circle")
+                                        .font(.largeTitle)
+                                    Spacer()
+                                    Text("Supprimer")
+                                        .bodyDefaultSemibold()
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                }
+                            }
+                            .foregroundStyle(Color.red)
+                            .frame(maxWidth: .infinity, maxHeight: 100)
+                            .padding(12)
+                            .background(Color.red.quinary)
+                            .cornerRadius(8)
+                            
+                            Button(action: { store.send(.showAddDocument) }) {
+                                VStack(alignment: .leading) {
+                                    Image(systemName: "plus.circle")
+                                        .font(.largeTitle)
+                                    Spacer()
+                                    Text("Nouveau document")
+                                        .bodyDefaultSemibold()
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .multilineTextAlignment(.leading)
+                                }
+                            }
+                            .foregroundStyle(Color.black.secondary)
+                            .frame(maxWidth: .infinity, maxHeight: 100)
+                            .padding(12)
+                            .background(Color.gray.quinary)
+                            .cornerRadius(8)
                         }
-                        .foregroundStyle(Color.blue)
-                        .frame(maxWidth: .infinity)
-                        .padding(12)
-                        .background(Color.blue.quinary)
-                        .cornerRadius(8)
-                        
-                        Spacer()
-                        Button(role: .destructive, action: { store.send(.deleteVehicle) }) {
-                            Label("Supprimer", systemImage: "trash")
-                        }
-                        .foregroundStyle(Color.red)
-                        .frame(maxWidth: .infinity)
-                        .padding(12)
-                        .background(Color.red.quinary)
-                        .cornerRadius(8)
                     }
-                    
-                    Button(role: .destructive, action: { store.send(.showAddDocument) }) {
-                        Label("Ajouter un nouveau document", systemImage: "plus.circle")
-                    }
-                    .foregroundStyle(Color.black.secondary)
-                    .frame(maxWidth: .infinity)
-                    .padding(12)
-                    .background(Color.gray.quinary)
-                    .cornerRadius(8)
+                    .padding(.horizontal, 16)
                 }
-                .padding(.horizontal, 16)
                 
+                VehicleSegmentedControl(
+                    tabs: VehicleSegmentedTab.allCases,
+                    activeTab: $activeTab,
+                    activeTint: .black,
+                    inActiveTint: .gray
+                )
+                .padding(.top, 16)
                 Divider()
+                    .padding(.top, 3)
+                    .padding(.bottom, 16)
                 
-                // Documents section
                 if store.vehicle.documents.isEmpty {
                     VStack(spacing: 16) {
                         Spacer()
@@ -103,114 +136,121 @@ struct VehicleView: View {
                     
                     ScrollView {
                         LazyVStack(spacing: 0) {
-                            Text("\(store.vehicle.documents.count) documents")
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .font(.title2)
-                                .fontWeight(.bold)
-                                .padding(.bottom, 8)
-                            ForEach(store.vehicle.documents, id: \.date) { document in
-                                HStack(alignment: .top, spacing: 16) {
-                                    // timeline point
-                                    VStack(spacing: 0) {
-                                        Circle()
-                                            .fill(Color.clear)
-                                            .frame(width: 16, height: 16)
-                                            .overlay(Circle().stroke(Color.black, lineWidth: 3))
-                                        
-                                        Rectangle()
-                                            .fill(Color.gray.opacity(0.3))
-                                            .frame(width: 2)
-                                            .frame(maxHeight: .infinity)
-                                    }
+                            ForEach(store.vehicle.documents.groupedByMonth(), id: \.title) { section in
+                                VStack(alignment: .leading, spacing: 24) {
+                                    Text(section.title)
+                                        .titleGroup()
+                                        .foregroundStyle(.secondary)
                                     
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        HStack {
-                                            Text(document.type.displayName)
-                                                .font(.caption2)
-                                                .padding(4)
-                                                .background(getDocumentColor(for: document.type))
-                                                .clipShape(Capsule())
-                                            Image(systemName: getDocumentIcon(for: document.fileURL))
-                                                .font(.caption2)
-                                                .padding(6)
-                                                .background(getDocumentColor(for: document.type))
-                                                .clipShape(Circle())
-                                            Spacer()
+                                    ForEach(section.items) { document in
+                                        switch activeTab {
+                                        case .historique: eventElement(of: document)
+                                        case .documents: documentElement(of: document)
                                         }
-                                        Text(document.name)
-                                            .bodyDefaultSemibold()
-                                            .foregroundStyle(.primary)
-                                        HStack {
-                                            Text("\(document.mileage) KM")
-                                                .bodySmallRegular()
-                                                .foregroundStyle(.secondary)
-                                            Spacer()
-                                            // Affichage formaté de la date
-                                            Text(formattedDate(document.date))
-                                                .bodySmallRegular()
-                                                .foregroundStyle(.secondary)
-                                        }
-                                    }
-                                    .padding(10)
-                                    .background(Color.white.opacity(0.8))
-                                    .cornerRadius(12)
-                                    .padding(.vertical, 8)
-                                    //                                .shadow(radius: 7, x: 0, y: 6)
-                                    .shadow( color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
-                                    .onTapGesture {
-                                        store.send(.showDocumentDetail(document.id))
                                     }
                                 }
+                                .padding(.vertical, 8)
                             }
                         }
                         .padding(.horizontal, 16)
                     }
                 }
             }
-            .background(Color.gray.opacity(0.1))
         }
         .onAppear {
             store.send(.loadVehicleData)
         }
     }
     
-    private func getDocumentIcon(for filePath: String) -> String {
-        let url = URL(fileURLWithPath: filePath)
-        let pathExtension = url.pathExtension.lowercased()
-        
-        switch pathExtension {
-        case "pdf":
-            return "doc.richtext.fill"
-        case "jpg", "jpeg", "png", "gif", "bmp", "tiff", "heic", "heif":
-            return "photo.fill"
-        case "txt", "text", "md":
-            return "doc.text.fill"
-        case "json", "xml":
-            return "doc.badge.gearshape.fill"
-        case "csv":
-            return "tablecells.fill"
-        default:
-            return "doc.fill"
+    private func eventElement(of document: Document) -> some View {
+        HStack(spacing: 20) {
+            Image(systemName: document.type.imageName)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 24, height: 24)
+                .foregroundStyle(.secondary)
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text(document.name)
+                        .bodyDefaultSemibold()
+                        .foregroundStyle(Color.black)
+                    Circle().fill(.secondary)
+                        .frame(width: 6, height: 6)
+                    Text(formattedDate(document.date))
+                        .bodyDefaultSemibold()
+                        .foregroundStyle(.secondary)
+                }
+                HStack {
+                    Text("200 €")
+                        .bodySmallRegular()
+                        .foregroundStyle(.secondary)
+                    Circle().fill(.secondary)
+                        .frame(width: 6, height: 6)
+                    Text(document.type.displayName)
+                        .bodySmallRegular()
+                        .foregroundStyle(.secondary)
+                }
+                HStack(alignment: .center) {
+                    Image(systemName: "gauge.open.with.lines.needle.33percent")
+                        .bodySmallRegular()
+                        .foregroundStyle(.secondary)
+                    Text("\(document.mileage) km")
+                        .bodySmallRegular()
+                        .foregroundStyle(.secondary)
+                }
+            }
+            Spacer()
+        }
+        .onTapGesture {
+            store.send(.showDocumentDetail(document.id))
         }
     }
     
-    private func getDocumentColor(for type: DocumentType) -> Color {
-        switch type {
-        case .carteGrise:
-            return .orange
-        case .facture:
-            return .blue
+    private func documentElement(of document: Document) -> some View {
+        HStack(spacing: 20) {
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text(document.name)
+                        .bodyDefaultSemibold()
+                        .foregroundStyle(Color.black)
+                    Circle().fill(.secondary)
+                        .frame(width: 6, height: 6)
+                    Text(formattedDate(document.date))
+                        .bodyDefaultSemibold()
+                        .foregroundStyle(.secondary)
+                }
+                HStack {
+                    Text("200 €")
+                        .bodySmallRegular()
+                        .foregroundStyle(.secondary)
+                    Circle().fill(.secondary)
+                        .frame(width: 6, height: 6)
+                    Text(document.type.displayName)
+                        .bodySmallRegular()
+                        .foregroundStyle(.secondary)
+                }
+                Text(document.fileType)
+                    .bodyXSmallSemibold()
+                    .foregroundStyle(.black.opacity(0.6))
+                    .padding(.vertical, 6)
+                    .padding(.horizontal, 14)
+                    .background(
+                        Rectangle()
+                            .fill(Color.gray.opacity(0.3)) // couleur du rectangle
+                            .cornerRadius(16)
+                    )            }
+            Spacer()
         }
     }
     
     private func formattedDate(_ date: Date) -> String {
         let formatter = DateFormatter()
-        formatter.dateStyle = .medium
+        formatter.locale = Locale(identifier: "fr_FR")
+        formatter.dateFormat = "d MMM"
         return formatter.string(from: date)
     }
     
     func yearString(from dateString: String) -> String {
-        // sécurité : si la string a au moins 4 caractères, on prend les 4 premiers
         String(dateString.prefix(4))
     }
     
@@ -243,22 +283,15 @@ struct VehicleView: View {
                                                             plate: "ABC-123",
                                                             documents: [
                                                                 .init(fileURL: "/path/to/document1.jpg", name: "Carte grise", date: Date(), mileage: "45000", type: .carteGrise),
-                                                                .init(fileURL: "/path/to/document2.pdf", name: "Facture révision", date: Date(), mileage: "50000", type: .facture),
-                                                                .init(fileURL: "/path/to/document1.jpg", name: "Test 1", date: Date(timeIntervalSince1970: 999), mileage: "1", type: .facture),
-                                                                .init(fileURL: "/path/to/document2.pdf", name: "Test 2", date: Date(timeIntervalSince1970: 99999), mileage: "50000", type: .facture),
-                                                                .init(fileURL: "/path/to/document1.jpg", name: "Carte grise", date: Date(), mileage: "45000", type: .carteGrise),
-                                                                .init(fileURL: "/path/to/document2.pdf", name: "Facture révision", date: Date(), mileage: "50000", type: .facture),
-                                                                .init(fileURL: "/path/to/document1.jpg", name: "Test 1", date: Date(timeIntervalSince1970: 999), mileage: "1", type: .facture),
-                                                                .init(fileURL: "/path/to/document2.pdf", name: "Test 2", date: Date(timeIntervalSince1970: 99999), mileage: "50000", type: .facture)
+                                                                .init(fileURL: "/path/to/document2.pdf", name: "Facture révision", date: Date(), mileage: "50000", type: .entretien),
+                                                                .init(fileURL: "/path/to/document1.jpg", name: "Test 1", date: Date(timeIntervalSince1970: 999), mileage: "1", type: .entretien),
+                                                                .init(fileURL: "/path/to/document2.pdf", name: "Test 2", date: Date(timeIntervalSince1970: 99999), mileage: "50000", type: .achatPiece),
+                                                                .init(fileURL: "/path/to/document1.jpg", name: "Carte grise", date: Date(), mileage: "45000", type: .entretien),
+                                                                .init(fileURL: "/path/to/document2.pdf", name: "Facture révision", date: Date(), mileage: "50000", type: .reparation),
+                                                                .init(fileURL: "/path/to/document1.jpg", name: "Test 1", date: Date(timeIntervalSince1970: 999), mileage: "1", type: .entretien),
+                                                                .init(fileURL: "/path/to/document2.pdf", name: "Test 2", date: Date(timeIntervalSince1970: 99999), mileage: "50000", type: .entretien)
                                                             ]))) {
                                                                 VehicleStore()
                                                             })
-    }
-}
-
-struct RedMenu: MenuStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        Menu(configuration)
-            .foregroundColor(.red)
     }
 }

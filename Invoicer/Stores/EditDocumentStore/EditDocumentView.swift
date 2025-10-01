@@ -98,15 +98,6 @@ struct EditDocumentView: View {
             .disabled(store.isLoading)
         }
     }
-    
-    private func getDocumentColor(for type: DocumentType) -> Color {
-        switch type {
-        case .carteGrise:
-            return .orange
-        case .facture:
-            return .blue
-        }
-    }
 }
 
 #Preview {
@@ -117,7 +108,7 @@ struct EditDocumentView: View {
             name: "Test Document",
             date: Date(),
             mileage: "50000",
-            type: .facture
+            type: .entretien
         )
     )) {
         EditDocumentStore()

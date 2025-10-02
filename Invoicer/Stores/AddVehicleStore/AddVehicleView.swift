@@ -12,48 +12,164 @@ struct AddVehicleView: View {
     @Bindable var store: StoreOf<AddVehicleStore>
     @State private var openDateSheet: Bool = false
     @State private var date: Date = .now
-    @State private var currentStep: FormStep = .brand
-    @State private var validationErrors: [FormStep: String] = [:]
+    @State private var currentStep: AddVehicleStep = .brand
+    @State private var validationErrors: [AddVehicleStep: String] = [:]
     @State private var activeStepID: Int? = 0
+    @FocusState private var focusedField: AddVehicleStep?
+    @State private var shouldFocusNextField: Bool = false
     
-    enum FormStep: Int, CaseIterable, Identifiable {
-        case brand = 0
-        case model = 1
-        case plate = 2
-        case mileage = 3
-        case date = 4
-        case summary = 5
-        
-        var id: Int { rawValue }
-        
-        var title: String {
-            switch self {
-            case .brand: return "Marque du véhicule"
-            case .model: return "Modèle du véhicule"
-            case .plate: return "Plaque d'immatriculation"
-            case .mileage: return "Kilométrage actuel"
-            case .date: return "Date de mise en circulation"
-            case .summary: return "Récapitulatif"
+    private let animationDuration: Double = 0.3
+    private let longAnimationDuration: Double = 0.4
+    private let errorHeight: CGFloat = 30
+    private let stepHeight: CGFloat = 100
+    private let buttonHeight: CGFloat = 70
+    private let headerHeight: CGFloat = 140
+    private let horizontalPadding: CGFloat = 20
+    
+    private var isSummaryStep: Bool { currentStep == .summary }
+    private var shouldShowProgress: Bool { true }
+    private var shouldShowBottomButtons: Bool { true }
+    private var shouldShowBackButton: Bool { currentStep.rawValue > 0 }
+    private var shouldShowCancelButton: Bool { currentStep.rawValue == 0 }
+    
+    private var headerSection: some View {
+        VStack(spacing: 0) {
+            if shouldShowProgress {
+                StepProgressView(currentStep: currentStep.rawValue, totalSteps: AddVehicleStep.allCases.count)
+                    .padding(.horizontal, horizontalPadding)
+            }
+            
+            VStack(spacing: 12) {
+                Text(currentStep.title)
+                    .titleLarge()
+                    .multilineTextAlignment(.center)
+                    .frame(minHeight: 40)
+                    .animation(.easeInOut(duration: animationDuration), value: currentStep)
+                
+                Text(currentStep.subtitle)
+                    .bodyDefaultRegular()
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .frame(minHeight: 44)
+                    .animation(.easeInOut(duration: animationDuration), value: currentStep)
+            }
+            .frame(height: headerHeight)
+            .padding(.horizontal, horizontalPadding)
+        }
+        .ignoresSafeArea(.keyboard)
+    }
+    
+    private var stepsScrollView: some View {
+        ScrollView(.horizontal) {
+            HStack(spacing: 0) {
+                ForEach(AddVehicleStep.allCases) { step in
+                    stepView(for: step)
+                }
+            }
+            .scrollTargetLayout()
+        }
+        .scrollIndicators(.hidden)
+        .scrollTargetBehavior(.viewAligned)
+        .scrollPosition(id: $activeStepID)
+        .scrollDisabled(true)
+        .animation(.easeInOut(duration: longAnimationDuration), value: activeStepID)
+    }
+    
+    private func stepView(for step: AddVehicleStep) -> some View {
+        Group {
+            if step == .summary {
+                summaryStepView(for: step)
+            } else {
+                regularStepView(for: step)
             }
         }
+    }
+    
+    private func summaryStepView(for step: AddVehicleStep) -> some View {
+        ScrollView(.vertical) {
+            VStack(spacing: 24) {
+                stepContentView(for: step)
+                ErrorDisplayView(error: validationErrors[step], height: errorHeight)
+            }
+            .padding(.horizontal, horizontalPadding)
+            .padding(.bottom, horizontalPadding)
+        }
+        .containerRelativeFrame(.horizontal)
+        .id(step.id)
+    }
+    
+    private func regularStepView(for step: AddVehicleStep) -> some View {
+        VStack(spacing: 4) {
+            stepContentView(for: step)
+            ErrorDisplayView(error: validationErrors[step], height: errorHeight)
+        }
+        .padding(.horizontal, horizontalPadding)
+        .containerRelativeFrame(.horizontal)
+        .id(step.id)
+        .frame(height: stepHeight)
+    }
+    
+    struct ErrorDisplayView: View {
+        let error: String?
+        let height: CGFloat
         
-        var subtitle: String {
-            switch self {
-            case .brand: return "Quelle est la marque de votre véhicule ?"
-            case .model: return "Quel est le modèle de votre véhicule ?"
-            case .plate: return "Quelle est la plaque d'immatriculation ?"
-            case .mileage: return "Quel est le kilométrage actuel ?"
-            case .date: return "Quelle est la date de mise en circulation ?"
-            case .summary: return "Vérifiez les informations saisies"
+        var body: some View {
+            VStack {
+                if let error = error {
+                    Text(error)
+                        .bodyXSmallRegular()
+                        .foregroundStyle(.red)
+                        .transition(.asymmetric(
+                            insertion: .opacity.combined(with: .move(edge: .top)),
+                            removal: .opacity.combined(with: .move(edge: .top))
+                        ))
+                }
+            }
+            .frame(height: height)
+            .animation(.easeInOut(duration: 0.3), value: error)
+        }
+    }
+    
+    private var primaryButton: some View {
+        Button(action: handlePrimaryAction) {
+            Text(currentStep.buttonTitle)
+                .bodyDefaultSemibold()
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 16)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.accentColor)
+                )
+        }
+    }
+    
+    private func bottomButtonsSection(safeAreaBottom: CGFloat) -> some View {
+        VStack(spacing: 12) {
+            primaryButton
+            
+            if shouldShowBackButton {
+                Button(action: previousStep) {
+                    Text("Retour")
+                        .bodyDefaultRegular()
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+            }
+            
+            if shouldShowCancelButton {
+                Button(action: cancelVehicleCreation) {
+                    Text("Annuler")
+                        .bodyDefaultRegular()
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
             }
         }
-        
-        var buttonTitle: String {
-            switch self {
-            case .summary: return "Créer le véhicule"
-            default: return "Continuer"
-            }
-        }
+        .frame(height: buttonHeight)
+        .padding(.horizontal, horizontalPadding)
+        .padding(.bottom, safeAreaBottom + horizontalPadding)
+        .animation(.easeInOut(duration: animationDuration), value: currentStep)
     }
     
     var body: some View {
@@ -63,139 +179,25 @@ struct AddVehicleView: View {
             
             GeometryReader { reader in
                 VStack(spacing: 0) {
-                    // Progress Indicator (hidden on summary)
-                    VStack(spacing: 0) {
-                        if currentStep != .summary {
-                            StepProgressView(currentStep: currentStep.rawValue, totalSteps: FormStep.allCases.count - 1)
-                                .padding(.horizontal, 20)
-                        }
-                        
-                        // Header avec titre et sous-titre fixes
-                        VStack(spacing: 12) {
-                            Text(currentStep.title)
-                                .titleLarge()
-                                .multilineTextAlignment(.center)
-                                .frame(minHeight: 40)
-                            
-                            Text(currentStep.subtitle)
-                                .bodyDefaultRegular()
-                                .foregroundStyle(.secondary)
-                                .multilineTextAlignment(.center)
-                                .frame(minHeight: 44)
-                        }
-                        .frame(height: 140)
-                        .padding(.horizontal, 20)
-                        .animation(.easeInOut(duration: 0.3), value: currentStep)
-                    }
-                    .ignoresSafeArea(.keyboard)
-                    
+                    headerSection
                     Spacer()
-                    
-                    ScrollView(.horizontal) {
-                        HStack(spacing: 0) {
-                            ForEach(FormStep.allCases) { step in
-                                if step == .summary {
-                                    ScrollView(.vertical) {
-                                        VStack(spacing: 24) {
-                                            stepContentView(for: step)
-                                            
-                                            VStack {
-                                                if let error = validationErrors[step] {
-                                                    Text(error)
-                                                        .bodyXSmallRegular()
-                                                        .foregroundStyle(.red)
-                                                        .transition(.asymmetric(
-                                                            insertion: .opacity.combined(with: .move(edge: .top)),
-                                                            removal: .opacity.combined(with: .move(edge: .top))
-                                                        ))
-                                                }
-                                            }
-                                            .frame(height: 30)
-                                            
-                                            Button(action: handlePrimaryAction) {
-                                                Text(currentStep.buttonTitle)
-                                                    .bodyDefaultSemibold()
-                                                    .foregroundStyle(.white)
-                                                    .frame(maxWidth: .infinity)
-                                                    .padding(.vertical, 16)
-                                                    .background(
-                                                        RoundedRectangle(cornerRadius: 12)
-                                                            .fill(Color.accentColor)
-                                                    )
-                                            }
-                                        }
-                                        .padding(.horizontal, 20)
-                                        .padding(.bottom, 20)
-                                    }
-                                    .containerRelativeFrame(.horizontal)
-                                    .id(step.id)
-                                } else {
-                                    VStack(spacing: 4) {
-                                        stepContentView(for: step)
-                                        
-                                        VStack {
-                                            if let error = validationErrors[step] {
-                                                Text(error)
-                                                    .bodyXSmallRegular()
-                                                    .foregroundStyle(.red)
-                                                    .transition(.asymmetric(
-                                                        insertion: .opacity.combined(with: .move(edge: .top)),
-                                                        removal: .opacity.combined(with: .move(edge: .top))
-                                                    ))
-                                            }
-                                        }
-                                        .frame(height: 30)
-                                    }
-                                    .padding(.horizontal, 20)
-                                    .containerRelativeFrame(.horizontal)
-                                    .id(step.id)
-                                    .frame(height: 100)
-                                }
-                            }
-                        }
-                        .scrollTargetLayout()
-                    }
-                    .scrollIndicators(.hidden)
-                    .scrollTargetBehavior(.viewAligned)
-                    .scrollPosition(id: $activeStepID)
-                    .scrollDisabled(true)
-                    
+                    stepsScrollView
                     Spacer()
-                    
-                    if currentStep != .summary {
-                        // Boutons en bas fixes
-                        VStack(spacing: 12) {
-                            Button(action: handlePrimaryAction) {
-                                Text(currentStep.buttonTitle)
-                                    .bodyDefaultSemibold()
-                                    .foregroundStyle(.white)
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 16)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 12)
-                                            .fill(Color.accentColor)
-                                    )
-                            }
-                            
-                            if currentStep.rawValue > 0 && currentStep != .summary {
-                                Button(action: previousStep) {
-                                    Text("Retour")
-                                        .bodyDefaultRegular()
-                                        .foregroundStyle(.secondary)
-                                }
-                                .buttonStyle(.plain)
-                            }
-                        }
-                        .frame(height: 70)
-                        .padding(.horizontal, 20)
-                        .padding(.bottom, reader.safeAreaInsets.bottom + 20)
-                        .animation(.easeInOut(duration: 0.3), value: currentStep)
+                    if shouldShowBottomButtons {
+                        bottomButtonsSection(safeAreaBottom: reader.safeAreaInsets.bottom)
                     }
                 }
             }
         }
-
         .navigationBarHidden(true)
+        .onChange(of: activeStepID) { _, _ in
+            if shouldFocusNextField {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                    focusedField = currentStep
+                    shouldFocusNextField = false
+                }
+            }
+        }
         .sheet(isPresented: $openDateSheet) {
             DatePickerSheet(
                 date: $date,
@@ -213,13 +215,21 @@ struct AddVehicleView: View {
     }
     
     private func handlePrimaryAction() {
-        // Fermer le clavier
-        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-        
-        if currentStep == .summary {
-            store.send(.saveVehicle)
+        if currentStep == .mileage {
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                if currentStep == .summary {
+                    store.send(.saveVehicle)
+                } else {
+                    nextStep()
+                }
+            }
         } else {
-            nextStep()
+            if currentStep == .summary {
+                store.send(.saveVehicle)
+            } else {
+                nextStep()
+            }
         }
     }
     
@@ -227,32 +237,36 @@ struct AddVehicleView: View {
         let currentValue = getCurrentStepValue()
         
         if currentValue.isEmpty {
-            withAnimation(.easeInOut(duration: 0.3)) {
-                validationErrors[currentStep] = "Ce champ est obligatoire"
-            }
+            validationErrors[currentStep] = "Ce champ est obligatoire"
             return
         }
         
         validationErrors[currentStep] = nil
         
-        withAnimation(.easeInOut(duration: 0.4)) {
-            if currentStep.rawValue < FormStep.allCases.count - 1 {
-                let nextStep = FormStep(rawValue: currentStep.rawValue + 1)!
-                currentStep = nextStep
-                activeStepID = nextStep.id
-            }
+        if currentStep.rawValue < AddVehicleStep.allCases.count - 1 {
+            let nextStep = AddVehicleStep(rawValue: currentStep.rawValue + 1)!
+            let wasFieldFocused = focusedField == currentStep
+            
+            shouldFocusNextField = wasFieldFocused && hasTextField(nextStep)
+            currentStep = nextStep
+            activeStepID = nextStep.id
         }
     }
     
     private func previousStep() {
-        withAnimation(.easeInOut(duration: 0.4)) {
-            if currentStep.rawValue > 0 {
-                let prevStep = FormStep(rawValue: currentStep.rawValue - 1)!
-                currentStep = prevStep
-                activeStepID = prevStep.id
-                validationErrors[currentStep] = nil
-            }
+        if currentStep.rawValue > 0 {
+            let prevStep = AddVehicleStep(rawValue: currentStep.rawValue - 1)!
+            let wasFieldFocused = focusedField == currentStep
+            
+            shouldFocusNextField = wasFieldFocused && hasTextField(prevStep)
+            currentStep = prevStep
+            activeStepID = prevStep.id
+            validationErrors[currentStep] = nil
         }
+    }
+    
+    private func cancelVehicleCreation() {
+        store.send(.cancelCreation)
     }
     
     private func getCurrentStepValue() -> String {
@@ -278,9 +292,18 @@ struct AddVehicleView: View {
         return formatter.string(from: date)
     }
     
+    private func hasTextField(_ step: AddVehicleStep) -> Bool {
+        switch step {
+        case .brand, .model, .plate, .mileage:
+            return true
+        case .date, .summary:
+            return false
+        }
+    }
+    
     
     @ViewBuilder
-    private func stepContentView(for step: FormStep) -> some View {
+    private func stepContentView(for step: AddVehicleStep) -> some View {
         switch step {
         case .brand:
             StepTextField(
@@ -288,10 +311,9 @@ struct AddVehicleView: View {
                 text: $store.vehicle.brand
             )
             .autocapitalization(.allCharacters)
+            .focused($focusedField, equals: .brand)
             .onChange(of: store.vehicle.brand) { _, _ in
-                withAnimation(.easeInOut(duration: 0.3)) {
-                    validationErrors[.brand] = nil
-                }
+                validationErrors[.brand] = nil
             }
             
         case .model:
@@ -300,10 +322,9 @@ struct AddVehicleView: View {
                 text: $store.vehicle.model
             )
             .autocapitalization(.allCharacters)
+            .focused($focusedField, equals: .model)
             .onChange(of: store.vehicle.model) { _, _ in
-                withAnimation(.easeInOut(duration: 0.3)) {
-                    validationErrors[.model] = nil
-                }
+                validationErrors[.model] = nil
             }
             
         case .plate:
@@ -312,10 +333,9 @@ struct AddVehicleView: View {
                 text: $store.vehicle.plate
             )
             .autocapitalization(.allCharacters)
+            .focused($focusedField, equals: .plate)
             .onChange(of: store.vehicle.plate) { _, _ in
-                withAnimation(.easeInOut(duration: 0.3)) {
-                    validationErrors[.plate] = nil
-                }
+                validationErrors[.plate] = nil
             }
             
         case .mileage:
@@ -325,14 +345,15 @@ struct AddVehicleView: View {
                 suffix: "KM"
             )
             .keyboardType(.numberPad)
+            .focused($focusedField, equals: .mileage)
             .onChange(of: store.vehicle.mileage) { _, _ in
-                withAnimation(.easeInOut(duration: 0.3)) {
-                    validationErrors[.mileage] = nil
-                }
+                validationErrors[.mileage] = nil
             }
             
         case .date:
-            Button(action: { openDateSheet = true }) {
+            Button(action: { 
+                openDateSheet = true 
+            }) {
                 HStack {
                     Text(store.vehicle.registrationDate.isEmpty ? "Sélectionner une date" : store.vehicle.registrationDate)
                         .bodyDefaultRegular()
@@ -353,9 +374,7 @@ struct AddVehicleView: View {
             }
             .buttonStyle(.plain)
             .onChange(of: store.vehicle.registrationDate) { _, _ in
-                withAnimation(.easeInOut(duration: 0.3)) {
-                    validationErrors[.date] = nil
-                }
+                validationErrors[.date] = nil
             }
             
         case .summary:
@@ -450,168 +469,64 @@ struct SummaryView: View {
     @Bindable var store: StoreOf<AddVehicleStore>
     
     var body: some View {
-        VStack(spacing: 24) {
-            // Marque
-            SummaryFieldView(
-                title: "Marque du véhicule",
-                value: store.vehicle.brand,
-                placeholder: "TOYOTA, BMW, MERCEDES..."
-            )
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Informations du véhicule")
+                .bodyDefaultSemibold()
+                .foregroundStyle(.primary)
             
-            // Modèle
-            SummaryFieldView(
-                title: "Modèle du véhicule",
-                value: store.vehicle.model,
-                placeholder: "COROLLA, X3, CLASSE A..."
-            )
-            
-            // Plaque
-            SummaryFieldView(
-                title: "Plaque d'immatriculation",
-                value: store.vehicle.plate,
-                placeholder: "AB-123-CD"
-            )
-            
-            // Kilométrage
-            SummaryFieldWithSuffixView(
-                title: "Kilométrage actuel",
-                value: store.vehicle.mileage,
-                placeholder: "120000",
-                suffix: "KM"
-            )
-            
-            // Date
-            SummaryFieldView(
-                title: "Date de mise en circulation",
-                value: store.vehicle.registrationDate,
-                placeholder: "Sélectionner une date"
+            VStack(spacing: 12) {
+                SummaryRowView(
+                    label: "Marque",
+                    value: store.vehicle.brand.isEmpty ? "Non renseigné" : store.vehicle.brand
+                )
+                
+                SummaryRowView(
+                    label: "Modèle",
+                    value: store.vehicle.model.isEmpty ? "Non renseigné" : store.vehicle.model
+                )
+                
+                SummaryRowView(
+                    label: "Plaque",
+                    value: store.vehicle.plate.isEmpty ? "Non renseigné" : store.vehicle.plate
+                )
+                
+                SummaryRowView(
+                    label: "Kilométrage actuel",
+                    value: store.vehicle.mileage.isEmpty ? "Non renseigné" : "\(store.vehicle.mileage) KM"
+                )
+                
+                SummaryRowView(
+                    label: "Date de mise en circulation",
+                    value: store.vehicle.registrationDate.isEmpty ? "Non renseigné" : store.vehicle.registrationDate
+                )
+            }
+            .padding(16)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color(.systemBackground))
+                    .stroke(Color(.systemGray4), lineWidth: 1)
             )
         }
     }
 }
 
-struct SummaryFieldView: View {
-    let title: String
+struct SummaryRowView: View {
+    let label: String
     let value: String
-    let placeholder: String
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(title)
-                .bodySmallSemibold()
+        VStack(alignment: .leading, spacing: 4) {
+            Text(label)
+                .bodyXSmallRegular()
                 .foregroundStyle(.secondary)
             
-            Text(value.isEmpty ? placeholder : value)
+            Text(value)
                 .bodyDefaultRegular()
-                .foregroundStyle(value.isEmpty ? .tertiary : .primary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 16)
-                .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color(.systemBackground))
-                        .stroke(Color(.systemGray4), lineWidth: 1)
-                )
+                .foregroundStyle(.primary)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
-
-struct SummaryFieldWithSuffixView: View {
-    let title: String
-    let value: String
-    let placeholder: String
-    let suffix: String
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(title)
-                .bodySmallSemibold()
-                .foregroundStyle(.secondary)
-            
-            HStack(spacing: 8) {
-                Text(value.isEmpty ? placeholder : value)
-                    .bodyDefaultRegular()
-                    .foregroundStyle(value.isEmpty ? .tertiary : .primary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 16)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color(.systemBackground))
-                            .stroke(Color(.systemGray4), lineWidth: 1)
-                    )
-                
-                Text(suffix)
-                    .bodyDefaultRegular()
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 16)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color(.systemGray5))
-                    )
-            }
-        }
-    }
-}
-
-struct DatePickerSheet: View {
-    @Binding var date: Date
-    let onSave: () -> Void
-    let onCancel: () -> Void
-    
-    var body: some View {
-        NavigationView {
-            VStack(spacing: 0) {
-                DatePicker(
-                    "Date de mise en circulation",
-                    selection: $date,
-                    displayedComponents: .date
-                )
-                .datePickerStyle(.graphical)
-                .padding()
-                
-                Spacer()
-            }
-            .navigationTitle("Date de mise en circulation")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Annuler", action: onCancel)
-                }
-                
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Valider", action: onSave)
-                        .fontWeight(.semibold)
-                }
-            }
-        }
-    }
-}
-
-//// MARK: - Keyboard Toolbar Extension
-//
-//struct KeyboardToolbar: ViewModifier {
-//    func body(content: Content) -> some View {
-//        content
-//            .toolbar {
-//                ToolbarItemGroup(placement: .keyboard) {
-//                    Spacer()
-//                    Button("Terminé") {
-//                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-//                    }
-//                    .font(.system(size: 16, weight: .medium))
-//                    .foregroundColor(.accentColor)
-//                }
-//            }
-//    }
-//}
-//
-//extension View {
-//    func keyboardToolbar() -> some View {
-//        self.modifier(KeyboardToolbar())
-//    }
-//}
 
 #Preview {
     NavigationStack {

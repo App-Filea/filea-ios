@@ -21,7 +21,7 @@ struct AddVehicleStore {
         case binding(BindingAction<State>)
         case saveVehicle
         case vehicleSaved
-        case goBack
+        case cancelCreation
     }
     
     @Dependency(\.fileStorageService) var fileStorageService
@@ -50,7 +50,7 @@ struct AddVehicleStore {
                     await dismiss()
                 }
                 
-            case .goBack:
+            case .cancelCreation:
                 return .run { _ in
                     await dismiss()
                 }

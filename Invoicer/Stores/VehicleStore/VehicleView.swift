@@ -10,7 +10,7 @@ import ComposableArchitecture
 
 struct VehicleView: View {
     @Bindable var store: StoreOf<VehicleStore>
-    @State private var activeTab: VehicleSegmentedTab = .documents
+    @State private var activeTab: VehicleSegmentedTab = .historique
     
     let circleSize: CGFloat = 12
     let lineWidth: CGFloat = 2

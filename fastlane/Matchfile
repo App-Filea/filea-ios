@@ -1,0 +1,38 @@
+# Matchfile
+
+# Git repository URL for storing certificates and provisioning profiles
+# Private repository in App-Filea organization for certificates
+git_url("git@github.com:App-Filea/filea-certificates.git")
+
+# Storage mode (git, google_cloud, s3, etc.)
+storage_mode("git")
+
+# App Identifier
+app_identifier(["come.nicolasbarb.filea"])
+
+# Your Apple Developer Team ID
+# You can find this in your Apple Developer account
+# team_id("XXXXXXXXXX")
+
+# Username (Apple ID email)
+username("nicolas.barb.pro@gmail.com")
+
+# Generate profiles for specific platforms
+platform("ios")
+
+# Additional configuration
+# For readonly access (when you just want to download certificates)
+readonly(false)
+
+# Organization: App-Filea
+# Updated for organization migration
+
+# Generate only specific certificate types
+# type("appstore") # or "development", "adhoc", "enterprise"
+
+# Keychain configuration
+keychain_name("fastlane_tmp_keychain")
+keychain_password("temp_password_for_ci")
+
+# Force recreate if profiles are expired
+force_for_new_devices(true)

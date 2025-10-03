@@ -1,0 +1,63 @@
+# The Deliverfile allows you to store various App Store Connect metadata
+# For more information, check out the docs
+# https://docs.fastlane.tools/actions/deliver/
+
+###################### More Options ######################
+# If you want to have even more control, check out the documentation
+# https://docs.fastlane.tools/actions/deliver/
+
+################# Automatically generated #################
+# Feel free to remove the following line if you use fastlane
+
+app_identifier("come.nicolasbarb.filea")
+username("nicolas.barb.pro@gmail.com")
+
+# Metadata
+name({
+  'fr-FR' => 'Filea'
+})
+
+description({
+  'fr-FR' => 'Application de gestion de factures et véhicules'
+})
+
+keywords({
+  'fr-FR' => 'facture,invoice,véhicule,gestion'
+})
+
+# App Review Information
+review_information({
+  first_name: "Nicolas",
+  last_name: "Barbosa", 
+  phone_number: "+33123456789",
+  email_address: "nicolas.barb.pro@gmail.com",
+  demo_user: "",
+  demo_password: "",
+  notes: "Application de gestion de factures et véhicules"
+})
+
+# Copyright
+copyright("#{Time.now.year} Nicolas Barbosa")
+
+# App Rating
+app_rating_config_path("./fastlane/rating_config.json")
+
+# Pricing
+price_tier(0)
+
+# Release Notes
+release_notes({
+  'default' => "Corrections de bugs et améliorations des performances",
+  'fr-FR' => "Corrections de bugs et améliorations des performances"
+})
+
+# Submission
+submit_for_review(false)
+automatic_release(false)
+force(true)
+
+# Phased Release
+phased_release(false)
+
+# Reject if necessary
+reject_if_possible(true)

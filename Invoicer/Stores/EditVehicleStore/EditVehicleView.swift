@@ -10,118 +10,124 @@ import ComposableArchitecture
 
 struct EditVehicleView: View {
     @Bindable var store: StoreOf<EditVehicleStore>
-    @State var openDateSheet: Bool = false
-    @State var date: Date = .now
+    @State private var openDateSheet: Bool = false
+    @State private var date: Date = .now
+    
+    private let horizontalPadding: CGFloat = 20
+    
     var body: some View {
         ZStack {
-            Color.gray.opacity(0.1)
+            Color.gray.opacity(0.3)
                 .ignoresSafeArea()
-            VStack {
-                ScrollView {
-                    VStack(spacing: 16) {
-                        textField("Marque", text: $store.brand)
-                        textField("Modèle", text: $store.model)
-                        textField("Plaque d'immatriculation", text: $store.plate)
-                        
-                        HStack(alignment: .bottom) {
-                            textField("Kilométrage actuel", text: $store.mileage)
-                                .keyboardType(.numberPad)
+            
+            GeometryReader { reader in
+                VStack(spacing: 0) {
+                    ScrollView {
+                        VStack(spacing: 24) {
+                            StepTextField(
+                                placeholder: "TOYOTA, BMW, MERCEDES...",
+                                text: $store.brand
+                            )
+                            .autocapitalization(.allCharacters)
                             
-                            Text("KM")
-                                .font(.body.bold())
-                                .padding(10)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .fill(Color.gray.opacity(0.1))
-                                )
-                        }
-                        
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Date de mise en circulation")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(.gray)
+                            StepTextField(
+                                placeholder: "COROLLA, X3, CLASSE A...",
+                                text: $store.model
+                            )
+                            .autocapitalization(.allCharacters)
                             
-                            Text($store.registrationDate.wrappedValue)
-                                .frame(maxWidth: .infinity, minHeight: 20, alignment: .leading)
-                                .font(.body.bold()) // texte en gras
-                                .padding(10)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .fill(Color.gray.opacity(0.1))
-                                )
-                                .onTapGesture {
-                                    openDateSheet = true
+                            StepTextField(
+                                placeholder: "AB-123-CD",
+                                text: $store.plate
+                            )
+                            .autocapitalization(.allCharacters)
+                            
+                            StepTextFieldWithSuffix(
+                                placeholder: "120000",
+                                text: $store.mileage,
+                                suffix: "KM"
+                            )
+                            .keyboardType(.numberPad)
+                            
+                            Button(action: { 
+                                openDateSheet = true 
+                            }) {
+                                HStack {
+                                    Text(store.registrationDate.isEmpty ? "Sélectionner une date" : store.registrationDate)
+                                        .bodyDefaultRegular()
+                                        .foregroundStyle(store.registrationDate.isEmpty ? .tertiary : .primary)
+                                    
+                                    Spacer()
+                                    
+                                    Image(systemName: "calendar")
+                                        .foregroundStyle(.secondary)
                                 }
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 16)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(Color(.systemBackground))
+                                        .stroke(Color(.systemGray4), lineWidth: 1)
+                                )
+                            }
+                            .buttonStyle(.plain)
                         }
-                        Spacer()
-                    }
-                    .padding()
-                    VStack {
-                        Button(action: { store.send(.updateVehicle) }) {
-                            Text("Sauvegarder")
-                                .frame(maxWidth: .infinity, minHeight: 60)
-                                .foregroundStyle(Color.black)
-                                .background(Color.white.opacity(0.8))
-                                .cornerRadius(12)
-                                .shadow( color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
-                        }
+                        .padding(.horizontal, horizontalPadding)
+                        .padding(.top, 24)
                         
-                        Button(action: { store.send(.goBack) }) {
-                            Text("Annuler")
-                                .frame(maxWidth: .infinity, minHeight: 60)
-                                .foregroundStyle(Color.red)
-                                .background(Color.red.opacity(0.2))
-                                .cornerRadius(12)
-                                .shadow( color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
+                        VStack(spacing: 12) {
+                            Button(action: { store.send(.updateVehicle) }) {
+                                Text("Sauvegarder")
+                                    .bodyDefaultSemibold()
+                                    .foregroundStyle(.white)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 16)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .fill(Color.accentColor)
+                                    )
+                            }
+                            
+                            Button(action: { store.send(.goBack) }) {
+                                Text("Annuler")
+                                    .bodyDefaultRegular()
+                                    .foregroundStyle(.secondary)
+                            }
+                            .buttonStyle(.plain)
                         }
+                        .padding(.horizontal, horizontalPadding)
+                        .padding(.bottom, reader.safeAreaInsets.bottom + horizontalPadding)
                     }
-                    .padding()
                 }
             }
         }
         .navigationTitle("Modifier mon véhicule")
         .navigationBarTitleDisplayMode(.large)
         .sheet(isPresented: $openDateSheet) {
-            VStack(spacing: 0) {
-                HStack {
-                    Button(action: {
-                        openDateSheet = false
-                    }) {
-                        Text("Annuler")
-                    }
-                    Spacer()
-                    Button(action: {
-                        store.registrationDate = date.ISO8601Format()
-                        openDateSheet = false
-                    }) {
-                        Text("Sauvegarder")
-                    }
+            DatePickerSheet(
+                date: $date,
+                onSave: {
+                    store.registrationDate = formatDate(date)
+                    openDateSheet = false
+                },
+                onCancel: {
+                    openDateSheet = false
                 }
-                DatePicker("", selection: $date, displayedComponents: .date)
-                    .datePickerStyle(.graphical)
-                    .presentationDetents([.medium])
-                    .interactiveDismissDisabled(true)
-            }
-            .padding(.horizontal)
+            )
+            .presentationDetents([.medium])
+            .presentationDragIndicator(.visible)
         }
     }
     
-    private func textField(_ marker: String, text: Binding<String>) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(marker)
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(.gray)
-            
-            TextField("", text: text)
-                .font(.body.bold()) // texte en gras
-                .padding(10)
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(Color.gray.opacity(0.1))
-                )
-        }
+    private func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.locale = Locale(identifier: "fr_FR")
+        return formatter.string(from: date)
     }
 }
+
+
 
 #Preview {
     EditVehicleView(store: Store(initialState: EditVehicleStore.State(

@@ -487,3 +487,5 @@ struct SummaryRowView: View {
         })
     }
 }
+
+// Test commit pour vérifier l'auteur Git

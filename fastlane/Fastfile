@@ -16,54 +16,173 @@
 default_platform(:ios)
 
 platform :ios do
-  desc "Setup certificates and profiles"
-  lane :certificates do
-    # Setup certificates for App Store distribution
-    match(type: "appstore")
-  end
-
-  desc "Generate new certificates and profiles (first time setup)"
+  desc "Setup all certificates and profiles (development, adhoc, appstore)"
   lane :setup_match do
-    # Generate certificates and profiles for the first time
+    # Generate certificates and profiles for all environments
+    UI.important("🔧 Génération des certificats Development...")
+    match(
+      type: "development",
+      force: true,
+      force_for_new_devices: true
+    )
+
+    UI.important("🔧 Génération des certificats AdHoc...")
+    match(
+      type: "adhoc",
+      force: true,
+      force_for_new_devices: true
+    )
+
+    UI.important("🔧 Génération des certificats App Store...")
     match(
       type: "appstore",
       force: true,
       force_for_new_devices: true
     )
+
+    UI.success("✅ Tous les certificats et profils ont été créés avec succès!")
+  end
+
+  desc "Clean and regenerate all certificates and profiles"
+  lane :regenerate_certificates do
+    # Nuke all existing certificates and profiles
+    UI.important("🗑️  Suppression des certificats et profils Development...")
+    match_nuke(
+      type: "development",
+      skip_confirmation: true
+    )
+
+    UI.important("🗑️  Suppression des certificats et profils AdHoc...")
+    match_nuke(
+      type: "adhoc",
+      skip_confirmation: true
+    )
+
+    UI.important("🗑️  Suppression des certificats et profils App Store...")
+    match_nuke(
+      type: "appstore",
+      skip_confirmation: true
+    )
+
+    UI.success("✅ Tous les anciens certificats et profils ont été supprimés")
+
+    # Regenerate all certificates and profiles
+    UI.important("🔄 Régénération des certificats Development...")
+    match(
+      type: "development",
+      force: true,
+      force_for_new_devices: true
+    )
+
+    UI.important("🔄 Régénération des certificats AdHoc...")
+    match(
+      type: "adhoc",
+      force: true,
+      force_for_new_devices: true
+    )
+
+    UI.important("🔄 Régénération des certificats App Store...")
+    match(
+      type: "appstore",
+      force: true,
+      force_for_new_devices: true
+    )
+
+    UI.success("✅ Tous les nouveaux certificats et profils ont été créés avec succès!")
   end
 
   desc "Push a new beta build to TestFlight"
-  lane :beta do
+  lane :beta do |options|
+    # Increment version if bump parameter is provided
+    if options[:bump]
+      increment_version_number(
+        xcodeproj: "Invoicer.xcodeproj",
+        bump_type: options[:bump]  # patch, minor, or major
+      )
+      UI.success("✅ Version incrémentée à #{get_version_number(xcodeproj: 'Invoicer.xcodeproj')}")
+    end
+
+    # Ensure git status is clean (optional, remove if you want to allow dirty workspace)
+    # ensure_git_status_clean
+
+    # Setup App Store Connect API Key
+    api_key = app_store_connect_api_key(
+      key_id: "KN4CQZ4P8G",
+      issuer_id: "52d3d37b-494c-4d95-afee-3272957150c7",
+      key_filepath: File.expand_path("~/.appstoreconnect/private_keys/AuthKey_KN4CQZ4P8G.p8"),
+      in_house: false
+    )
+
     # Setup certificates and provisioning profiles
-    match(type: "appstore")
-    
-    # Increment build number
-    increment_build_number(xcodeproj: "Invoicer.xcodeproj")
-    
-    # Build the app
+    match(
+      type: "appstore",
+      api_key: api_key,
+      readonly: is_ci,
+      verbose: true
+    )
+
+    # Get latest TestFlight build number to avoid conflicts
+    latest_testflight_build_number = latest_testflight_build_number(
+      api_key: api_key,
+      app_identifier: CredentialsManager::AppfileConfig.try_fetch_value(:app_identifier),
+      initial_build_number: 0
+    )
+
+    # Increment build number (based on TestFlight)
+    increment_build_number(
+      xcodeproj: "Invoicer.xcodeproj",
+      build_number: latest_testflight_build_number + 1
+    )
+
+    # Build the app using gym
     build_app(
       scheme: "Invoicer",
-      workspace: nil,
       project: "Invoicer.xcodeproj",
-      export_method: "app-store",
-      output_directory: "./fastlane/builds",
       clean: true,
-      codesigning_identity: "iPhone Distribution",
+      output_directory: "./fastlane/builds",
+      output_name: "Invoicer",
+      export_method: "app-store",
       export_options: {
         method: "app-store",
         provisioningProfiles: {
-          "come.nicolasbarb.filea" => "match AppStore come.nicolasbarb.filea"
+          CredentialsManager::AppfileConfig.try_fetch_value(:app_identifier) => "match AppStore #{CredentialsManager::AppfileConfig.try_fetch_value(:app_identifier)}"
         }
       }
     )
-    
+
+    # Get changelog from last commit body (description only, not the title)
+    changelog = sh("git log -1 --pretty=%b").strip
+
+    # Use default message if commit body is empty
+    if changelog.empty?
+      changelog = "Corrections de bugs et améliorations des performances"
+      UI.warning("⚠️  Aucune description de commit trouvée, utilisation du changelog par défaut")
+    end
+
     # Upload to TestFlight
     upload_to_testflight(
+      api_key: api_key,
       skip_waiting_for_build_processing: true,
       skip_submission: true,
       distribute_external: false,
-      notify_external_testers: false
+      notify_external_testers: false,
+      changelog: changelog
     )
+
+    # Commit version and build number changes
+    commit_version_bump(
+      message: "Bump version to #{get_version_number(xcodeproj: 'Invoicer.xcodeproj')} build #{lane_context[SharedValues::BUILD_NUMBER]} [skip ci]",
+      xcodeproj: "Invoicer.xcodeproj",
+      force: true
+    )
+
+    # Tag release
+    add_git_tag(
+      tag: "testflight/#{get_version_number(xcodeproj: 'Invoicer.xcodeproj')}/#{lane_context[SharedValues::BUILD_NUMBER]}"
+    )
+
+    # Push to remote
+    push_to_git_remote
   end
 
   desc "Build app for release"

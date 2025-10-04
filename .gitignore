@@ -1,0 +1,23 @@
+# Xcode
+xcuserdata/
+*.xcuserstate
+*.xcworkspace/xcuserdata/
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/builds/
+fastlane/test_output/
+fastlane/README.md
+
+# iOS Builds
+*.ipa
+*.dSYM.zip
+*.app
+
+# Asset Catalog temporary files
+*.appiconset/*.jpg
+*.appiconset/*.png
+
+# macOS
+.DS_Store

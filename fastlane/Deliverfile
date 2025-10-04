@@ -9,7 +9,7 @@
 ################# Automatically generated #################
 # Feel free to remove the following line if you use fastlane
 
-app_identifier("come.nicolasbarb.filea")
+app_identifier("com.nicolasbarb.filea")
 username("nicolas.barb.pro@gmail.com")
 
 # Metadata

@@ -1,11 +1,11 @@
 # app_identifier("[[APP_IDENTIFIER]]") # The bundle identifier of your app
 # apple_id("[[APPLE_ID]]") # Your Apple email address
 
-app_identifier("come.nicolasbarb.filea") # The bundle identifier of your app
+app_identifier("com.nicolasbarb.filea") # The bundle identifier of your app
 apple_id("nicolas.barb.pro@gmail.com") # Your Apple email address
 
-# You can uncomment the line below to automatically use the latest App Store Connect Team if you're in multiple teams
-# team_id("123456789")
+# Apple Developer Team ID
+team_id("GFYJNR5373")
 
 # For more information about the Appfile, see:
 #     https://docs.fastlane.tools/advanced/#appfile

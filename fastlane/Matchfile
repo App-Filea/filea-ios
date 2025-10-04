@@ -8,11 +8,11 @@ git_url("git@github.com:App-Filea/filea-certificates.git")
 storage_mode("git")
 
 # App Identifier
-app_identifier(["come.nicolasbarb.filea"])
+app_identifier(["com.nicolasbarb.filea"])
 
 # Your Apple Developer Team ID
-# You can find this in your Apple Developer account
-# team_id("XXXXXXXXXX")
+# Found in Apple Developer account
+team_id("GFYJNR5373")
 
 # Username (Apple ID email)
 username("nicolas.barb.pro@gmail.com")
@@ -30,9 +30,7 @@ readonly(false)
 # Generate only specific certificate types
 # type("appstore") # or "development", "adhoc", "enterprise"
 
-# Keychain configuration
-keychain_name("fastlane_tmp_keychain")
-keychain_password("temp_password_for_ci")
+# Keychain configuration - using default keychain
 
 # Force recreate if profiles are expired
 force_for_new_devices(true)

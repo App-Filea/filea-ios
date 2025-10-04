@@ -95,11 +95,40 @@ platform :ios do
   lane :beta do |options|
     # Increment version if bump parameter is provided
     if options[:bump]
+      # Get current version
+      current_version = get_version_number(
+        xcodeproj: "Invoicer.xcodeproj",
+        target: "Invoicer"
+      )
+
+      # Parse version components
+      version_parts = current_version.split('.')
+      major = version_parts[0].to_i
+      minor = version_parts[1]&.to_i || 0
+      patch = version_parts[2]&.to_i || 0
+
+      # Increment based on bump type
+      case options[:bump]
+      when "major"
+        major += 1
+        minor = 0
+        patch = 0
+      when "minor"
+        minor += 1
+        patch = 0
+      when "patch"
+        patch += 1
+      end
+
+      new_version = "#{major}.#{minor}.#{patch}"
+
+      # Set new version
       increment_version_number(
         xcodeproj: "Invoicer.xcodeproj",
-        bump_type: options[:bump]  # patch, minor, or major
+        version_number: new_version
       )
-      UI.success("✅ Version incrémentée à #{get_version_number(xcodeproj: 'Invoicer.xcodeproj')}")
+
+      UI.success("✅ Version incrémentée de #{current_version} à #{new_version}")
     end
 
     # Ensure git status is clean (optional, remove if you want to allow dirty workspace)

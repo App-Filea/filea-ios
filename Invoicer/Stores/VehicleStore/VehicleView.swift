@@ -7,6 +7,7 @@
 
 import SwiftUI
 import ComposableArchitecture
+import QuickLook
 
 struct VehicleView: View {
     @Bindable var store: StoreOf<VehicleStore>
@@ -240,6 +241,10 @@ struct VehicleView: View {
                             .cornerRadius(16)
                     )            }
             Spacer()
+
+            DocumentThumbnailView(fileURL: document.fileURL)
+                .frame(width: 60, height: 80)
+                .clipShape(RoundedRectangle(cornerRadius: 8))
         }
     }
     
@@ -268,7 +273,57 @@ struct VehicleView: View {
         .padding(.horizontal, 8)
     }
     
-    
+}
+
+struct DocumentThumbnailView: View {
+    let fileURL: String
+    @State private var thumbnail: UIImage?
+
+    var body: some View {
+        Group {
+            if let thumbnail = thumbnail {
+                Image(uiImage: thumbnail)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+            } else {
+                Rectangle()
+                    .fill(Color.gray.opacity(0.3))
+                    .overlay(
+                        Image(systemName: "doc.fill")
+                            .foregroundStyle(.secondary)
+                    )
+            }
+        }
+        .task {
+            await loadThumbnail()
+        }
+    }
+
+    private nonisolated func loadThumbnail() async {
+        let url = URL(fileURLWithPath: fileURL)
+        let size = CGSize(width: 60, height: 80)
+        let scale = await MainActor.run { UIScreen.main.scale }
+
+        let request = QLThumbnailGenerator.Request(
+            fileAt: url,
+            size: size,
+            scale: scale,
+            representationTypes: .thumbnail
+        )
+
+        let generator = QLThumbnailGenerator.shared
+
+        do {
+            let representation = try await generator.generateBestRepresentation(for: request)
+            let thumbnailImage = representation.uiImage
+            await MainActor.run { [thumbnailImage] in
+                self.thumbnail = thumbnailImage
+            }
+        } catch {
+            print("Failed to generate thumbnail: \(error)")
+        }
+    }
+
 }
 
 #Preview {

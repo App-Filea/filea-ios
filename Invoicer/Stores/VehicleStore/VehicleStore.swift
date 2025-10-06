@@ -14,17 +14,23 @@ struct VehicleStore {
     struct State: Equatable {
         var vehicle: Vehicle
         @Shared(.vehicles) var vehicles: [Vehicle] = []
+        @Presents var deleteAlert: AlertState<Action.Alert>?
     }
-    
+
     enum Action: Equatable {
         case loadVehicleData
         case vehicleDataLoaded(Vehicle)
         case showAddDocument
         case showDocumentDetail(UUID)
         case showEditVehicle
-        case deleteVehicle
+        case deleteVehicleTapped
+        case deleteAlert(PresentationAction<Alert>)
         case vehicleDeleted
         case goBack
+
+        enum Alert: Equatable {
+            case confirmDelete
+        }
     }
     
     @Dependency(\.fileStorageService) var fileStorageService
@@ -40,7 +46,7 @@ struct VehicleStore {
                         await send(.vehicleDataLoaded(updatedVehicle))
                     }
                 }
-                
+
             case .vehicleDataLoaded(let vehicle):
                 state.vehicle = vehicle
                 // Mettre à jour aussi dans le shared si pas encore fait
@@ -50,24 +56,40 @@ struct VehicleStore {
                     }
                 }
                 return .none
-                
+
             case .showAddDocument:
                 return .none
-                
+
             case .showDocumentDetail(let documentId):
                 return .none
-                
+
             case .showEditVehicle:
                 return .none
-                
-                
-                
-            case .deleteVehicle:
+
+            case .deleteVehicleTapped:
+                state.deleteAlert = AlertState {
+                    TextState("Supprimer le véhicule")
+                } actions: {
+                    ButtonState(role: .destructive, action: .confirmDelete) {
+                        TextState("Supprimer")
+                    }
+                    ButtonState(role: .cancel) {
+                        TextState("Annuler")
+                    }
+                } message: {
+                    TextState("Êtes-vous sûr de vouloir supprimer ce véhicule ? Cette action est irréversible.")
+                }
+                return .none
+
+            case .deleteAlert(.presented(.confirmDelete)):
                 return .run { [vehicleId = state.vehicle.id] send in
                     await fileStorageService.deleteVehicle(vehicleId)
                     await send(.vehicleDeleted)
                 }
-                
+
+            case .deleteAlert:
+                return .none
+
             case .vehicleDeleted:
                 // Supprimer le véhicule de la liste partagée pour mise à jour réactive
                 state.$vehicles.withLock { vehicles in
@@ -76,12 +98,13 @@ struct VehicleStore {
                 return .run { _ in
                     await dismiss()
                 }
-                
+
             case .goBack:
                 return .run { _ in
                     await dismiss()
                 }
             }
         }
+        .ifLet(\.$deleteAlert, action: \.deleteAlert)
     }
 }

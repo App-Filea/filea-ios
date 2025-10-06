@@ -71,7 +71,7 @@ struct VehicleView: View {
                             .background(Color.blue.quinary)
                             .cornerRadius(8)
                             
-                            Button(action: { store.send(.deleteVehicle) }) {
+                            Button(action: { store.send(.deleteVehicleTapped) }) {
                                 VStack(alignment: .leading) {
                                     Image(systemName: "trash.circle")
                                         .font(.largeTitle)
@@ -161,6 +161,7 @@ struct VehicleView: View {
         .onAppear {
             store.send(.loadVehicleData)
         }
+        .alert($store.scope(state: \.deleteAlert, action: \.deleteAlert))
     }
     
     private func eventElement(of document: Document) -> some View {

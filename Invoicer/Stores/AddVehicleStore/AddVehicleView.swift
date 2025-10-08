@@ -42,13 +42,14 @@ struct AddVehicleView: View {
             VStack(spacing: 12) {
                 Text(currentStep.title)
                     .titleLarge()
+                    .foregroundStyle(Color("onBackground"))
                     .multilineTextAlignment(.center)
                     .frame(minHeight: 40)
                     .animation(.easeInOut(duration: animationDuration), value: currentStep)
                 
                 Text(currentStep.subtitle)
                     .bodyDefaultRegular()
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color("onBackgroundSecondary"))
                     .multilineTextAlignment(.center)
                     .frame(minHeight: 44)
                     .animation(.easeInOut(duration: animationDuration), value: currentStep)
@@ -134,12 +135,12 @@ struct AddVehicleView: View {
         Button(action: handlePrimaryAction) {
             Text(currentStep.buttonTitle)
                 .bodyDefaultSemibold()
-                .foregroundStyle(.white)
+                .foregroundStyle(Color("onPrimary"))
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
                 .background(
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.accentColor)
+                        .fill(Color("primary"))
                 )
         }
     }
@@ -152,7 +153,7 @@ struct AddVehicleView: View {
                 Button(action: previousStep) {
                     Text("Retour")
                         .bodyDefaultRegular()
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color("onBackground"))
                 }
                 .buttonStyle(.plain)
             }
@@ -161,7 +162,7 @@ struct AddVehicleView: View {
                 Button(action: cancelVehicleCreation) {
                     Text("Annuler")
                         .bodyDefaultRegular()
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color("onBackground"))
                 }
                 .buttonStyle(.plain)
             }
@@ -174,7 +175,7 @@ struct AddVehicleView: View {
     
     var body: some View {
         ZStack {
-            Color.gray.opacity(0.3)
+            Color("background")
                 .ignoresSafeArea()
             
             GeometryReader { reader in
@@ -202,7 +203,7 @@ struct AddVehicleView: View {
             DatePickerSheet(
                 date: $date,
                 onSave: {
-                    store.vehicle.registrationDate = formatDate(date)
+                    store.vehicle.registrationDate = date
                     openDateSheet = false
                 },
                 onCancel: {
@@ -275,7 +276,7 @@ struct AddVehicleView: View {
         case .model: return store.vehicle.model
         case .plate: return store.vehicle.plate
         case .mileage: return store.vehicle.mileage
-        case .date: return store.vehicle.registrationDate
+        case .date: return formatDate(store.vehicle.registrationDate)
         case .summary: return "complete"
         }
     }
@@ -306,9 +307,12 @@ struct AddVehicleView: View {
     private func stepContentView(for step: AddVehicleStep) -> some View {
         switch step {
         case .brand:
-            StepTextField(
+            OutlinedTextField(
+                focusedField: $focusedField,
+                field: AddVehicleStep.brand,
                 placeholder: "TOYOTA, BMW, MERCEDES...",
-                text: $store.vehicle.brand
+                text: $store.vehicle.brand,
+                hasError: validationErrors[.brand] != nil
             )
             .autocapitalization(.allCharacters)
             .focused($focusedField, equals: .brand)
@@ -317,20 +321,25 @@ struct AddVehicleView: View {
             }
             
         case .model:
-            StepTextField(
+            OutlinedTextField(
+                focusedField: $focusedField,
+                field: AddVehicleStep.model,
                 placeholder: "COROLLA, X3, CLASSE A...",
-                text: $store.vehicle.model
+                text: $store.vehicle.model,
+                hasError: validationErrors[.model] != nil
             )
             .autocapitalization(.allCharacters)
             .focused($focusedField, equals: .model)
             .onChange(of: store.vehicle.model) { _, _ in
                 validationErrors[.model] = nil
             }
-            
         case .plate:
-            StepTextField(
+            OutlinedTextField(
+                focusedField: $focusedField,
+                field: AddVehicleStep.plate,
                 placeholder: "AB-123-CD",
-                text: $store.vehicle.plate
+                text: $store.vehicle.plate,
+                hasError: validationErrors[.plate] != nil
             )
             .autocapitalization(.allCharacters)
             .focused($focusedField, equals: .plate)
@@ -339,9 +348,12 @@ struct AddVehicleView: View {
             }
             
         case .mileage:
-            StepTextFieldWithSuffix(
+            OutlinedTextField(
+                focusedField: $focusedField,
+                field: AddVehicleStep.mileage,
                 placeholder: "120000",
                 text: $store.vehicle.mileage,
+                hasError: validationErrors[.mileage] != nil,
                 suffix: "KM"
             )
             .keyboardType(.numberPad)
@@ -351,25 +363,25 @@ struct AddVehicleView: View {
             }
             
         case .date:
-            Button(action: { 
-                openDateSheet = true 
+            Button(action: {
+                openDateSheet = true
             }) {
                 HStack {
-                    Text(store.vehicle.registrationDate.isEmpty ? "Sélectionner une date" : store.vehicle.registrationDate)
+                    Text(formatDate(store.vehicle.registrationDate))
                         .bodyDefaultRegular()
-                        .foregroundStyle(store.vehicle.registrationDate.isEmpty ? .tertiary : .primary)
-                    
+                        .foregroundStyle(Color("onSurface"))
+
                     Spacer()
-                    
+
                     Image(systemName: "calendar")
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color("onBackgroundSecondary"))
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 16)
                 .background(
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(Color(.systemBackground))
-                        .stroke(Color(.systemGray4), lineWidth: 1)
+                        .stroke(validationErrors[.date] != nil ? Color("error") : Color("outline"), lineWidth: 2)
+                        .animation(.easeInOut(duration: 0.3), value: validationErrors[.date] != nil)
                 )
             }
             .buttonStyle(.plain)
@@ -391,26 +403,41 @@ struct StepProgressView: View {
     
     var body: some View {
         VStack(spacing: 12) {
-            HStack {
+            HStack(spacing: 0) {
                 ForEach(0..<totalSteps, id: \.self) { step in
-                    Circle()
-                        .fill(step <= currentStep ? Color.accentColor : Color(.systemGray4))
-                        .frame(width: 8, height: 8)
-                        .scaleEffect(step == currentStep ? 1.2 : 1.0)
-                        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: currentStep)
+                    Circle().stroke(lineWidth: 3)
+                        .frame(width: 20, height: 20)
+                        .foregroundStyle(step < currentStep ? Color("primary") : Color("primaryContainer") )
+                        .overlay {
+                            if step < currentStep {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .resizable()
+                                    .frame(width: 20, height: 20)
+                                    .foregroundStyle(Color("primary"))
+                                    .transition(.scale)
+                            }
+                    }
+                    
                     
                     if step < totalSteps - 1 {
-                        Rectangle()
-                            .fill(step < currentStep ? Color.accentColor : Color(.systemGray4))
-                            .frame(height: 2)
-                            .animation(.easeInOut(duration: 0.3), value: currentStep)
+                        ZStack(alignment: .leading){
+                            Rectangle()
+                                .frame(height: 3)
+                                .foregroundStyle(Color("primaryContainer") )
+                            Rectangle()
+                                .frame(height: 3)
+                                .frame(maxWidth: step >= currentStep ? 0 : .infinity, alignment: .leading)
+                                .foregroundStyle(Color("primary"))
+                        }
                     }
                 }
             }
             
+            .animation(.default, value: currentStep)
+
             Text("\(currentStep + 1) sur \(totalSteps)")
                 .bodyXSmallRegular()
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color("onBackgroundSecondary"))
         }
         .padding(.vertical, 8)
     }
@@ -419,44 +446,51 @@ struct StepProgressView: View {
 
 struct SummaryView: View {
     @Bindable var store: StoreOf<AddVehicleStore>
-    
+
+    private func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.locale = Locale(identifier: "fr_FR")
+        return formatter.string(from: date)
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Informations du véhicule")
                 .bodyDefaultSemibold()
-                .foregroundStyle(.primary)
-            
+                .foregroundStyle(Color("onBackground"))
+
             VStack(spacing: 12) {
                 SummaryRowView(
                     label: "Marque",
                     value: store.vehicle.brand.isEmpty ? "Non renseigné" : store.vehicle.brand
                 )
-                
+
                 SummaryRowView(
                     label: "Modèle",
                     value: store.vehicle.model.isEmpty ? "Non renseigné" : store.vehicle.model
                 )
-                
+
                 SummaryRowView(
                     label: "Plaque",
                     value: store.vehicle.plate.isEmpty ? "Non renseigné" : store.vehicle.plate
                 )
-                
+
                 SummaryRowView(
                     label: "Kilométrage actuel",
                     value: store.vehicle.mileage.isEmpty ? "Non renseigné" : "\(store.vehicle.mileage) KM"
                 )
-                
+
                 SummaryRowView(
                     label: "Date de mise en circulation",
-                    value: store.vehicle.registrationDate.isEmpty ? "Non renseigné" : store.vehicle.registrationDate
+                    value: formatDate(store.vehicle.registrationDate)
                 )
             }
             .padding(16)
             .background(
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(Color(.systemBackground))
-                    .stroke(Color(.systemGray4), lineWidth: 1)
+                    .fill(Color("surface"))
+                    .stroke(Color("outline"), lineWidth: 2)
             )
         }
     }
@@ -465,16 +499,16 @@ struct SummaryView: View {
 struct SummaryRowView: View {
     let label: String
     let value: String
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(label)
                 .bodyXSmallRegular()
-                .foregroundStyle(.secondary)
-            
+                .foregroundStyle(Color("onBackgroundSecondary"))
+
             Text(value)
                 .bodyDefaultRegular()
-                .foregroundStyle(.primary)
+                .foregroundStyle(Color("onSurface"))
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }

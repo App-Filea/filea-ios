@@ -12,86 +12,111 @@ struct EditVehicleView: View {
     @Bindable var store: StoreOf<EditVehicleStore>
     @State private var openDateSheet: Bool = false
     @State private var date: Date = .now
-    
+    @FocusState private var focusedField: EditVehicleField?
+
     private let horizontalPadding: CGFloat = 20
+
+    enum EditVehicleField: Hashable {
+        case brand, model, plate, mileage
+    }
     
     var body: some View {
         ZStack {
-            Color.gray.opacity(0.3)
+            Color("background")
                 .ignoresSafeArea()
-            
+
             GeometryReader { reader in
                 VStack(spacing: 0) {
+                    Text("Modifier mon véhicule")
+                        .titleLarge()
+                        .foregroundStyle(Color("onBackground"))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, horizontalPadding)
+                        .padding(.top, 20)
+                        .padding(.bottom, 8)
+
                     ScrollView {
                         VStack(spacing: 24) {
-                            StepTextField(
+                            OutlinedTextField(
+                                focusedField: $focusedField,
+                                field: EditVehicleField.brand,
                                 placeholder: "TOYOTA, BMW, MERCEDES...",
                                 text: $store.brand
                             )
                             .autocapitalization(.allCharacters)
-                            
-                            StepTextField(
+                            .focused($focusedField, equals: .brand)
+
+                            OutlinedTextField(
+                                focusedField: $focusedField,
+                                field: EditVehicleField.model,
                                 placeholder: "COROLLA, X3, CLASSE A...",
                                 text: $store.model
                             )
                             .autocapitalization(.allCharacters)
-                            
-                            StepTextField(
+                            .focused($focusedField, equals: .model)
+
+                            OutlinedTextField(
+                                focusedField: $focusedField,
+                                field: EditVehicleField.plate,
                                 placeholder: "AB-123-CD",
                                 text: $store.plate
                             )
                             .autocapitalization(.allCharacters)
-                            
-                            StepTextFieldWithSuffix(
+                            .focused($focusedField, equals: .plate)
+
+                            OutlinedTextField(
+                                focusedField: $focusedField,
+                                field: EditVehicleField.mileage,
                                 placeholder: "120000",
                                 text: $store.mileage,
                                 suffix: "KM"
                             )
                             .keyboardType(.numberPad)
-                            
-                            Button(action: { 
-                                openDateSheet = true 
+                            .focused($focusedField, equals: .mileage)
+
+                            Button(action: {
+                                date = store.registrationDate
+                                openDateSheet = true
                             }) {
                                 HStack {
-                                    Text(store.registrationDate.isEmpty ? "Sélectionner une date" : store.registrationDate)
+                                    Text(formatDate(store.registrationDate))
                                         .bodyDefaultRegular()
-                                        .foregroundStyle(store.registrationDate.isEmpty ? .tertiary : .primary)
-                                    
+                                        .foregroundStyle(Color("onSurface"))
+
                                     Spacer()
-                                    
+
                                     Image(systemName: "calendar")
-                                        .foregroundStyle(.secondary)
+                                        .foregroundStyle(Color("onBackgroundSecondary"))
                                 }
                                 .padding(.horizontal, 16)
                                 .padding(.vertical, 16)
                                 .background(
                                     RoundedRectangle(cornerRadius: 12)
-                                        .fill(Color(.systemBackground))
-                                        .stroke(Color(.systemGray4), lineWidth: 1)
+                                        .stroke(Color("outline"), lineWidth: 2)
                                 )
                             }
                             .buttonStyle(.plain)
                         }
                         .padding(.horizontal, horizontalPadding)
                         .padding(.top, 24)
-                        
+
                         VStack(spacing: 12) {
                             Button(action: { store.send(.updateVehicle) }) {
                                 Text("Sauvegarder")
                                     .bodyDefaultSemibold()
-                                    .foregroundStyle(.white)
+                                    .foregroundStyle(Color("onPrimary"))
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 16)
                                     .background(
                                         RoundedRectangle(cornerRadius: 12)
-                                            .fill(Color.accentColor)
+                                            .fill(Color("primary"))
                                     )
                             }
-                            
+
                             Button(action: { store.send(.goBack) }) {
                                 Text("Annuler")
                                     .bodyDefaultRegular()
-                                    .foregroundStyle(.secondary)
+                                    .foregroundStyle(Color("onBackground"))
                             }
                             .buttonStyle(.plain)
                         }
@@ -101,13 +126,12 @@ struct EditVehicleView: View {
                 }
             }
         }
-        .navigationTitle("Modifier mon véhicule")
-        .navigationBarTitleDisplayMode(.large)
+        .navigationBarHidden(true)
         .sheet(isPresented: $openDateSheet) {
             DatePickerSheet(
                 date: $date,
                 onSave: {
-                    store.registrationDate = formatDate(date)
+                    store.registrationDate = date
                     openDateSheet = false
                 },
                 onCancel: {
@@ -131,7 +155,7 @@ struct EditVehicleView: View {
 
 #Preview {
     EditVehicleView(store: Store(initialState: EditVehicleStore.State(
-        vehicle: Vehicle(brand: "Test Car", model: "", mileage: "50000", registrationDate: "2020-01-01", plate: "ABC-123")
+        vehicle: Vehicle(brand: "Test Car", model: "", mileage: "50000", registrationDate: Date(timeIntervalSince1970: 1322784000), plate: "ABC-123")
     )) {
         EditVehicleStore()
     })

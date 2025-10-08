@@ -8,17 +8,17 @@
 import Foundation
 
 struct Vehicle: Codable, Equatable, Identifiable {
-    
+
     let id: UUID
 //    var nickname: String?
     var brand: String
     var model: String
     var mileage: String
-    var registrationDate: String
+    var registrationDate: Date
     var plate: String
     var documents: [Document] = []
-    
-    init(/*nickname: String? = nil, */brand: String = "", model: String = "", mileage: String = "", registrationDate: String = "", plate: String = "", documents: [Document] = []) {
+
+    init(/*nickname: String? = nil, */brand: String = "", model: String = "", mileage: String = "", registrationDate: Date = .now, plate: String = "", documents: [Document] = []) {
         self.id = UUID()
 //        self.nickname = nickname
         self.brand = brand

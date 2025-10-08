@@ -16,12 +16,12 @@ struct EditVehicleStore {
         var brand: String
         var model: String
         var mileage: String
-        var registrationDate: String
+        var registrationDate: Date
         var plate: String
         var isLoading = false
         @Shared(.vehicles) var vehicles: [Vehicle] = []
         var updatedVehicle: Vehicle?
-        
+
         init(vehicle: Vehicle) {
             self.originalVehicle = vehicle
             self.brand = vehicle.brand

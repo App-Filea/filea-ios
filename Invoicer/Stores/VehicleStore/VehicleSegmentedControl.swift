@@ -45,7 +45,7 @@ struct VehicleSegmentedControl: View {
                     ZStack {
                         if activeTab == tab {
                             RoundedRectangle(cornerRadius: 0)
-                                .fill(.blue)
+                                .fill(activeTint)
                                 .frame(height: 2)
                                 .offset(y: 2)
                                 .frame(maxHeight: .infinity, alignment: .bottom)

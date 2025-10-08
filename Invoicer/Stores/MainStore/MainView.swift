@@ -13,18 +13,22 @@ struct MainView: View {
     
     var body: some View {
         ZStack(alignment: .bottom) {
+            Color("background")
+                .ignoresSafeArea()
+            
             VStack(spacing: 20) {
                 if store.vehicles.isEmpty {
                     VStack(spacing: 16) {
                         Spacer()
                         Image(systemName: "car.fill")
                             .imageScale(.large)
-                            .foregroundStyle(.tint)
+                            .foregroundStyle(Color("primary"))
                         Text("Aucun véhicule enregistré")
                             .font(.headline)
+                            .foregroundStyle(Color("onBackground"))
                         Text("Commencez par ajouter votre premier véhicule")
                             .font(.subheadline)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(Color("onBackground"))
                         Spacer()
                     }
                     .padding()
@@ -36,24 +40,26 @@ struct MainView: View {
                                 HStack(alignment: .firstTextBaseline) {
                                     Text(vehicle.brand.uppercased())
                                         .bodyXLargeBlack()
+                                        .foregroundStyle(Color("onBackground"))
                                     Text(vehicle.model)
                                         .bodyDefaultLight()
+                                        .foregroundStyle(Color("onBackground"))
                                     Spacer()
                                     
                                     Text(vehicle.plate)
                                         .bodyXSmallRegular()
-                                        .foregroundStyle(.secondary)
+                                        .foregroundStyle(Color("onBackgroundSecondary"))
                                         .padding(6)
                                         .overlay(
                                             RoundedRectangle(cornerRadius: 4)
-                                                .stroke(.secondary, lineWidth: 0.5)
+                                                .stroke(Color("onBackgroundSecondary"), lineWidth: 0.5)
                                         )
                                         .alignmentGuide(.firstTextBaseline) { d in
                                             d[.bottom]
                                         }
                                 }
                                 HStack(spacing: 4) {
-                                    Text("2011"/*vehicle.registrationDate*/)
+                                    Text(formattedDate(vehicle.registrationDate, isOnlyYear: true))
                                     Text("-")
                                     Text("\(vehicle.mileage)km")
                                     Spacer()
@@ -63,10 +69,10 @@ struct MainView: View {
                                         Image(systemName: "arrow.right")
                                     }
                                     .bodyXSmallSemibold()
-                                    .foregroundStyle(.primary)
+                                    .foregroundStyle(Color("onBackground"))
                                 }
                                 .bodyDefaultLight()
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(Color("onBackgroundSecondary"))
                             }
                             .padding(.vertical, 4)
                             .contentShape(Rectangle())
@@ -87,20 +93,16 @@ struct MainView: View {
                 }
             }
             
-            Button(action: {
-                store.send(.showAddVehicle)
-            }) {
-                HStack {
-                    Image(systemName: "plus.circle.fill")
-                    Text("Ajouter un véhicule")
-                }
-                .bodyDefaultSemibold()
-                .padding()
-                .background(Color.blue)
-                .foregroundColor(.white)
-                .cornerRadius(8)
-                .shadow(color: Color.black.opacity(0.38), radius: 8, x: 0, y: 4)
-            }
+            Button("Ajouter un véhicule",
+                   systemImage: "plus.circle.fill",
+                   action: { store.send(.showAddVehicle) })
+            .bodyDefaultSemibold()
+            .padding(.vertical, 14)
+            .padding(.horizontal, 24)
+            .background(Color("primary"))
+            .foregroundColor(Color("onPrimary"))
+            .cornerRadius(12)
+            .shadow(color: Color.black.opacity(0.38), radius: 8, x: 0, y: 4)
             .padding()
         }
         .onAppear {
@@ -109,6 +111,13 @@ struct MainView: View {
             }
         }
         .navigationBarBackButtonHidden()
+    }
+    
+    private func formattedDate(_ date: Date, isOnlyYear: Bool = false) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "fr_FR")
+        formatter.dateFormat = isOnlyYear ? "yyyy" : "d MMM"
+        return formatter.string(from: date)
     }
 }
 
@@ -123,24 +132,24 @@ struct MainView: View {
 #Preview("1 vehicle") {
     NavigationView {
         MainView(store: Store(initialState: MainStore.State(vehicles: [
-            .init(brand: "Lexus", model: "CT200H", mileage: "120000", registrationDate: "2011-12-02", plate: "BZ-029-YV", documents: []),
-            .init(brand: "Lexus", model: "CT200H", mileage: "120000", registrationDate: "2011-12-02", plate: "BZ-029-YV", documents: []),
-            .init(brand: "Lexus", model: "CT200H", mileage: "120000", registrationDate: "2011-12-02", plate: "BZ-029-YV", documents: []),
-            .init(brand: "Lexus", model: "CT200H", mileage: "120000", registrationDate: "2011-12-02", plate: "BZ-029-YV", documents: []),
-            .init(brand: "Lexus", model: "CT200H", mileage: "120000", registrationDate: "2011-12-02", plate: "BZ-029-YV", documents: []),
-            .init(brand: "Lexus", model: "CT200H", mileage: "120000", registrationDate: "2011-12-02", plate: "BZ-029-YV", documents: []),
-            .init(brand: "Lexus", model: "CT200H", mileage: "120000", registrationDate: "2011-12-02", plate: "BZ-029-YV", documents: []),
-            .init(brand: "Lexus", model: "CT200H", mileage: "120000", registrationDate: "2011-12-02", plate: "BZ-029-YV", documents: []),
-            .init(brand: "Lexus", model: "CT200H", mileage: "120000", registrationDate: "2011-12-02", plate: "BZ-029-YV", documents: []),
-            .init(brand: "Lexus", model: "CT200H", mileage: "120000", registrationDate: "2011-12-02", plate: "BZ-029-YV", documents: []),
-            .init(brand: "Lexus", model: "CT200H", mileage: "120000", registrationDate: "2011-12-02", plate: "BZ-029-YV", documents: []),
-            .init(brand: "Lexus", model: "CT200H", mileage: "120000", registrationDate: "2011-12-02", plate: "BZ-029-YV", documents: []),
-            .init(brand: "Lexus", model: "CT200H", mileage: "120000", registrationDate: "2011-12-02", plate: "BZ-029-YV", documents: []),
-            .init(brand: "Lexus", model: "CT200H", mileage: "120000", registrationDate: "2011-12-02", plate: "BZ-029-YV", documents: []),
-            .init(brand: "Lexus", model: "CT200H", mileage: "120000", registrationDate: "2011-12-02", plate: "BZ-029-YV", documents: []),
-            .init(brand: "Lexus", model: "CT200H", mileage: "120000", registrationDate: "2011-12-02", plate: "BZ-029-YV", documents: []),
-            .init(brand: "Lexus", model: "CT200H", mileage: "120000", registrationDate: "2011-12-02", plate: "BZ-029-YV", documents: []),
-            .init(brand: "Lexus", model: "CT200H", mileage: "120000", registrationDate: "2011-12-02", plate: "BZ-029-YV", documents: []),
+            .init(brand: "Lexus", model: "CT200H", mileage: "120000", registrationDate: Date(timeIntervalSince1970: 1322784000), plate: "BZ-029-YV", documents: []),
+            .init(brand: "Lexus", model: "CT200H", mileage: "120000", registrationDate: Date(timeIntervalSince1970: 1322784000), plate: "BZ-029-YV", documents: []),
+            .init(brand: "Lexus", model: "CT200H", mileage: "120000", registrationDate: Date(timeIntervalSince1970: 1322784000), plate: "BZ-029-YV", documents: []),
+            .init(brand: "Lexus", model: "CT200H", mileage: "120000", registrationDate: Date(timeIntervalSince1970: 1322784000), plate: "BZ-029-YV", documents: []),
+            .init(brand: "Lexus", model: "CT200H", mileage: "120000", registrationDate: Date(timeIntervalSince1970: 1322784000), plate: "BZ-029-YV", documents: []),
+            .init(brand: "Lexus", model: "CT200H", mileage: "120000", registrationDate: Date(timeIntervalSince1970: 1322784000), plate: "BZ-029-YV", documents: []),
+            .init(brand: "Lexus", model: "CT200H", mileage: "120000", registrationDate: Date(timeIntervalSince1970: 1322784000), plate: "BZ-029-YV", documents: []),
+            .init(brand: "Lexus", model: "CT200H", mileage: "120000", registrationDate: Date(timeIntervalSince1970: 1322784000), plate: "BZ-029-YV", documents: []),
+            .init(brand: "Lexus", model: "CT200H", mileage: "120000", registrationDate: Date(timeIntervalSince1970: 1322784000), plate: "BZ-029-YV", documents: []),
+            .init(brand: "Lexus", model: "CT200H", mileage: "120000", registrationDate: Date(timeIntervalSince1970: 1322784000), plate: "BZ-029-YV", documents: []),
+            .init(brand: "Lexus", model: "CT200H", mileage: "120000", registrationDate: Date(timeIntervalSince1970: 1322784000), plate: "BZ-029-YV", documents: []),
+            .init(brand: "Lexus", model: "CT200H", mileage: "120000", registrationDate: Date(timeIntervalSince1970: 1322784000), plate: "BZ-029-YV", documents: []),
+            .init(brand: "Lexus", model: "CT200H", mileage: "120000", registrationDate: Date(timeIntervalSince1970: 1322784000), plate: "BZ-029-YV", documents: []),
+            .init(brand: "Lexus", model: "CT200H", mileage: "120000", registrationDate: Date(timeIntervalSince1970: 1322784000), plate: "BZ-029-YV", documents: []),
+            .init(brand: "Lexus", model: "CT200H", mileage: "120000", registrationDate: Date(timeIntervalSince1970: 1322784000), plate: "BZ-029-YV", documents: []),
+            .init(brand: "Lexus", model: "CT200H", mileage: "120000", registrationDate: Date(timeIntervalSince1970: 1322784000), plate: "BZ-029-YV", documents: []),
+            .init(brand: "Lexus", model: "CT200H", mileage: "120000", registrationDate: Date(timeIntervalSince1970: 1322784000), plate: "BZ-029-YV", documents: []),
+            .init(brand: "Lexus", model: "CT200H", mileage: "120000", registrationDate: Date(timeIntervalSince1970: 1322784000), plate: "BZ-029-YV", documents: []),
         ])) {
             MainStore()
         })

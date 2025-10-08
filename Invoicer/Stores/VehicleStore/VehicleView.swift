@@ -18,7 +18,7 @@ struct VehicleView: View {
     
     var body: some View {
         ZStack(alignment: .top) {
-            Color.gray.opacity(0.1)
+            Color("background")
                 .ignoresSafeArea()
             VStack(spacing: 0) {
                 VStack(spacing: 16) {
@@ -26,82 +26,99 @@ struct VehicleView: View {
                         HStack(alignment: .firstTextBaseline) {
                             Text(store.vehicle.brand.uppercased())
                                 .bodyXLargeBlack()
+                                .foregroundStyle(Color("onBackground"))
                             Text(store.vehicle.model)
                                 .bodyDefaultLight()
+                                .foregroundStyle(Color("onBackground"))
                             Spacer()
                             
                             Text(store.vehicle.plate)
                                 .bodyXSmallRegular()
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(Color("onBackgroundSecondary"))
                                 .padding(6)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 4)
-                                        .stroke(.secondary, lineWidth: 0.5)
+                                        .stroke(Color("onBackgroundSecondary"), lineWidth: 0.5)
                                 )
                                 .alignmentGuide(.firstTextBaseline) { d in
                                     d[.bottom]
                                 }
                         }
                         HStack(spacing: 4) {
-                            Text("2011"/*vehicle.registrationDate*/)
+                            Text(formattedDate(store.vehicle.registrationDate, isOnlyYear: true))
                             Text("-")
                             Text("\(store.vehicle.mileage)km")
                             Spacer()
                         }
                         .bodyDefaultLight()
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color("onBackgroundSecondary"))
                     }
                     .padding(.horizontal, 16)
                     
                     VStack(spacing: 10) {
-                        HStack(spacing: 8) {
+                        
+                        HStack {
                             Button(action: { store.send(.showEditVehicle) }) {
-                                VStack(alignment: .leading) {
-                                    Image(systemName: "pencil.circle")
-                                        .font(.largeTitle)
+                                HStack(alignment: .lastTextBaseline) {
+                                    Image(systemName: "square.and.pencil")
+                                        .frame(maxHeight: 20)
+                                        .foregroundStyle(Color("onSurface"))
+                                        .font(.title3)
+                                        .padding(6)
+                                        .cornerRadius(8)
                                     Spacer()
                                     Text("Modifier")
                                         .bodyDefaultSemibold()
+                                        .foregroundStyle(Color("onSurface"))
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                 }
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 14)
+                                .padding(.horizontal, 24)
+                                .background(Color("tertiary"))
+                                .cornerRadius(8)
                             }
-                            .foregroundStyle(Color.blue)
-                            .frame(maxWidth: .infinity, maxHeight: 100)
-                            .padding(12)
-                            .background(Color.blue.quinary)
-                            .cornerRadius(8)
                             
                             Button(action: { store.send(.deleteVehicleTapped) }) {
-                                VStack(alignment: .leading) {
-                                    Image(systemName: "trash.circle")
-                                        .font(.largeTitle)
+                                HStack(alignment: .lastTextBaseline) {
+                                    Image(systemName: "trash")
+                                        .frame(maxHeight: 20)
+                                        .foregroundStyle(Color("onErrorContainer"))
+                                        .font(.title3)
+                                        .padding(6)
+                                        .cornerRadius(8)
                                     Spacer()
                                     Text("Supprimer")
                                         .bodyDefaultSemibold()
+                                        .foregroundStyle(Color("onErrorContainer"))
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                 }
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 14)
+                                .padding(.horizontal, 24)
+                                .background(Color("errorContainer"))
+                                .cornerRadius(8)
                             }
-                            .foregroundStyle(Color.red)
-                            .frame(maxWidth: .infinity, maxHeight: 100)
-                            .padding(12)
-                            .background(Color.red.quinary)
-                            .cornerRadius(8)
-                            
-                            Button(action: { store.send(.showAddDocument) }) {
-                                VStack(alignment: .leading) {
-                                    Image(systemName: "plus.circle")
-                                        .font(.largeTitle)
-                                    Spacer()
-                                    Text("Nouveau document")
-                                        .bodyDefaultSemibold()
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        .multilineTextAlignment(.leading)
-                                }
+                        }
+                        
+                        Button(action: { store.send(.showAddDocument) }) {
+                            HStack(alignment: .firstTextBaseline) {
+                                Spacer()
+                                Image(systemName: "plus")
+                                    .foregroundStyle(Color("onPrimary"))
+                                    .font(.title3)
+                                    .padding(6)
+                                    .cornerRadius(8)
+                                Text("Nouveau document")
+                                    .bodyDefaultSemibold()
+                                    .foregroundStyle(Color("onPrimary"))
+                                    .multilineTextAlignment(.leading)
+                                Spacer()
                             }
-                            .foregroundStyle(Color.black.secondary)
-                            .frame(maxWidth: .infinity, maxHeight: 100)
-                            .padding(12)
-                            .background(Color.gray.quinary)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .padding(.horizontal, 24)
+                            .background(Color("primary"))
                             .cornerRadius(8)
                         }
                     }
@@ -111,8 +128,8 @@ struct VehicleView: View {
                 VehicleSegmentedControl(
                     tabs: VehicleSegmentedTab.allCases,
                     activeTab: $activeTab,
-                    activeTint: .black,
-                    inActiveTint: .gray
+                    activeTint: Color("primary"),
+                    inActiveTint: .onDisabled
                 )
                 .padding(.top, 16)
                 Divider()
@@ -124,12 +141,13 @@ struct VehicleView: View {
                         Spacer()
                         Image(systemName: "doc.fill")
                             .imageScale(.large)
-                            .foregroundStyle(.tint)
+                            .foregroundStyle(Color("onSurfaceVariant"))
                         Text("No documents yet")
                             .font(.headline)
+                            .foregroundStyle(Color("onBackground"))
                         Text("Add documents by taking photos")
                             .font(.subheadline)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(Color("onBackgroundSecondary"))
                         Spacer()
                     }
                     .padding()
@@ -170,35 +188,36 @@ struct VehicleView: View {
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 24, height: 24)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color("onSurfaceVariant"))
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
                     Text(document.name)
                         .bodyDefaultSemibold()
-                        .foregroundStyle(Color.black)
-                    Circle().fill(.secondary)
+                        .foregroundStyle(Color("onSurface"))
+                    Circle()
+                        .fill(Color("onSurfaceVariant"))
                         .frame(width: 6, height: 6)
                     Text(formattedDate(document.date))
                         .bodyDefaultSemibold()
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color("onSurfaceVariant"))
                 }
                 HStack {
                     Text("200 €")
                         .bodySmallRegular()
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color("onSurfaceVariant"))
                     Circle().fill(.secondary)
                         .frame(width: 6, height: 6)
                     Text(document.type.displayName)
                         .bodySmallRegular()
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color("onSurfaceVariant"))
                 }
                 HStack(alignment: .center) {
                     Image(systemName: "gauge.open.with.lines.needle.33percent")
                         .bodySmallRegular()
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color("onSurfaceVariant"))
                     Text("\(document.mileage) km")
                         .bodySmallRegular()
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color("onSurfaceVariant"))
                 }
             }
             Spacer()
@@ -214,33 +233,35 @@ struct VehicleView: View {
                 HStack {
                     Text(document.name)
                         .bodyDefaultSemibold()
-                        .foregroundStyle(Color.black)
-                    Circle().fill(.secondary)
+                        .foregroundStyle(Color("onSurface"))
+                    Circle()
+                        .fill(Color("onSurfaceVariant"))
                         .frame(width: 6, height: 6)
                     Text(formattedDate(document.date))
                         .bodyDefaultSemibold()
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color("onSurfaceVariant"))
                 }
                 HStack {
                     Text("200 €")
                         .bodySmallRegular()
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color("onSurfaceVariant"))
                     Circle().fill(.secondary)
                         .frame(width: 6, height: 6)
                     Text(document.type.displayName)
                         .bodySmallRegular()
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color("onSurfaceVariant"))
                 }
                 Text(document.fileType)
                     .bodyXSmallSemibold()
-                    .foregroundStyle(.black.opacity(0.6))
+                    .foregroundStyle(Color("onTertiary"))
                     .padding(.vertical, 6)
                     .padding(.horizontal, 14)
                     .background(
                         Rectangle()
-                            .fill(Color.gray.opacity(0.3)) // couleur du rectangle
+                            .fill(Color("tertiary")) // couleur du rectangle
                             .cornerRadius(16)
-                    )            }
+                    )
+            }
             Spacer()
 
             DocumentThumbnailView(fileURL: document.fileURL)
@@ -249,10 +270,10 @@ struct VehicleView: View {
         }
     }
     
-    private func formattedDate(_ date: Date) -> String {
+    private func formattedDate(_ date: Date, isOnlyYear: Bool = false) -> String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "fr_FR")
-        formatter.dateFormat = "d MMM"
+        formatter.dateFormat = isOnlyYear ? "yyyy" : "d MMM"
         return formatter.string(from: date)
     }
     
@@ -335,7 +356,7 @@ struct DocumentThumbnailView: View {
                                                     Vehicle(brand: "Lexus",
                                                             model: "CT200h",
                                                             mileage: "122000",
-                                                            registrationDate: "2020-01-01",
+                                                            registrationDate: Date(timeIntervalSince1970: 1322784000),
                                                             plate: "ABC-123",
                                                             documents: [
                                                                 .init(fileURL: "/path/to/document1.jpg", name: "Carte grise", date: Date(), mileage: "45000", type: .carteGrise),

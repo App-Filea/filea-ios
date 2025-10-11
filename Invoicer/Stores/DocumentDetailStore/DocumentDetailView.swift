@@ -55,6 +55,15 @@ struct DocumentDetailView: View {
 //                                        .foregroundColor(getDocumentColor(for: document.type))
                                         .cornerRadius(8)
                                 }
+
+                                if let amount = document.amount {
+                                    HStack {
+                                        Text("Montant:")
+                                            .fontWeight(.medium)
+                                        Text(String(format: "%.2f €", amount))
+                                            .foregroundColor(.primary)
+                                    }
+                                }
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding()

@@ -7,10 +7,49 @@
 
 import Foundation
 
+enum VehicleType: String, Codable, CaseIterable, Identifiable {
+    case car = "Car"
+    case motorcycle = "Motorcycle"
+    case truck = "Truck"
+    case bicycle = "Bicycle"
+    case other = "Other"
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .car: return "Voiture"
+        case .motorcycle: return "Moto"
+        case .truck: return "Camion"
+        case .bicycle: return "Vélo"
+        case .other: return "Autre"
+        }
+    }
+
+    var iconName: String? {
+        switch self {
+        case .car: return "car.side"
+        case .motorcycle: return "motorcycle"
+        case .truck: return "truck.box"
+        case .bicycle: return "bicycle"
+        case .other: return nil
+        }
+    }
+
+    var shouldFlipIcon: Bool {
+        switch self {
+        case .car: return false
+        case .motorcycle, .truck, .bicycle: return true
+        case .other: return false
+        }
+    }
+}
+
 struct Vehicle: Codable, Equatable, Identifiable {
 
     let id: UUID
 //    var nickname: String?
+    var type: VehicleType
     var brand: String
     var model: String
     var mileage: String
@@ -18,9 +57,10 @@ struct Vehicle: Codable, Equatable, Identifiable {
     var plate: String
     var documents: [Document] = []
 
-    init(/*nickname: String? = nil, */brand: String = "", model: String = "", mileage: String = "", registrationDate: Date = .now, plate: String = "", documents: [Document] = []) {
+    init(/*nickname: String? = nil, */type: VehicleType = .car, brand: String = "", model: String = "", mileage: String = "", registrationDate: Date = .now, plate: String = "", documents: [Document] = []) {
         self.id = UUID()
 //        self.nickname = nickname
+        self.type = type
         self.brand = brand
         self.model = model
         self.mileage = mileage

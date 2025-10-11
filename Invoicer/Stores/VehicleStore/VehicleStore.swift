@@ -20,8 +20,6 @@ struct VehicleStore {
     enum Action: Equatable {
         case loadVehicleData
         case vehicleDataLoaded(Vehicle)
-        case showAddDocument
-        case showDocumentDetail(UUID)
         case showEditVehicle
         case deleteVehicleTapped
         case deleteAlert(PresentationAction<Alert>)
@@ -55,12 +53,6 @@ struct VehicleStore {
                         vehicles[index] = vehicle
                     }
                 }
-                return .none
-
-            case .showAddDocument:
-                return .none
-
-            case .showDocumentDetail(let documentId):
                 return .none
 
             case .showEditVehicle:

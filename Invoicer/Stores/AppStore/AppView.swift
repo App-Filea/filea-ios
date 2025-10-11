@@ -10,17 +10,19 @@ import ComposableArchitecture
 
 struct AppView: View {
     @Bindable var store: StoreOf<AppStore>
-    
+
     var body: some View {
         NavigationStack(path: $store.scope(state: \.path, action: \.path)) {
-            VStack {
-                Text("LaunchScreen")
-            }
-            .onAppear {
-                store.send(.initiate)
-            }
+            Color.clear
+                .onAppear {
+                    store.send(.initiate)
+                }
         } destination: { store in
             switch store.state {
+            case .vehiclesList:
+                if let store = store.scope(state: \.vehiclesList, action: \.vehiclesList) {
+                    VehiclesListView(store: store)
+                }
             case .main:
                 if let store = store.scope(state: \.main, action: \.main) {
                     MainView(store: store)

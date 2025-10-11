@@ -13,6 +13,7 @@ struct EditVehicleStore {
     @ObservableState
     struct State: Equatable {
         let originalVehicle: Vehicle
+        var type: VehicleType
         var brand: String
         var model: String
         var mileage: String
@@ -24,16 +25,18 @@ struct EditVehicleStore {
 
         init(vehicle: Vehicle) {
             self.originalVehicle = vehicle
+            self.type = vehicle.type
             self.brand = vehicle.brand
             self.model = vehicle.model
             self.mileage = vehicle.mileage
             self.registrationDate = vehicle.registrationDate
             self.plate = vehicle.plate
         }
-        
+
         // Computed property pour avoir le véhicule avec les changements actuels
         var vehicle: Vehicle {
             updatedVehicle ?? Vehicle(
+                type: type,
                 brand: brand,
                 model: model,
                 mileage: mileage,
@@ -65,6 +68,7 @@ struct EditVehicleStore {
             case .updateVehicle:
                 state.isLoading = true
                 let updatedVehicle = Vehicle(
+                    type: state.type,
                     brand: state.brand,
                     model: state.model,
                     mileage: state.mileage,
@@ -72,16 +76,17 @@ struct EditVehicleStore {
                     plate: state.plate,
                     documents: state.originalVehicle.documents
                 )
-                
+
                 return .run { [originalVehicleId = state.originalVehicle.id] send in
                     await fileStorageService.updateVehicle(originalVehicleId, with: updatedVehicle)
                     await send(.vehicleUpdated)
                 }
-                
+
             case .vehicleUpdated:
                 state.isLoading = false
                 // Créer le véhicule mis à jour et le stocker
                 let updatedVehicle = Vehicle(
+                    type: state.type,
                     brand: state.brand,
                     model: state.model,
                     mileage: state.mileage,

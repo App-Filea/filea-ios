@@ -26,8 +26,8 @@ protocol FileStorageServiceProtocol: Sendable {
     func openVehiclesFolder() async
     func loadVehicles() async -> [Vehicle]
     func saveVehicle(_ vehicle: Vehicle) async
-    func saveDocument(image: UIImage, for vehicleId: UUID, name: String, date: Date, mileage: String, type: DocumentType) async
-    func saveDocument(fileURL: URL, for vehicleId: UUID, name: String, date: Date, mileage: String, type: DocumentType) async
+    func saveDocument(image: UIImage, for vehicleId: UUID, name: String, date: Date, mileage: String, type: DocumentType, amount: Double?) async
+    func saveDocument(fileURL: URL, for vehicleId: UUID, name: String, date: Date, mileage: String, type: DocumentType, amount: Double?) async
     func deleteVehicle(_ vehicleId: UUID) async
     func deleteDocument(_ document: Document, for vehicleId: UUID) async
     func updateVehicle(_ vehicleId: UUID, with updatedVehicle: Vehicle) async
@@ -60,7 +60,7 @@ extension FileStorageService: FileStorageServiceProtocol {
         }.value
     }
     
-    func saveDocument(image: UIImage, for vehicleId: UUID, name: String, date: Date, mileage: String, type: DocumentType) async {
+    func saveDocument(image: UIImage, for vehicleId: UUID, name: String, date: Date, mileage: String, type: DocumentType, amount: Double?) async {
         await Task {
             self.saveDocument(
                 image: image,
@@ -68,12 +68,13 @@ extension FileStorageService: FileStorageServiceProtocol {
                 name: name,
                 date: date,
                 mileage: mileage,
-                type: type
+                type: type,
+                amount: amount
             )
         }.value
     }
-    
-    func saveDocument(fileURL: URL, for vehicleId: UUID, name: String, date: Date, mileage: String, type: DocumentType) async {
+
+    func saveDocument(fileURL: URL, for vehicleId: UUID, name: String, date: Date, mileage: String, type: DocumentType, amount: Double?) async {
         await Task {
             self.saveDocument(
                 fileURL: fileURL,
@@ -81,7 +82,8 @@ extension FileStorageService: FileStorageServiceProtocol {
                 name: name,
                 date: date,
                 mileage: mileage,
-                type: type
+                type: type,
+                amount: amount
             )
         }.value
     }
@@ -319,93 +321,94 @@ final class FileStorageService: @unchecked Sendable {
     }
     
     
-    func saveDocument(image: UIImage, for vehicleId: UUID, name: String, date: Date, mileage: String, type: DocumentType) {
+    func saveDocument(image: UIImage, for vehicleId: UUID, name: String, date: Date, mileage: String, type: DocumentType, amount: Double?) {
         logger.info("💾 Sauvegarde d'un document image pour le véhicule: \(vehicleId)")
-        
+
         // Find the vehicle to get its folder name
         var vehicles = loadVehicles()
         guard let vehicleIndex = vehicles.firstIndex(where: { $0.id == vehicleId }) else {
             logger.error("❌ Véhicule non trouvé avec l'ID: \(vehicleId)")
             return
         }
-        
+
         let vehicle = vehicles[vehicleIndex]
-        
+
         // Create filename with timestamp
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd_HH-mm-ss"
         let filename = "document_\(dateFormatter.string(from: Date())).jpg"
-        
+
         let vehicleDirectoryURL = vehiclesDirectory.appendingPathComponent("\(vehicle.brand)\(vehicle.model)")
         let imageFileURL = vehicleDirectoryURL.appendingPathComponent(filename)
-        
+
         // Save image to disk
         guard let imageData = image.jpegData(compressionQuality: 0.8) else {
             logger.error("❌ Impossible de convertir l'image en données JPEG")
             return
         }
-        
+
         do {
             try imageData.write(to: imageFileURL)
             logger.info("📄 Image sauvegardée à: \(imageFileURL.path)")
-            
+
             // Create document object with metadata
             let document = Document(
                 fileURL: imageFileURL.path,
                 name: name,
                 date: date,
                 mileage: mileage,
-                type: type
+                type: type,
+                amount: amount
             )
-            
+
             // Add document to vehicle
             vehicles[vehicleIndex].documents.append(document)
-            
+
             // Save updated vehicles list
             let jsonData = try JSONEncoder().encode(vehicles)
             try jsonData.write(to: vehiclesFileURL)
-            
+
             logger.info("✅ Document image sauvegardé avec succès")
             logger.info("📊 Total de documents pour ce véhicule: \(vehicles[vehicleIndex].documents.count)")
-            
+
         } catch {
             logger.error("❌ Erreur lors de la sauvegarde du document: \(error.localizedDescription)")
         }
     }
     
-    func saveDocument(fileURL: URL, for vehicleId: UUID, name: String, date: Date, mileage: String, type: DocumentType) {
+    func saveDocument(fileURL: URL, for vehicleId: UUID, name: String, date: Date, mileage: String, type: DocumentType, amount: Double?) {
         logger.info("💾 Sauvegarde d'un fichier document pour le véhicule: \(vehicleId)")
         logger.info("📄 Fichier source: \(fileURL.lastPathComponent)")
-        
+
         // Find the vehicle to get its folder name
         var vehicles = loadVehicles()
         guard let vehicleIndex = vehicles.firstIndex(where: { $0.id == vehicleId }) else {
             logger.error("❌ Véhicule non trouvé avec l'ID: \(vehicleId)")
             return
         }
-        
+
         let vehicle = vehicles[vehicleIndex]
-        
+
         // Get original filename and extension
         let originalFilename = fileURL.lastPathComponent
         let fileExtension = fileURL.pathExtension
         let baseName = (originalFilename as NSString).deletingPathExtension
-        
+
         // Create filename with timestamp to avoid conflicts
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd_HH-mm-ss"
         let timestamp = dateFormatter.string(from: Date())
         let filename: String
-        
+
         if fileExtension.isEmpty {
             filename = "\(baseName)_\(timestamp)"
         } else {
             filename = "\(baseName)_\(timestamp).\(fileExtension)"
         }
-        
+
         let vehicleDirectoryURL = vehiclesDirectory.appendingPathComponent("\(vehicle.brand)\(vehicle.model)")
         let destinationFileURL = vehicleDirectoryURL.appendingPathComponent(filename)
-        
+
         do {
             // Start accessing security-scoped resource
             let hasAccess = fileURL.startAccessingSecurityScopedResource()
@@ -414,30 +417,31 @@ final class FileStorageService: @unchecked Sendable {
                     fileURL.stopAccessingSecurityScopedResource()
                 }
             }
-            
+
             // Copy file to vehicle directory
             try FileManager.default.copyItem(at: fileURL, to: destinationFileURL)
             logger.info("📄 Fichier copié vers: \(destinationFileURL.path)")
-            
+
             // Create document object with metadata
             let document = Document(
                 fileURL: destinationFileURL.path,
                 name: name,
                 date: date,
                 mileage: mileage,
-                type: type
+                type: type,
+                amount: amount
             )
-            
+
             // Add document to vehicle
             vehicles[vehicleIndex].documents.append(document)
-            
+
             // Save updated vehicles list
             let jsonData = try JSONEncoder().encode(vehicles)
             try jsonData.write(to: vehiclesFileURL)
-            
+
             logger.info("✅ Document fichier sauvegardé avec succès")
             logger.info("📊 Total de documents pour ce véhicule: \(vehicles[vehicleIndex].documents.count)")
-            
+
         } catch {
             logger.error("❌ Erreur lors de la sauvegarde du fichier: \(error.localizedDescription)")
         }

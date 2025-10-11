@@ -11,71 +11,235 @@ import ComposableArchitecture
 struct EditVehicleView: View {
     @Bindable var store: StoreOf<EditVehicleStore>
     @State private var openDateSheet: Bool = false
-    @State private var date: Date = .now
-    @FocusState private var focusedField: EditVehicleField?
+    @State private var validationErrors: [String: String] = [:]
+    @FocusState private var focusedField: Field?
 
     private let horizontalPadding: CGFloat = 20
 
-    enum EditVehicleField: Hashable {
+    enum Field: Hashable {
         case brand, model, plate, mileage
     }
-    
+
+    private func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.locale = Locale(identifier: "fr_FR")
+        return formatter.string(from: date)
+    }
+
+    private var isFormValid: Bool {
+        !store.brand.isEmpty &&
+        !store.model.isEmpty &&
+        !store.plate.isEmpty &&
+        !store.mileage.isEmpty
+    }
+
     var body: some View {
         ZStack {
             Color("background")
                 .ignoresSafeArea()
 
-            GeometryReader { reader in
-                VStack(spacing: 0) {
+            VStack(spacing: 0) {
+                // Header
+                VStack(spacing: 12) {
                     Text("Modifier mon véhicule")
                         .titleLarge()
                         .foregroundStyle(Color("onBackground"))
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, horizontalPadding)
-                        .padding(.top, 20)
-                        .padding(.bottom, 8)
 
-                    ScrollView {
-                        VStack(spacing: 24) {
+                    Text("Modifiez les informations de votre véhicule")
+                        .bodyDefaultRegular()
+                        .foregroundStyle(Color("onBackgroundSecondary"))
+                        .multilineTextAlignment(.center)
+                }
+                .padding(.horizontal, horizontalPadding)
+                .padding(.vertical, 24)
+
+                // Form ScrollView
+                ScrollView(.vertical, showsIndicators: false) {
+                    VStack(spacing: 20) {
+                        // Vehicle Type
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Type de véhicule")
+                                .bodyDefaultSemibold()
+                                .foregroundStyle(Color("onBackground"))
+
+                            Menu {
+                                ForEach(VehicleType.allCases) { type in
+                                    Button(action: {
+                                        store.type = type
+                                    }) {
+                                        HStack {
+                                            Text(type.displayName)
+                                            if store.type == type {
+                                                Image(systemName: "checkmark")
+                                            }
+                                        }
+                                    }
+                                }
+                            } label: {
+                                HStack {
+                                    Text(store.type.displayName)
+                                        .bodyDefaultRegular()
+                                        .foregroundStyle(Color("onSurface"))
+
+                                    Spacer()
+
+                                    Image(systemName: "chevron.down")
+                                        .foregroundStyle(Color("onBackgroundSecondary"))
+                                }
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 16)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(Color("background"))
+                                        .stroke(Color("outline"), lineWidth: 2)
+                                )
+                            }
+                            .buttonStyle(.plain)
+                        }
+
+                        // Brand
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Marque")
+                                .bodyDefaultSemibold()
+                                .foregroundStyle(Color("onBackground"))
+
                             OutlinedTextField(
                                 focusedField: $focusedField,
-                                field: EditVehicleField.brand,
+                                field: Field.brand,
                                 placeholder: "TOYOTA, BMW, MERCEDES...",
-                                text: $store.brand
+                                text: $store.brand,
+                                hasError: validationErrors["brand"] != nil
                             )
+                            .submitLabel(.next)
                             .autocapitalization(.allCharacters)
                             .focused($focusedField, equals: .brand)
+                            .onSubmit {
+                                focusedField = .model
+                            }
+                            .onChange(of: store.brand) { _, _ in
+                                validationErrors["brand"] = nil
+                            }
+
+                            if let error = validationErrors["brand"] {
+                                Text(error)
+                                    .bodyXSmallRegular()
+                                    .foregroundStyle(.red)
+                            }
+                        }
+
+                        // Model
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Modèle")
+                                .bodyDefaultSemibold()
+                                .foregroundStyle(Color("onBackground"))
 
                             OutlinedTextField(
                                 focusedField: $focusedField,
-                                field: EditVehicleField.model,
+                                field: Field.model,
                                 placeholder: "COROLLA, X3, CLASSE A...",
-                                text: $store.model
+                                text: $store.model,
+                                hasError: validationErrors["model"] != nil
                             )
+                            .submitLabel(.next)
                             .autocapitalization(.allCharacters)
                             .focused($focusedField, equals: .model)
+                            .onSubmit {
+                                focusedField = .plate
+                            }
+                            .onChange(of: store.model) { _, _ in
+                                validationErrors["model"] = nil
+                            }
+
+                            if let error = validationErrors["model"] {
+                                Text(error)
+                                    .bodyXSmallRegular()
+                                    .foregroundStyle(.red)
+                            }
+                        }
+
+                        // Plate
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Plaque d'immatriculation")
+                                .bodyDefaultSemibold()
+                                .foregroundStyle(Color("onBackground"))
 
                             OutlinedTextField(
                                 focusedField: $focusedField,
-                                field: EditVehicleField.plate,
+                                field: Field.plate,
                                 placeholder: "AB-123-CD",
-                                text: $store.plate
+                                text: $store.plate,
+                                hasError: validationErrors["plate"] != nil
                             )
+                            .submitLabel(.next)
                             .autocapitalization(.allCharacters)
                             .focused($focusedField, equals: .plate)
+                            .onSubmit {
+                                focusedField = .mileage
+                            }
+                            .onChange(of: store.plate) { _, _ in
+                                validationErrors["plate"] = nil
+                            }
+
+                            if let error = validationErrors["plate"] {
+                                Text(error)
+                                    .bodyXSmallRegular()
+                                    .foregroundStyle(.red)
+                            }
+                        }
+
+                        // Mileage
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Kilométrage actuel")
+                                .bodyDefaultSemibold()
+                                .foregroundStyle(Color("onBackground"))
 
                             OutlinedTextField(
                                 focusedField: $focusedField,
-                                field: EditVehicleField.mileage,
+                                field: Field.mileage,
                                 placeholder: "120000",
                                 text: $store.mileage,
+                                hasError: validationErrors["mileage"] != nil,
                                 suffix: "KM"
                             )
                             .keyboardType(.numberPad)
                             .focused($focusedField, equals: .mileage)
+                            .onChange(of: store.mileage) { _, _ in
+                                validationErrors["mileage"] = nil
+                            }
+                            .toolbar {
+                                if focusedField == .mileage {
+                                    ToolbarItemGroup(placement: .keyboard) {
+                                        Spacer()
+                                        Button {
+                                            focusedField = nil
+                                            openDateSheet = true
+                                        } label: {
+                                            Text("Suivant")
+                                                .bold()
+                                                .padding(.horizontal, 20)
+                                                .padding(.vertical, 10)
+                                                .foregroundColor(Color("primary"))
+                                                .cornerRadius(8)
+                                        }
+                                    }
+                                }
+                            }
+
+                            if let error = validationErrors["mileage"] {
+                                Text(error)
+                                    .bodyXSmallRegular()
+                                    .foregroundStyle(.red)
+                            }
+                        }
+
+                        // Registration Date
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Date de mise en circulation")
+                                .bodyDefaultSemibold()
+                                .foregroundStyle(Color("onBackground"))
 
                             Button(action: {
-                                date = store.registrationDate
                                 openDateSheet = true
                             }) {
                                 HStack {
@@ -92,46 +256,58 @@ struct EditVehicleView: View {
                                 .padding(.vertical, 16)
                                 .background(
                                     RoundedRectangle(cornerRadius: 12)
+                                        .fill(Color("background"))
                                         .stroke(Color("outline"), lineWidth: 2)
                                 )
                             }
                             .buttonStyle(.plain)
                         }
-                        .padding(.horizontal, horizontalPadding)
-                        .padding(.top, 24)
-
-                        VStack(spacing: 12) {
-                            Button(action: { store.send(.updateVehicle) }) {
-                                Text("Sauvegarder")
-                                    .bodyDefaultSemibold()
-                                    .foregroundStyle(Color("onPrimary"))
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 16)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 12)
-                                            .fill(Color("primary"))
-                                    )
-                            }
-
-                            Button(action: { store.send(.goBack) }) {
-                                Text("Annuler")
-                                    .bodyDefaultRegular()
-                                    .foregroundStyle(Color("onBackground"))
-                            }
-                            .buttonStyle(.plain)
-                        }
-                        .padding(.horizontal, horizontalPadding)
-                        .padding(.bottom, reader.safeAreaInsets.bottom + horizontalPadding)
                     }
+                    .padding(.horizontal, horizontalPadding)
                 }
+
+                Spacer()
+                VStack(spacing: 12) {
+                    Button(action: updateVehicle) {
+                        if store.isLoading {
+                            ProgressView()
+                                .tint(Color("onPrimary"))
+                        } else {
+                            Text("Sauvegarder")
+                                .bodyDefaultSemibold()
+                                .foregroundStyle(Color("onPrimary"))
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(isFormValid ? Color("primary") : Color("primary").opacity(0.5))
+                    )
+                    .disabled(!isFormValid || store.isLoading)
+
+                    Button(action: {
+                        store.send(.goBack)
+                    }) {
+                        Text("Annuler")
+                            .bodyDefaultRegular()
+                            .foregroundStyle(Color("onBackground"))
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(.horizontal, horizontalPadding)
+                .padding(.bottom, 16)
             }
+            .ignoresSafeArea(.keyboard, edges: .bottom)
         }
         .navigationBarHidden(true)
         .sheet(isPresented: $openDateSheet) {
             DatePickerSheet(
-                date: $date,
+                date: Binding(
+                    get: { store.registrationDate },
+                    set: { store.registrationDate = $0 }
+                ),
                 onSave: {
-                    store.registrationDate = date
                     openDateSheet = false
                 },
                 onCancel: {
@@ -142,12 +318,34 @@ struct EditVehicleView: View {
             .presentationDragIndicator(.visible)
         }
     }
-    
-    private func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.locale = Locale(identifier: "fr_FR")
-        return formatter.string(from: date)
+
+    private func updateVehicle() {
+        // Validate all fields
+        var hasErrors = false
+
+        if store.brand.isEmpty {
+            validationErrors["brand"] = "Ce champ est obligatoire"
+            hasErrors = true
+        }
+
+        if store.model.isEmpty {
+            validationErrors["model"] = "Ce champ est obligatoire"
+            hasErrors = true
+        }
+
+        if store.plate.isEmpty {
+            validationErrors["plate"] = "Ce champ est obligatoire"
+            hasErrors = true
+        }
+
+        if store.mileage.isEmpty {
+            validationErrors["mileage"] = "Ce champ est obligatoire"
+            hasErrors = true
+        }
+
+        if !hasErrors {
+            store.send(.updateVehicle)
+        }
     }
 }
 

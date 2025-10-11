@@ -21,6 +21,7 @@ struct DatePickerSheet: View {
                     displayedComponents: .date
                 )
                 .datePickerStyle(.graphical)
+                .accentColor(Color("primary"))
                 .padding()
                 
                 Spacer()
@@ -30,11 +31,13 @@ struct DatePickerSheet: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Annuler", action: onCancel)
+                        .foregroundStyle(Color("onBackgroundSecondary"))
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Valider", action: onSave)
                         .fontWeight(.semibold)
+                        .foregroundStyle(Color("primary"))
                 }
             }
         }

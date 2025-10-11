@@ -24,24 +24,28 @@ struct EditDocumentStore {
         var date: Date
         var mileage: String
         var type: DocumentType
-        
+        var amount: String
+
         init(vehicleId: UUID, document: Document) {
             self.vehicleId = vehicleId
             self.documentId = document.id
             self.originalDocument = document
-            
+
             // Initialize editing fields with current values
             self.name = document.name
             self.date = document.date
             self.mileage = document.mileage
             self.type = document.type
+            self.amount = document.amount.map { String($0) } ?? ""
         }
-        
+
         var hasChanges: Bool {
+            let amountDouble = Double(amount.replacingOccurrences(of: ",", with: "."))
             return name != originalDocument.name ||
                    date != originalDocument.date ||
                    mileage != originalDocument.mileage ||
-                   type != originalDocument.type
+                   type != originalDocument.type ||
+                   amountDouble != originalDocument.amount
         }
         
         var canSave: Bool {
@@ -54,6 +58,7 @@ struct EditDocumentStore {
         case updateDate(Date)
         case updateMileage(String)
         case updateType(DocumentType)
+        case updateAmount(String)
         case save
         case cancel
         case documentSaved
@@ -81,18 +86,23 @@ struct EditDocumentStore {
             case .updateType(let type):
                 state.type = type
                 return .none
-                
+
+            case .updateAmount(let amount):
+                state.amount = amount
+                return .none
+
             case .save:
                 guard state.canSave else { return .none }
-                
+
                 state.isLoading = true
-                
+
                 // Create updated document
                 var updatedDocument = state.originalDocument
                 updatedDocument.name = state.name
                 updatedDocument.date = state.date
                 updatedDocument.mileage = state.mileage
                 updatedDocument.type = state.type
+                updatedDocument.amount = Double(state.amount.replacingOccurrences(of: ",", with: "."))
                 
                 return .run { [vehicleId = state.vehicleId, document = updatedDocument] send in
                     do {

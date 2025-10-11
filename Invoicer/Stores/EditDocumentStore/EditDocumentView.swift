@@ -56,19 +56,40 @@ struct EditDocumentView: View {
                         Text("Type de document")
                             .font(.subheadline)
                             .fontWeight(.medium)
-                        
+
                         Picker("Type", selection: .init(
                             get: { store.type },
                             set: { store.send(.updateType($0)) }
                         )) {
-                            ForEach(DocumentType.allCases, id: \.self) { type in
-                                Text(type.displayName).tag(type)
+                            ForEach(DocumentCategory.allCases, id: \.self) { category in
+                                Section(category.displayName) {
+                                    ForEach(DocumentType.allCases.filter { $0.category == category }, id: \.self) { type in
+                                        HStack {
+                                            Image(systemName: type.imageName)
+                                            Text(type.displayName)
+                                        }
+                                        .tag(type)
+                                    }
+                                }
                             }
                         }
-                        .pickerStyle(.segmented)
+                        .pickerStyle(.menu)
+                    }
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Montant (optionnel)")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+
+                        TextField("Montant en €", text: .init(
+                            get: { store.amount },
+                            set: { store.send(.updateAmount($0)) }
+                        ))
+                        .textFieldStyle(.roundedBorder)
+                        .keyboardType(.decimalPad)
                     }
                 }
-                
+
                 if store.hasChanges {
                     Section {
                         Text("Des modifications ont été apportées")

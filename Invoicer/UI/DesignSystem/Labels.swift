@@ -97,7 +97,7 @@ struct TitleGroup: ViewModifier {
 struct BodyXLargeBlack: ViewModifier {
     func body(content: Content) -> some View {
         content
-            .font(.title)
+            .font(.largeTitle)
             .fontWeight(.black)
             .kerning(-1)
     }

@@ -29,6 +29,7 @@ struct AddDocumentStore {
         var documentDate: Date = Date()
         var documentMileage: String = ""
         var documentType: DocumentType = .entretien
+        var documentAmount: String = ""
         
         enum DocumentSource: Equatable {
             case none
@@ -40,6 +41,18 @@ struct AddDocumentStore {
             case selectFile
             case preview
             case metadata
+        }
+
+        // Validation computed properties
+        var canProceedFromPreview: Bool {
+            capturedImage != nil || selectedFileURL != nil
+        }
+
+        var canSaveDocument: Bool {
+            !documentName.isEmpty &&
+            !documentMileage.isEmpty &&
+            !documentAmount.isEmpty &&
+            canProceedFromPreview
         }
     }
     
@@ -56,6 +69,7 @@ struct AddDocumentStore {
         case updateDocumentDate(Date)
         case updateDocumentMileage(String)
         case updateDocumentType(DocumentType)
+        case updateDocumentAmount(String)
         case saveDocument
         case documentSaved
         case goBack
@@ -70,6 +84,8 @@ struct AddDocumentStore {
             case .showCamera:
                 state.showCamera = true
                 state.documentSource = .camera
+                // Réinitialiser les données existantes
+                state.capturedImage = nil
                 return .none
                 
             case .hideCamera:
@@ -79,6 +95,9 @@ struct AddDocumentStore {
             case .showFilePicker:
                 state.showFilePicker = true
                 state.documentSource = .file
+                // Réinitialiser les données existantes
+                state.selectedFileURL = nil
+                state.selectedFileName = nil
                 return .none
                 
             case .hideFilePicker:
@@ -88,14 +107,26 @@ struct AddDocumentStore {
             case .imageCapture(let image):
                 state.capturedImage = image
                 state.showCamera = false
-                state.currentStep = .preview
+                if image != nil {
+                    state.currentStep = .preview
+                } else {
+                    // Si aucune image n'a été capturée, revenir à selectFile
+                    state.currentStep = .selectFile
+                    state.documentSource = .none
+                }
                 return .none
-                
+
             case .fileSelected(let url):
                 state.selectedFileURL = url
                 state.selectedFileName = url?.lastPathComponent
                 state.showFilePicker = false
-                state.currentStep = .preview
+                if url != nil {
+                    state.currentStep = .preview
+                } else {
+                    // Si aucun fichier n'a été sélectionné, revenir à selectFile
+                    state.currentStep = .selectFile
+                    state.documentSource = .none
+                }
                 return .none
                 
             case .nextStep:
@@ -117,12 +148,10 @@ struct AddDocumentStore {
                     return .none
                 case .preview:
                     state.currentStep = .selectFile
-                    state.capturedImage = nil
-                    state.selectedFileURL = nil
-                    state.selectedFileName = nil
-                    state.documentSource = .none
+                    // Keep captured data for non-destructive navigation
                 case .metadata:
                     state.currentStep = .preview
+                    // Keep metadata for non-destructive navigation
                 }
                 return .none
                 
@@ -141,7 +170,11 @@ struct AddDocumentStore {
             case .updateDocumentType(let type):
                 state.documentType = type
                 return .none
-                
+
+            case .updateDocumentAmount(let amount):
+                state.documentAmount = amount
+                return .none
+
             case .saveDocument:
                 guard !state.documentName.isEmpty else { return .none }
                 
@@ -153,7 +186,9 @@ struct AddDocumentStore {
                         state.isLoading = false
                         return .none
                     }
-                    
+
+                    let amount = Double(state.documentAmount.replacingOccurrences(of: ",", with: "."))
+
                     return .run { [vehicleId = state.vehicleId, name = state.documentName, date = state.documentDate, mileage = state.documentMileage, type = state.documentType] send in
                         await fileStorageService.saveDocument(
                             image: image,
@@ -161,7 +196,8 @@ struct AddDocumentStore {
                             name: name,
                             date: date,
                             mileage: mileage,
-                            type: type
+                            type: type,
+                            amount: amount
                         )
                         await send(.documentSaved)
                     }
@@ -171,7 +207,9 @@ struct AddDocumentStore {
                         state.isLoading = false
                         return .none
                     }
-                    
+
+                    let amount = Double(state.documentAmount.replacingOccurrences(of: ",", with: "."))
+
                     return .run { [vehicleId = state.vehicleId, name = state.documentName, date = state.documentDate, mileage = state.documentMileage, type = state.documentType] send in
                         await fileStorageService.saveDocument(
                             fileURL: fileURL,
@@ -179,7 +217,8 @@ struct AddDocumentStore {
                             name: name,
                             date: date,
                             mileage: mileage,
-                            type: type
+                            type: type,
+                            amount: amount
                         )
                         await send(.documentSaved)
                     }

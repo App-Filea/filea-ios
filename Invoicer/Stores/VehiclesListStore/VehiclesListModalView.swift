@@ -52,7 +52,7 @@ struct VehiclesListModalView: View {
                 }
             }
             .fullScreenCover(item: $store.scope(state: \.addVehicle, action: \.addVehicle)) { store in
-                    AddVehicleView(store: store)
+                    AddVehicleMultiStepView(store: store)
             }
         }
     }
@@ -95,7 +95,7 @@ struct VehiclesListModalView: View {
             HStack(spacing: 16) {
                 // Vehicle info
                 VStack(alignment: .leading, spacing: 0) {
-                    Text("Véhicule principal")
+                    Text(vehicle.isPrimary ? "Véhicule principal" : "Véhicule secondaire")
                         .font(.footnote)
                         .foregroundStyle(Color(.secondaryLabel))
                     
@@ -121,14 +121,14 @@ struct VehiclesListModalView: View {
                                 .foregroundStyle(Color(.label))
                                 .frame(maxWidth: 128)
                                 .scaleEffect(x: vehicle.type.shouldFlipIcon ? -1 : 1, y: 1)
-                                .offset(x: vehicle.type.offsetX, y: -10)
+                                .offset(x: 60, y: -10)
                         }
                     }
 
                     HStack(spacing: 0) {
                         Text(vehicle.plate)
                         Spacer()
-                        Text("\(vehicle.mileage) km")
+                        Text(vehicle.mileage != nil ? "\(vehicle.mileage!) km" : "Non renseigné")
                         Spacer()
                         Text("\(vehicle.registrationDate, style: .date)")
                     }

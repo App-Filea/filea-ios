@@ -14,6 +14,7 @@ struct AppStore {
     @ObservableState
     struct State: Equatable {
         @Shared(.vehicles) var vehicles: [Vehicle] = []
+        @Shared(.selectedVehicle) var selectedVehicle: Vehicle?
         var path = StackState<Path.State>()
         var isStorageInitialized = false
     }
@@ -25,6 +26,9 @@ struct AppStore {
         case initializeStorage
         case storageInitialized
         case vehiclesLoaded([Vehicle])
+        case reselectVehicleIfNeeded
+        case vehicleListChanged
+        case navigateToVehiclesList
     }
 
     @Dependency(\.fileStorageService) var fileStorageService
@@ -43,9 +47,25 @@ struct AppStore {
                 return .send(.initiateCompleted)
 
             case .initiateCompleted:
+                // Clear the path first to reset navigation
+                state.path.removeAll()
+
+                // Logique de sélection intelligente du véhicule
                 if !state.vehicles.isEmpty {
-                    // Si véhicules existent → push MainView
-                    state.path.append(.main(MainStore.State()))
+                    // 1. Chercher un véhicule principal
+                    if let primaryVehicle = state.vehicles.first(where: { $0.isPrimary }) {
+                        state.$selectedVehicle.withLock { $0 = primaryVehicle }
+                        state.path.append(.main(MainStore.State()))
+                    }
+                    // 2. Si un seul véhicule (même secondaire), le sélectionner
+                    else if state.vehicles.count == 1 {
+                        state.$selectedVehicle.withLock { $0 = state.vehicles.first }
+                        state.path.append(.main(MainStore.State()))
+                    }
+                    // 3. Si plusieurs véhicules mais aucun principal → afficher la liste
+                    else {
+                        state.path.append(.vehiclesList(VehiclesListStore.State()))
+                    }
                 } else {
                     // Si pas de véhicules → push VehiclesListView
                     state.path.append(.vehiclesList(VehiclesListStore.State()))
@@ -61,6 +81,39 @@ struct AppStore {
 
             case .storageInitialized:
                 state.isStorageInitialized = true
+                return .none
+
+            case .reselectVehicleIfNeeded:
+                // Si le véhicule sélectionné n'existe plus ou est nil
+                if let selectedVehicle = state.selectedVehicle,
+                   !state.vehicles.contains(where: { $0.id == selectedVehicle.id }) {
+                    // Le véhicule sélectionné a été supprimé, resélectionner intelligemment
+                    state.$selectedVehicle.withLock { $0 = nil }
+                }
+
+                // Si aucun véhicule sélectionné, appliquer la logique de sélection intelligente
+                if state.selectedVehicle == nil && !state.vehicles.isEmpty {
+                    if let primaryVehicle = state.vehicles.first(where: { $0.isPrimary }) {
+                        state.$selectedVehicle.withLock { $0 = primaryVehicle }
+                    } else if state.vehicles.count == 1 {
+                        state.$selectedVehicle.withLock { $0 = state.vehicles.first }
+                    }
+                }
+                return .none
+
+            case .vehicleListChanged:
+                // Recharger les véhicules depuis le storage
+                return .run { send in
+                    let loadedVehicles = await fileStorageService.loadVehicles()
+                    await send(.vehiclesLoaded(loadedVehicles))
+                    await send(.navigateToVehiclesList)
+                }
+
+            case .navigateToVehiclesList:
+                // Rediriger vers VehiclesListView (après création ou suppression)
+                state.path.removeAll()
+                state.$selectedVehicle.withLock { $0 = nil }
+                state.path.append(.vehiclesList(VehiclesListStore.State()))
                 return .none
             }
         }

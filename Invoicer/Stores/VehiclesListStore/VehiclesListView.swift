@@ -45,7 +45,7 @@ struct VehiclesListView: View {
         .navigationBarTitleDisplayMode(.large)
         .navigationBarBackButtonHidden()
         .fullScreenCover(item: $store.scope(state: \.addVehicle, action: \.addVehicle)) { store in
-                AddVehicleView(store: store)
+                AddVehicleMultiStepView(store: store)
         }
     }
 
@@ -87,7 +87,7 @@ struct VehiclesListView: View {
             HStack(spacing: 16) {
                 // Vehicle info
                 VStack(alignment: .leading, spacing: 0) {
-                    Text("Véhicule principal")
+                    Text(vehicle.isPrimary ? "Véhicule principal" : "Véhicule secondaire")
                         .font(.footnote)
                         .foregroundStyle(Color(.secondaryLabel))
                     
@@ -120,7 +120,7 @@ struct VehiclesListView: View {
                     HStack(spacing: 0) {
                         Text(vehicle.plate)
                         Spacer()
-                        Text("\(vehicle.mileage) km")
+                        Text(vehicle.mileage != nil ? "\(vehicle.mileage!) km" : "Non renseigné")
                         Spacer()
                         Text("\(vehicle.registrationDate, style: .date)")
                     }

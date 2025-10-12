@@ -33,7 +33,7 @@ struct AppView: View {
                 }
             case .addVehicle:
                 if let store = store.scope(state: \.addVehicle, action: \.addVehicle) {
-                    AddVehicleView(store: store)
+                    AddVehicleMultiStepView(store: store)
                 }
             case .editVehicle:
                 if let store = store.scope(state: \.editVehicle, action: \.editVehicle) {

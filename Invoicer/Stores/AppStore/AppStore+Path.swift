@@ -51,6 +51,17 @@ extension AppStore {
                 state.path.append(.editDocument(EditDocumentStore.State(vehicleId: documentDetailState.vehicleId, document: document)))
             }
 
+        // Handle vehicle creation - reload and navigate to list
+        case .element(id: _, action: .addVehicle(.vehicleSaved)):
+            return .send(.vehicleListChanged)
+
+        // Handle vehicle deletion - reload and navigate to appropriate view
+        case .element(id: _, action: .main(.vehicleDeleted)):
+            return .send(.vehicleListChanged)
+
+        case .element(id: _, action: .vehicle(.vehicleDeleted)):
+            return .send(.vehicleListChanged)
+
         default: return .none
         }
         return .none

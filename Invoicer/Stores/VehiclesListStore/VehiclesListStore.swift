@@ -13,6 +13,7 @@ struct VehiclesListStore {
     @ObservableState
     struct State: Equatable {
         @Shared(.vehicles) var vehicles: [Vehicle] = []
+        @Shared(.selectedVehicle) var selectedVehicle: Vehicle?
         @Presents var addVehicle: AddVehicleStore.State?
         var isLoading = false
     }
@@ -46,8 +47,9 @@ struct VehiclesListStore {
                 state.addVehicle = AddVehicleStore.State()
                 return .none
 
-            case .selectVehicle:
-                // Navigation handled by AppStore+Path
+            case .selectVehicle(let vehicle):
+                // Update selected vehicle (navigation handled by AppStore+Path)
+                state.$selectedVehicle.withLock { $0 = vehicle }
                 return .none
 
             case .addVehicle:

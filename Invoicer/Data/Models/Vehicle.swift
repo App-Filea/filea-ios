@@ -48,24 +48,31 @@ enum VehicleType: String, Codable, CaseIterable, Identifiable {
 struct Vehicle: Codable, Equatable, Identifiable {
 
     let id: UUID
-//    var nickname: String?
     var type: VehicleType
     var brand: String
     var model: String
-    var mileage: String
+    var mileage: String?
     var registrationDate: Date
     var plate: String
+    var isPrimary: Bool
     var documents: [Document] = []
 
-    init(/*nickname: String? = nil, */type: VehicleType = .car, brand: String = "", model: String = "", mileage: String = "", registrationDate: Date = .now, plate: String = "", documents: [Document] = []) {
+    init(type: VehicleType = .car,
+         brand: String = "",
+         model: String = "",
+         mileage: String? = nil,
+         registrationDate: Date = .now,
+         plate: String = "",
+         isPrimary: Bool = false,
+         documents: [Document] = []) {
         self.id = UUID()
-//        self.nickname = nickname
         self.type = type
         self.brand = brand
         self.model = model
         self.mileage = mileage
         self.registrationDate = registrationDate
         self.plate = plate
+        self.isPrimary = isPrimary
         self.documents = documents
     }
 }

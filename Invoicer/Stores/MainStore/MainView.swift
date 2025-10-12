@@ -200,13 +200,13 @@ struct MainView: View {
                 } label: {
                     VStack(alignment: .leading, spacing: 4) {
                         HStack(spacing: 4) {
-                            Text("Véhicule principal")
+                            Text(store.currentVehicle?.isPrimary == true ? "Véhicule principal" : "Véhicule secondaire")
                             Image(systemName: "arrow.triangle.2.circlepath")
                                 .rotationEffect(.degrees(90))
                         }
                         .font(.footnote)
                         .foregroundColor(Color(.secondaryLabel))
-                        
+
                         if let vehicle = store.currentVehicle {
                             HStack(alignment: .firstTextBaseline, spacing: 6) {
                                 Text(vehicle.brand.uppercased())

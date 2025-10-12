@@ -19,6 +19,7 @@ struct EditVehicleStore {
         var mileage: String
         var registrationDate: Date
         var plate: String
+        var isPrimary: Bool
         var isLoading = false
         @Shared(.vehicles) var vehicles: [Vehicle] = []
         var updatedVehicle: Vehicle?
@@ -28,9 +29,10 @@ struct EditVehicleStore {
             self.type = vehicle.type
             self.brand = vehicle.brand
             self.model = vehicle.model
-            self.mileage = vehicle.mileage
+            self.mileage = vehicle.mileage ?? ""
             self.registrationDate = vehicle.registrationDate
             self.plate = vehicle.plate
+            self.isPrimary = vehicle.isPrimary
         }
 
         // Computed property pour avoir le véhicule avec les changements actuels
@@ -39,9 +41,10 @@ struct EditVehicleStore {
                 type: type,
                 brand: brand,
                 model: model,
-                mileage: mileage,
+                mileage: mileage.isEmpty ? nil : mileage,
                 registrationDate: registrationDate,
                 plate: plate,
+                isPrimary: isPrimary,
                 documents: originalVehicle.documents
             )
         }
@@ -67,17 +70,37 @@ struct EditVehicleStore {
                 
             case .updateVehicle:
                 state.isLoading = true
+
+                // Si le véhicule devient principal, mettre tous les autres en secondaire
+                if state.isPrimary && !state.originalVehicle.isPrimary {
+                    state.$vehicles.withLock { vehicles in
+                        for index in vehicles.indices {
+                            if vehicles[index].id != state.originalVehicle.id {
+                                vehicles[index].isPrimary = false
+                            }
+                        }
+                    }
+                }
+
                 let updatedVehicle = Vehicle(
                     type: state.type,
                     brand: state.brand,
                     model: state.model,
-                    mileage: state.mileage,
+                    mileage: state.mileage.isEmpty ? nil : state.mileage,
                     registrationDate: state.registrationDate,
                     plate: state.plate,
+                    isPrimary: state.isPrimary,
                     documents: state.originalVehicle.documents
                 )
 
-                return .run { [originalVehicleId = state.originalVehicle.id] send in
+                return .run { [vehicles = state.vehicles, originalVehicleId = state.originalVehicle.id] send in
+                    // Sauvegarder tous les véhicules mis à jour
+                    for existingVehicle in vehicles {
+                        if existingVehicle.id != originalVehicleId {
+                            await fileStorageService.updateVehicle(existingVehicle.id, with: existingVehicle)
+                        }
+                    }
+                    // Mettre à jour le véhicule actuel
                     await fileStorageService.updateVehicle(originalVehicleId, with: updatedVehicle)
                     await send(.vehicleUpdated)
                 }
@@ -89,9 +112,10 @@ struct EditVehicleStore {
                     type: state.type,
                     brand: state.brand,
                     model: state.model,
-                    mileage: state.mileage,
+                    mileage: state.mileage.isEmpty ? nil : state.mileage,
                     registrationDate: state.registrationDate,
                     plate: state.plate,
+                    isPrimary: state.isPrimary,
                     documents: state.originalVehicle.documents
                 )
                 state.updatedVehicle = updatedVehicle

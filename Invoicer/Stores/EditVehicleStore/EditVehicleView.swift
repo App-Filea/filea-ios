@@ -30,8 +30,7 @@ struct EditVehicleView: View {
     private var isFormValid: Bool {
         !store.brand.isEmpty &&
         !store.model.isEmpty &&
-        !store.plate.isEmpty &&
-        !store.mileage.isEmpty
+        !store.plate.isEmpty
     }
 
     var body: some View {
@@ -338,10 +337,7 @@ struct EditVehicleView: View {
             hasErrors = true
         }
 
-        if store.mileage.isEmpty {
-            validationErrors["mileage"] = "Ce champ est obligatoire"
-            hasErrors = true
-        }
+        // Mileage is optional, no validation needed
 
         if !hasErrors {
             store.send(.updateVehicle)

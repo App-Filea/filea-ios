@@ -14,3 +14,9 @@ extension SharedReaderKey where Self == InMemoryKey<[Vehicle]>.Default {
         Self[.inMemory("vehicles"), default: []]
     }
 }
+
+extension SharedReaderKey where Self == InMemoryKey<Vehicle?>.Default {
+    static var selectedVehicle: Self {
+        Self[.inMemory("selectedVehicle"), default: nil]
+    }
+}

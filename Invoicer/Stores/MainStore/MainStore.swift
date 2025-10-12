@@ -13,12 +13,13 @@ struct MainStore {
     @ObservableState
     struct State: Equatable {
         @Shared(.vehicles) var vehicles: [Vehicle] = []
+        @Shared(.selectedVehicle) var selectedVehicle: Vehicle?
         @Presents var vehicleDetail: VehicleStore.State?
         @Presents var deleteAlert: AlertState<Action.Alert>?
         @Presents var vehiclesList: VehiclesListModalStore.State?
 
         var currentVehicle: Vehicle? {
-            vehicles.first
+            selectedVehicle
         }
 
         var currentVehicleDocuments: [Document] {
@@ -124,6 +125,8 @@ struct MainStore {
                     state.$vehicles.withLock { vehicles in
                         vehicles.removeAll { $0.id == vehicleId }
                     }
+                    // La resélection sera gérée dans AppStore
+                    state.$selectedVehicle.withLock { $0 = nil }
                 }
                 return .none
 
@@ -135,7 +138,7 @@ struct MainStore {
                 return .none
 
             case .vehiclesList(.presented(.selectVehicle)):
-                // Dismiss le fullScreenCover après sélection
+                // Selection and dismiss handled by VehiclesListModalStore
                 state.vehiclesList = nil
                 return .none
 

@@ -52,7 +52,7 @@ struct VehicleView: View {
                     HStack(spacing: 4) {
                         Text(formattedDate(store.vehicle.registrationDate, isOnlyYear: true))
                         Text("-")
-                        Text("\(store.vehicle.mileage)km")
+                        Text(store.vehicle.mileage != nil ? "\(store.vehicle.mileage!)km" : "Non renseigné")
                         Spacer()
                     }
                     .bodyDefaultLight()

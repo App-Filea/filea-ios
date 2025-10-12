@@ -13,6 +13,7 @@ struct VehiclesListModalStore {
     @ObservableState
     struct State: Equatable {
         @Shared(.vehicles) var vehicles: [Vehicle] = []
+        @Shared(.selectedVehicle) var selectedVehicle: Vehicle?
         @Presents var addVehicle: AddVehicleStore.State?
         var isLoading = false
     }
@@ -48,7 +49,9 @@ struct VehiclesListModalStore {
                 state.addVehicle = AddVehicleStore.State()
                 return .none
 
-            case .selectVehicle:
+            case .selectVehicle(let vehicle):
+                // Update selected vehicle before dismissing
+                state.$selectedVehicle.withLock { $0 = vehicle }
                 return .run { _ in
                     await dismiss()
                 }

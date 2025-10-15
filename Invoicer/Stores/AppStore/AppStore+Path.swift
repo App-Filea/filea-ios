@@ -19,14 +19,11 @@ extension AppStore {
             state.path.append(.addVehicle(AddVehicleStore.State()))
 
         case .element(id: _, action: .main(.showVehicleDetail(let vehicle))):
-            state.path.append(.vehicle(VehicleStore.State(vehicle: vehicle)))
+            state.path.append(.vehicleDetails(VehicleDetailsStore.State()))
 
-        // Navigation from MainStore to documents
+        // AddDocument now handled by sheet in MainView
         case .element(id: _, action: .main(.showAddDocument)):
-            if case .main(let mainState) = state.path.last,
-               let currentVehicle = mainState.currentVehicle {
-                state.path.append(.addDocument(AddDocumentStore.State(vehicleId: currentVehicle.id)))
-            }
+            return .none
 
         case .element(id: _, action: .main(.showDocumentDetail(let document))):
             if case .main(let mainState) = state.path.last,
@@ -39,11 +36,6 @@ extension AppStore {
             if case .main(let mainState) = state.path.last,
                let currentVehicle = mainState.currentVehicle {
                 state.path.append(.editVehicle(EditVehicleStore.State(vehicle: currentVehicle)))
-            }
-
-        case .element(id: _, action: .vehicle(.showEditVehicle)):
-            if case .vehicle(let vehicleState) = state.path.last {
-                state.path.append(.editVehicle(EditVehicleStore.State(vehicle: vehicleState.vehicle)))
             }
 
         case .element(id: _, action: .documentDetail(.editDocumentLoaded(let document))):
@@ -59,7 +51,7 @@ extension AppStore {
         case .element(id: _, action: .main(.vehicleDeleted)):
             return .send(.vehicleListChanged)
 
-        case .element(id: _, action: .vehicle(.vehicleDeleted)):
+        case .element(id: _, action: .vehicleDetails(.vehicleDeleted)):
             return .send(.vehicleListChanged)
 
         default: return .none

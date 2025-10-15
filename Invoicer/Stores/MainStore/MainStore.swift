@@ -14,9 +14,10 @@ struct MainStore {
     struct State: Equatable {
         @Shared(.vehicles) var vehicles: [Vehicle] = []
         @Shared(.selectedVehicle) var selectedVehicle: Vehicle?
-        @Presents var vehicleDetail: VehicleStore.State?
+        @Presents var vehicleDetail: VehicleDetailsStore.State?
         @Presents var deleteAlert: AlertState<Action.Alert>?
         @Presents var vehiclesList: VehiclesListModalStore.State?
+        @Presents var addDocument: AddDocumentStore.State?
 
         var currentVehicle: Vehicle? {
             selectedVehicle
@@ -28,8 +29,9 @@ struct MainStore {
     }
 
     enum Action: Equatable {
-        case vehicleDetail(PresentationAction<VehicleStore.Action>)
+        case vehicleDetail(PresentationAction<VehicleDetailsStore.Action>)
         case vehiclesList(PresentationAction<VehiclesListModalStore.Action>)
+        case addDocument(PresentationAction<AddDocumentStore.Action>)
         case loadVehicles
         case vehiclesLoaded([Vehicle])
         case showAddVehicle
@@ -64,7 +66,7 @@ struct MainStore {
                 return .none
                 
             case .showVehicleDetail(let vehicle):
-                state.vehicleDetail = VehicleStore.State(vehicle: vehicle)
+                state.vehicleDetail = VehicleDetailsStore.State()
                 return .none
 
             case .showVehiclesList:
@@ -81,7 +83,10 @@ struct MainStore {
                 return .none
 
             case .showAddDocument:
-                // Navigation handled by AppStore+Path
+                guard let currentVehicle = state.currentVehicle else {
+                    return .none
+                }
+                state.addDocument = AddDocumentStore.State(vehicleId: currentVehicle.id)
                 return .none
 
             case .showDocumentDetail:
@@ -144,14 +149,20 @@ struct MainStore {
 
             case .vehiclesList:
                 return .none
+
+            case .addDocument:
+                return .none
             }
         }
         .ifLet(\.$vehicleDetail, action: \.vehicleDetail) {
-            VehicleStore()
+            VehicleDetailsStore()
         }
         .ifLet(\.$deleteAlert, action: \.deleteAlert)
         .ifLet(\.$vehiclesList, action: \.vehiclesList) {
             VehiclesListModalStore()
+        }
+        .ifLet(\.$addDocument, action: \.addDocument) {
+            AddDocumentStore()
         }
     }
 }

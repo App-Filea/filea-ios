@@ -14,6 +14,9 @@ struct OutlinedTextField<Field: Hashable>: View {
     @Binding var text: String
     var hasError: Bool = false
     var suffix: String? = nil
+    var horizontalPadding: CGFloat = 14
+    var verticalPadding: CGFloat = 12
+    var cornerRadius: CGFloat = 10
 
     private var borderColor: Color {
         if hasError {
@@ -46,10 +49,10 @@ struct OutlinedTextField<Field: Hashable>: View {
                             .bodyDefaultRegular()
                             .foregroundColor(Color("onBackgroundSecondary"))
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 16)
+                    .padding(.horizontal, horizontalPadding)
+                    .padding(.vertical, verticalPadding)
                     .background(
-                        RoundedRectangle(cornerRadius: 12)
+                        RoundedRectangle(cornerRadius: cornerRadius)
                             .stroke(borderColor, lineWidth: 2)
                             .animation(.easeInOut(duration: 0.3), value: borderColor)
                     )
@@ -59,10 +62,10 @@ struct OutlinedTextField<Field: Hashable>: View {
                         .foregroundColor(Color("onSurface"))
                         .accentColor(Color("primary"))
                         .textFieldStyle(.plain)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 16)
+                        .padding(.horizontal, horizontalPadding)
+                        .padding(.vertical, verticalPadding)
                         .background(
-                            RoundedRectangle(cornerRadius: 12)
+                            RoundedRectangle(cornerRadius: cornerRadius)
                                 .stroke(borderColor, lineWidth: 2)
                                 .animation(.easeInOut(duration: 0.3), value: borderColor)
                         )

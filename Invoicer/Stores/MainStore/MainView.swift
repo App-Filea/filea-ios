@@ -34,6 +34,9 @@ struct MainView: View {
         .fullScreenCover(item: $store.scope(state: \.vehiclesList, action: \.vehiclesList)) { store in
             VehiclesListModalView(store: store)
         }
+        .fullScreenCover(item: $store.scope(state: \.addDocument, action: \.addDocument)) { store in
+            AddDocumentMultiStepView(store: store)
+        }
     }
 
     // MARK: - Empty State

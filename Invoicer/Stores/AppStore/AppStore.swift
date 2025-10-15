@@ -128,10 +128,9 @@ struct AppStore {
         enum State: Equatable {
             case vehiclesList(VehiclesListStore.State)
             case main(MainStore.State)
-            case vehicle(VehicleStore.State)
+            case vehicleDetails(VehicleDetailsStore.State)
             case addVehicle(AddVehicleStore.State)
             case editVehicle(EditVehicleStore.State)
-            case addDocument(AddDocumentStore.State)
             case documentDetail(DocumentDetailCoordinatorStore.State)
             case editDocument(EditDocumentStore.State)
         }
@@ -139,20 +138,18 @@ struct AppStore {
         enum Action: Equatable {
             case vehiclesList(VehiclesListStore.Action)
             case main(MainStore.Action)
-            case vehicle(VehicleStore.Action)
+            case vehicleDetails(VehicleDetailsStore.Action)
             case addVehicle(AddVehicleStore.Action)
             case editVehicle(EditVehicleStore.Action)
-            case addDocument(AddDocumentStore.Action)
             case documentDetail(DocumentDetailCoordinatorStore.Action)
             case editDocument(EditDocumentStore.Action)
         }
         var body: some ReducerOf<Self> {
             Scope(state: \.vehiclesList, action: \.vehiclesList) { VehiclesListStore() }
             Scope(state: \.main, action: \.main) { MainStore() }
-            Scope(state: \.vehicle, action: \.vehicle) { VehicleStore() }
+            Scope(state: \.vehicleDetails, action: \.vehicleDetails) { VehicleDetailsStore() }
             Scope(state: \.addVehicle, action: \.addVehicle) { AddVehicleStore() }
             Scope(state: \.editVehicle, action: \.editVehicle) { EditVehicleStore() }
-            Scope(state: \.addDocument, action: \.addDocument) { AddDocumentStore() }
             Scope(state: \.documentDetail, action: \.documentDetail) { DocumentDetailCoordinatorStore() }
             Scope(state: \.editDocument, action: \.editDocument) { EditDocumentStore() }
         }

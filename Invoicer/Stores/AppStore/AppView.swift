@@ -27,9 +27,9 @@ struct AppView: View {
                 if let store = store.scope(state: \.main, action: \.main) {
                     MainView(store: store)
                 }
-            case .vehicle:
-                if let store = store.scope(state: \.vehicle, action: \.vehicle) {
-                    VehicleView(store: store)
+            case .vehicleDetails:
+                if let store = store.scope(state: \.vehicleDetails, action: \.vehicleDetails) {
+                    VehicleDetailsView(store: store)
                 }
             case .addVehicle:
                 if let store = store.scope(state: \.addVehicle, action: \.addVehicle) {
@@ -38,10 +38,6 @@ struct AppView: View {
             case .editVehicle:
                 if let store = store.scope(state: \.editVehicle, action: \.editVehicle) {
                     EditVehicleView(store: store)
-                }
-            case .addDocument:
-                if let store = store.scope(state: \.addDocument, action: \.addDocument) {
-                    AddDocumentView(store: store)
                 }
             case .documentDetail:
                 if let store = store.scope(state: \.documentDetail, action: \.documentDetail) {

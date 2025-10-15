@@ -34,7 +34,7 @@ struct AddVehicleStepView: View {
             if let errorMessage = validationResult.errorMessage, store.showValidationError {
                 Text(errorMessage)
                     .bodyXSmallRegular()
-                    .foregroundStyle(Color("error"))
+                    .foregroundStyle(Color.red)
                     .padding(.horizontal, .gutterMD)
                     .padding(.bottom, .stackSM)
             }
@@ -81,27 +81,27 @@ struct AddVehicleStepView: View {
                         if let iconName = type.iconName {
                             Image(systemName: iconName)
                                 .font(.title2)
-                                .foregroundStyle(store.vehicleType == type ? Color("onPrimary") : Color("onSurface"))
+                                .foregroundStyle(store.vehicleType == type ? Color.white : Color(.label))
                                 .scaleEffect(x: type.shouldFlipIcon ? -1 : 1, y: 1)
                         }
 
                         Text(type.displayName)
                             .bodyDefaultSemibold()
-                            .foregroundStyle(store.vehicleType == type ? Color("onPrimary") : Color("onSurface"))
+                            .foregroundStyle(store.vehicleType == type ? Color.white : Color(.label))
 
                         Spacer()
 
                         if store.vehicleType == type {
                             Image(systemName: "checkmark.circle.fill")
-                                .foregroundStyle(Color("onPrimary"))
+                                .foregroundStyle(Color.white)
                         }
                     }
                     .padding(.horizontal, .insetLG)
                     .padding(.vertical, .insetLG)
                     .background(
                         RoundedRectangle(cornerRadius: 12)
-                            .fill(store.vehicleType == type ? Color(.systemPurple) : Color("surface"))
-                            .stroke(store.vehicleType == type ? Color(.systemPurple) : Color("outline"), lineWidth: 2)
+                            .fill(store.vehicleType == type ? Color(.systemPurple) : Color(.secondarySystemBackground))
+                            .stroke(store.vehicleType == type ? Color(.systemPurple) : Color(.separator), lineWidth: 2)
                     )
                 }
                 .buttonStyle(.plain)
@@ -109,57 +109,99 @@ struct AddVehicleStepView: View {
 
             // Séparateur
             Rectangle()
-                .fill(Color("outline"))
+                .fill(Color(.separator))
                 .frame(height: 1)
                 .padding(.vertical, .stackSM)
 
             // Sélection Principal/Secondaire
             HStack(spacing: .inlineMD) {
+                // Bouton Principal
                 Button(action: {
-                    store.isPrimary = true
-                }) {
-                    HStack(spacing: .iconTextGap) {
-                        Image(systemName: "star.fill")
-                            .font(.body)
-                            .foregroundStyle(store.isPrimary ? Color("onPrimary") : Color("onSurface"))
-
-                        Text("Principal")
-                            .bodyDefaultSemibold()
-                            .foregroundStyle(store.isPrimary ? Color("onPrimary") : Color("onSurface"))
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                        store.isPrimary = true
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding(.horizontal, .insetLG)
-                    .padding(.vertical, .insetLG)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(store.isPrimary ? Color(.systemPurple) : Color("surface"))
-                            .stroke(store.isPrimary ? Color(.systemPurple) : Color("outline"), lineWidth: 2)
-                    )
+                }) {
+                    Text("Principal")
+                        .bodyDefaultSemibold()
+                        .foregroundStyle(store.isPrimary ? Color.white : Color(.label))
+                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal, .insetLG)
+                        .padding(.vertical, .insetLG)
+                        .background(
+                            ZStack {
+                                if store.isPrimary {
+                                    // Gradient background pour l'état sélectionné
+                                    RoundedRectangle(cornerRadius: 16)
+                                        .fill(
+                                            LinearGradient(
+                                                gradient: Gradient(colors: [
+                                                    Color.purple.opacity(0.9),
+                                                    Color.purple
+                                                ]),
+                                                startPoint: .topLeading,
+                                                endPoint: .bottomTrailing
+                                            )
+                                        )
+                                        .shadow(color: Color.purple.opacity(0.4), radius: 8, x: 0, y: 4)
+                                } else {
+                                    // Background non sélectionné avec effet glass
+                                    RoundedRectangle(cornerRadius: 16)
+                                        .fill(Color(.secondarySystemBackground))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 16)
+                                                .stroke(Color(.separator).opacity(0.5), lineWidth: 1)
+                                        )
+                                }
+                            }
+                        )
+                        .scaleEffect(store.isPrimary ? 1.0 : 0.98)
                 }
                 .buttonStyle(.plain)
+                .animation(.spring(response: 0.3, dampingFraction: 0.7), value: store.isPrimary)
 
+                // Bouton Secondaire
                 Button(action: {
-                    store.isPrimary = false
-                }) {
-                    HStack(spacing: .iconTextGap) {
-                        Image(systemName: "star")
-                            .font(.body)
-                            .foregroundStyle(!store.isPrimary ? Color("onPrimary") : Color("onSurface"))
-
-                        Text("Secondaire")
-                            .bodyDefaultSemibold()
-                            .foregroundStyle(!store.isPrimary ? Color("onPrimary") : Color("onSurface"))
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                        store.isPrimary = false
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding(.horizontal, .insetLG)
-                    .padding(.vertical, .insetLG)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(!store.isPrimary ? Color(.systemPurple) : Color("surface"))
-                            .stroke(!store.isPrimary ? Color(.systemPurple) : Color("outline"), lineWidth: 2)
-                    )
+                }) {
+                    Text("Secondaire")
+                        .bodyDefaultSemibold()
+                        .foregroundStyle(!store.isPrimary ? Color.white : Color(.label))
+                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal, .insetLG)
+                        .padding(.vertical, .insetLG)
+                        .background(
+                            ZStack {
+                                if !store.isPrimary {
+                                    // Gradient background pour l'état sélectionné
+                                    RoundedRectangle(cornerRadius: 16)
+                                        .fill(
+                                            LinearGradient(
+                                                gradient: Gradient(colors: [
+                                                    Color.purple.opacity(0.9),
+                                                    Color.purple
+                                                ]),
+                                                startPoint: .topLeading,
+                                                endPoint: .bottomTrailing
+                                            )
+                                        )
+                                        .shadow(color: Color.purple.opacity(0.4), radius: 8, x: 0, y: 4)
+                                } else {
+                                    // Background non sélectionné avec effet glass
+                                    RoundedRectangle(cornerRadius: 16)
+                                        .fill(Color(.secondarySystemBackground))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 16)
+                                                .stroke(Color(.separator).opacity(0.5), lineWidth: 1)
+                                        )
+                                }
+                            }
+                        )
+                        .scaleEffect(!store.isPrimary ? 1.0 : 0.98)
                 }
                 .buttonStyle(.plain)
+                .animation(.spring(response: 0.3, dampingFraction: 0.7), value: store.isPrimary)
             }
         }
     }
@@ -186,14 +228,14 @@ struct AddVehicleStepView: View {
 
                 TextField("TOYOTA, BMW, MERCEDES...", text: $store.brand)
                     .bodyDefaultRegular()
-                    .foregroundColor(Color("onSurface"))
-                    .accentColor(Color("primary"))
+                    .foregroundColor(Color(.label))
+                    .accentColor(Color.purple)
                     .textFieldStyle(.plain)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 16)
                     .background(
                         RoundedRectangle(cornerRadius: 12)
-                            .stroke(!validationResult.isValid && store.showValidationError && store.brand.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? Color("error") : Color("outline"), lineWidth: 2)
+                            .stroke(!validationResult.isValid && store.showValidationError && store.brand.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? Color.red : Color(.separator), lineWidth: 2)
                             .animation(.easeInOut(duration: 0.3), value: !validationResult.isValid && store.showValidationError)
                     )
                     .submitLabel(.next)
@@ -220,14 +262,14 @@ struct AddVehicleStepView: View {
 
                 TextField("COROLLA, X3, CLASSE A...", text: $store.model)
                     .bodyDefaultRegular()
-                    .foregroundColor(Color("onSurface"))
-                    .accentColor(Color("primary"))
+                    .foregroundColor(Color(.label))
+                    .accentColor(Color.purple)
                     .textFieldStyle(.plain)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 16)
                     .background(
                         RoundedRectangle(cornerRadius: 12)
-                            .stroke(!validationResult.isValid && store.showValidationError && store.model.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? Color("error") : Color("outline"), lineWidth: 2)
+                            .stroke(!validationResult.isValid && store.showValidationError && store.model.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? Color.red : Color(.separator), lineWidth: 2)
                             .animation(.easeInOut(duration: 0.3), value: !validationResult.isValid && store.showValidationError)
                     )
                     .submitLabel(.next)
@@ -261,14 +303,14 @@ struct AddVehicleStepView: View {
 
                 TextField("AB-123-CD", text: $store.plate)
                     .bodyDefaultRegular()
-                    .foregroundColor(Color("onSurface"))
-                    .accentColor(Color("primary"))
+                    .foregroundColor(Color(.label))
+                    .accentColor(Color.purple)
                     .textFieldStyle(.plain)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 16)
                     .background(
                         RoundedRectangle(cornerRadius: 12)
-                            .stroke(!validationResult.isValid && store.showValidationError && store.plate.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? Color("error") : Color("outline"), lineWidth: 2)
+                            .stroke(!validationResult.isValid && store.showValidationError && store.plate.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? Color.red : Color(.separator), lineWidth: 2)
                             .animation(.easeInOut(duration: 0.3), value: !validationResult.isValid && store.showValidationError)
                     )
                     .submitLabel(.next)
@@ -296,19 +338,19 @@ struct AddVehicleStepView: View {
                 HStack {
                     TextField("120000", text: $store.mileage)
                         .bodyDefaultRegular()
-                        .foregroundColor(Color("onSurface"))
-                        .accentColor(Color("primary"))
+                        .foregroundColor(Color(.label))
+                        .accentColor(Color.purple)
                         .textFieldStyle(.plain)
 
                     Text("KM")
                         .bodyDefaultRegular()
-                        .foregroundColor(Color("onBackgroundSecondary"))
+                        .foregroundColor(Color(.secondaryLabel))
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 16)
                 .background(
                     RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color("outline"), lineWidth: 2)
+                        .stroke(Color(.separator), lineWidth: 2)
                 )
             }
 
@@ -336,19 +378,19 @@ struct AddVehicleStepView: View {
                     HStack {
                         Text(formatDate(store.registrationDate))
                             .bodyDefaultRegular()
-                            .foregroundStyle(Color("onSurface"))
+                            .foregroundStyle(Color(.label))
 
                         Spacer()
 
                         Image(systemName: "calendar")
-                            .foregroundStyle(Color("onBackgroundSecondary"))
+                            .foregroundStyle(Color(.secondaryLabel))
                     }
                     .padding(.horizontal, .insetLG)
                     .padding(.vertical, .insetLG)
                     .background(
                         RoundedRectangle(cornerRadius: 12)
-                            .fill(Color("surface"))
-                            .stroke(Color("outline"), lineWidth: 2)
+                            .fill(Color(.secondarySystemBackground))
+                            .stroke(Color(.separator), lineWidth: 2)
                     )
                 }
                 .buttonStyle(.plain)
@@ -378,7 +420,7 @@ struct AddVehicleStepView: View {
             if let icon = icon {
                 Image(systemName: icon)
                     .font(.title3)
-                    .foregroundStyle(Color("primary"))
+                    .foregroundStyle(Color.purple)
                     .frame(width: 28)
                     .scaleEffect(x: iconFlipped ? -1 : 1, y: 1)
             }
@@ -386,11 +428,11 @@ struct AddVehicleStepView: View {
             VStack(alignment: .leading, spacing: .stackXS) {
                 Text(title)
                     .bodyXSmallSemibold()
-                    .foregroundStyle(Color("onBackgroundSecondary"))
+                    .foregroundStyle(Color(.secondaryLabel))
 
                 Text(value)
                     .bodyDefaultSemibold()
-                    .foregroundStyle(Color("onBackground"))
+                    .foregroundStyle(Color(.label))
             }
 
             Spacer()
@@ -399,7 +441,7 @@ struct AddVehicleStepView: View {
         .padding(.vertical, .insetMD)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color("surface"))
+                .fill(Color(.secondarySystemBackground))
         )
     }
 

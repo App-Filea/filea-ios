@@ -151,7 +151,7 @@ struct AddVehicleMultiStepView: View {
                         Text(currentStep.title)
                             .font(.title2)
                             .fontWeight(.bold)
-                            .foregroundStyle(Color("onBackground"))
+                            .foregroundStyle(Color(.label))
                             .multilineTextAlignment(.center)
                         Spacer()
                         Button("Suivant", action: {
@@ -193,7 +193,7 @@ struct AddVehicleMultiStepView: View {
                 .padding(.horizontal, 16)
                 Text(currentStep.subtitle)
                     .bodyDefaultRegular()
-                    .foregroundStyle(Color("onBackgroundSecondary"))
+                    .foregroundStyle(Color(.secondaryLabel))
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
                     .frame(height: 40, alignment: .top)

@@ -22,6 +22,7 @@ struct EditVehicleStore {
         var isPrimary: Bool
         var isLoading = false
         @Shared(.vehicles) var vehicles: [Vehicle] = []
+        @Shared(.selectedVehicle) var selectedVehicle: Vehicle?
         var updatedVehicle: Vehicle?
 
         init(vehicle: Vehicle) {
@@ -119,12 +120,17 @@ struct EditVehicleStore {
                     documents: state.originalVehicle.documents
                 )
                 state.updatedVehicle = updatedVehicle
+
                 // Mettre à jour la liste partagée
                 state.$vehicles.withLock { vehicles in
                     if let index = vehicles.firstIndex(where: { $0.id == state.originalVehicle.id }) {
                         vehicles[index] = updatedVehicle
                     }
                 }
+
+                // CRUCIAL: Mettre à jour selectedVehicle directement
+                state.$selectedVehicle.withLock { $0 = updatedVehicle }
+
                 return .run { _ in
                     await dismiss()
                 }

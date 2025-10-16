@@ -17,18 +17,14 @@ struct MainView: View {
         ZStack(alignment: .bottom) {
             Color(.secondarySystemBackground)
                 .ignoresSafeArea()
-
-            if store.vehicles.isEmpty {
-                emptyStateView
-            } else {
                 mainContentView
-            }
         }
-        .onAppear {
-            if store.vehicles.isEmpty {
-                store.send(.loadVehicles)
-            }
-        }
+//        .onAppear {
+//            if store.vehicles.isEmpty {
+//                store.send(.loadVehicles)
+//            }
+//            store.send(.calculateTotalCost)
+//        }
         .navigationBarBackButtonHidden()
         .alert($store.scope(state: \.deleteAlert, action: \.deleteAlert))
         .fullScreenCover(item: $store.scope(state: \.vehiclesList, action: \.vehiclesList)) { store in
@@ -37,36 +33,6 @@ struct MainView: View {
         .fullScreenCover(item: $store.scope(state: \.addDocument, action: \.addDocument)) { store in
             AddDocumentMultiStepView(store: store)
         }
-    }
-
-    // MARK: - Empty State
-    private var emptyStateView: some View {
-        VStack(spacing: 16) {
-            Spacer()
-            Image(systemName: "car.fill")
-                .font(.system(size: 60))
-                .foregroundStyle(.blue)
-            Text("Aucun véhicule enregistré")
-                .font(.headline)
-                .foregroundStyle(Color(.label))
-            Text("Commencez par ajouter votre premier véhicule")
-                .font(.subheadline)
-                .foregroundStyle(Color(.secondaryLabel))
-            Spacer()
-
-            Button("Ajouter un véhicule",
-                   systemImage: "plus.circle.fill",
-                   action: { store.send(.showAddVehicle) })
-            .font(.body.weight(.semibold))
-            .padding(.vertical, 14)
-            .padding(.horizontal, 24)
-            .background(.blue)
-            .foregroundColor(.white)
-            .cornerRadius(12)
-            .shadow(color: .black.opacity(0.2), radius: 8, x: 0, y: 4)
-            .padding()
-        }
-        .padding()
     }
 
     // MARK: - Main Content
@@ -189,17 +155,17 @@ struct MainView: View {
                     } label: {
                         Label("Supprimer", systemImage: "trash")
                     }
-                    Divider()
-                    Menu("Partager") {
-                        Button(action: {}) {
-                            Label("La propriété du véhicule",
-                                  systemImage: "square.and.arrow.up.badge.checkmark")
-                        }
-                        Button(action: {}) {
-                            Label("La lecture du véhicule",
-                                  systemImage: "square.and.arrow.up.badge.clock")
-                        }
-                    }
+//                    Divider()
+//                    Menu("Partager") {
+//                        Button(action: {}) {
+//                            Label("La propriété du véhicule",
+//                                  systemImage: "square.and.arrow.up.badge.checkmark")
+//                        }
+//                        Button(action: {}) {
+//                            Label("La lecture du véhicule",
+//                                  systemImage: "square.and.arrow.up.badge.clock")
+//                        }
+//                    }
                 } label: {
                     VStack(alignment: .leading, spacing: 4) {
                         HStack(spacing: 4) {
@@ -228,13 +194,13 @@ struct MainView: View {
                 .menuActionDismissBehavior(.automatic)
                 
                 Spacer()
-                Button {
-                    store.send(.showSettings)
-                } label: {
-                    Image(systemName: "gearshape")
-                        .font(.title)
-                        .foregroundColor(Color(.label))
-                }
+//                Button {
+//                    store.send(.showSettings)
+//                } label: {
+//                    Image(systemName: "gearshape")
+//                        .font(.title)
+//                        .foregroundColor(Color(.label))
+//                }
             }
         }
         .padding(.top, 8)
@@ -244,93 +210,179 @@ struct MainView: View {
     private var statsCardsView: some View {
         HStack(spacing: 12) {
             // Total cost card
-            VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Text("Coût total")
-                        .font(.subheadline)
-                        .foregroundStyle(Color(.label))
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .font(.caption)
-                        .foregroundStyle(Color(.secondaryLabel))
+            Color(.systemBackground)
+                .frame(height: 140)
+                .frame(maxWidth: .infinity)
+                .cornerRadius(16)
+                .overlay {
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            Text("Coût total")
+                                .font(.subheadline)
+                                .foregroundStyle(Color(.label))
+                            Spacer()
+                        }
+                        Spacer()
+                        HStack(alignment: .firstTextBaseline, spacing: 4) {
+                            Text(formatAmount(store.currentVehicleTotalCost))
+                                .font(.system(size: 40, weight: .bold))
+                                .foregroundStyle(Color(.label))
+                            Text("€")
+                                .font(.system(size: 24, weight: .semibold))
+                                .foregroundStyle(Color(.secondaryLabel))
+                        }
+                        Text("Sur l'année en cours")
+                            .font(.caption)
+                            .foregroundStyle(Color(.secondaryLabel))
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(16)
                 }
-
-                Text("500 €")
-                    .font(.system(size: 40, weight: .bold))
-                    .foregroundStyle(Color(.label))
-
-                Text("Sur l'année en cours")
-                    .font(.caption)
-                    .foregroundStyle(Color(.secondaryLabel))
-            }
-            .padding(16)
-            .frame(height: 140)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color(.systemBackground))
-            .cornerRadius(16)
 
             // Alerts card
-            VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Text("Alertes")
-                        .font(.subheadline)
-                        .foregroundStyle(Color(.label))
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .font(.caption)
-                        .foregroundStyle(Color(.secondaryLabel))
+            Color(.systemBackground)
+                .frame(height: 140)
+                .frame(maxWidth: .infinity)
+                .cornerRadius(16)
+                .overlay {
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            Text("Alertes")
+                                .font(.subheadline)
+                                .foregroundStyle(Color(.label))
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundStyle(Color(.secondaryLabel))
+                        }
+                        Spacer()
+                        HStack(alignment: .firstTextBaseline, spacing: 4) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .font(.system(size: 24, weight: .semibold))
+                                .foregroundStyle(.yellow)
+
+                            Text("0")
+                                .font(.system(size: 40, weight: .bold))
+                                .foregroundStyle(Color(.label))
+                        }
+                        Text("Nécessite votre attention")
+                            .font(.caption)
+                            .foregroundStyle(Color(.secondaryLabel))
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(16)
                 }
-
-                HStack(alignment: .top, spacing: 4) {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .font(.title3)
-                        .foregroundStyle(.yellow)
-
-                    Text("2")
-                        .font(.system(size: 40, weight: .bold))
-                        .foregroundStyle(Color(.label))
-                }
-
-                Text("Nécessite votre attention")
-                    .font(.caption)
-                    .foregroundStyle(Color(.secondaryLabel))
-            }
-            .padding(16)
-            .frame(height: 140)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color(.systemBackground))
-            .cornerRadius(16)
         }
     }
 
     // MARK: - Monthly Expenses Chart
     private var monthlyExpensesChartView: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Dépenses mensuel")
+            Text("Dépenses mensuelles")
                 .font(.headline)
                 .foregroundStyle(Color(.label))
 
-            // Mock chart data
-            Chart {
-                ForEach(0..<12, id: \.self) { month in
-                    LineMark(
-                        x: .value("Month", month),
-                        y: .value("Amount", Double.random(in: 50...150))
-                    )
-                    .foregroundStyle(.blue)
-                }
+            if store.currentVehicleMonthlyExpenses.isEmpty {
+                emptyExpensesChart
+            } else {
+                expensesChart
             }
-            .frame(height: 120)
-            .chartXAxis(.hidden)
-            .chartYAxis(.hidden)
 
-            Text("Dépenses mensuel sur l'année 2025")
+            Text("Dépenses mensuelles sur l'année \(Calendar.current.component(.year, from: Date()))")
                 .font(.caption)
                 .foregroundStyle(Color(.secondaryLabel))
         }
         .padding()
         .background(Color(.systemBackground))
         .cornerRadius(16)
+    }
+
+    // MARK: - Empty Expenses Chart
+    private var emptyExpensesChart: some View {
+        Chart {
+            ForEach(1...12, id: \.self) { month in
+                RectangleMark(
+                    x: .value("Mois", monthName(for: month)),
+                    y: .value("Montant", 0),
+                    height: 0.5
+                )
+                .foregroundStyle(Color(.tertiaryLabel))
+            }
+        }
+        .frame(height: 120)
+        .chartYScale(domain: 0...100)
+        .chartXAxis {
+            AxisMarks(values: .automatic) { value in
+                AxisValueLabel {
+                    if let monthName = value.as(String.self) {
+                        let currentMonth = Calendar.current.component(.month, from: Date())
+                        let isCurrentMonth = monthName == self.monthName(for: currentMonth)
+
+                        Text(String(monthName.prefix(3)))
+                            .font(isCurrentMonth ? .caption2.weight(.bold) : .caption2)
+                            .foregroundStyle(isCurrentMonth ? Color(.label) : Color(.secondaryLabel))
+                    }
+                }
+            }
+        }
+        .chartYAxis(.hidden)
+        .accessibilityLabel("Graphique des dépenses mensuelles")
+        .accessibilityValue("Aucune dépense enregistrée cette année")
+    }
+
+    // MARK: - Expenses Chart
+    private var expensesChart: some View {
+        Chart {
+            ForEach(store.currentVehicleMonthlyExpenses) { expense in
+                if expense.amount > 0 {
+                    BarMark(
+                        x: .value("Mois", expense.monthName),
+                        yStart: .value("Start", 0),
+                        yEnd: .value("Montant", expense.amount)
+                    )
+                    .foregroundStyle(expense.month == Calendar.current.component(.month, from: Date()) ? Color(.systemPurple) : Color(.systemPurple).opacity(0.5))
+                    .clipShape(Capsule())
+                } else {
+                    RectangleMark(
+                        x: .value("Mois", expense.monthName),
+                        y: .value("Montant", 0),
+                        height: 0.5
+                    )
+                    .foregroundStyle(Color(.tertiaryLabel))
+                }
+            }
+        }
+        .frame(height: 120)
+        .chartYScale(domain: 0...max(store.currentVehicleMonthlyExpenses.map(\.amount).max() ?? 100, 100))
+        .chartXAxis {
+            AxisMarks(values: .automatic) { value in
+                AxisValueLabel {
+                    if let monthName = value.as(String.self) {
+                        let currentMonth = Calendar.current.component(.month, from: Date())
+                        let isCurrentMonth = store.currentVehicleMonthlyExpenses.first(where: { $0.monthName == monthName })?.month == currentMonth
+
+                        Text(String(monthName.prefix(3)))
+                            .font(isCurrentMonth ? .caption2.weight(.bold) : .caption2)
+                            .foregroundStyle(isCurrentMonth ? Color(.label) : Color(.secondaryLabel))
+                    }
+                }
+            }
+        }
+        .chartYAxis(.hidden)
+        .accessibilityLabel("Graphique des dépenses mensuelles")
+        .accessibilityValue(accessibilityExpensesDescription)
+    }
+
+    // MARK: - Accessibility
+    private var accessibilityExpensesDescription: String {
+        let totalExpenses = store.currentVehicleMonthlyExpenses.reduce(0) { $0 + $1.amount }
+        let monthsWithExpenses = store.currentVehicleMonthlyExpenses.filter { $0.amount > 0 }.count
+
+        if totalExpenses == 0 {
+            return "Aucune dépense enregistrée cette année"
+        }
+
+        return "Total de \(formatAmount(totalExpenses)) euros sur \(monthsWithExpenses) mois"
     }
 
     // MARK: - Document Display Methods
@@ -416,6 +468,19 @@ struct MainView: View {
 
 
     // MARK: - Helpers
+    private func monthName(for month: Int) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "fr_FR")
+        formatter.dateFormat = "MMM"
+
+        var components = DateComponents()
+        components.month = month
+        if let date = Calendar.current.date(from: components) {
+            return formatter.string(from: date).capitalized
+        }
+        return ""
+    }
+
     private func formattedDate(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "fr_FR")
@@ -427,8 +492,18 @@ struct MainView: View {
         let formatter = NumberFormatter()
         formatter.numberStyle = .currency
         formatter.currencyCode = "EUR"
-        formatter.maximumFractionDigits = 2
+        formatter.maximumFractionDigits = 0
+        formatter.minimumFractionDigits = 0
         return formatter.string(from: NSNumber(value: amount)) ?? "0 €"
+    }
+
+    private func formatAmount(_ amount: Double) -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.groupingSeparator = " "
+        formatter.maximumFractionDigits = 0
+        formatter.minimumFractionDigits = 0
+        return formatter.string(from: NSNumber(value: amount)) ?? "0"
     }
 }
 
@@ -483,20 +558,37 @@ struct DocumentThumbnailView: View {
     }
 }
 
-#Preview("Empty list"){
+#Preview() {
     NavigationView {
-        MainView(store: Store(initialState: MainStore.State()) {
-            MainStore()
-        })
-    }
-}
-
-#Preview("1 vehicle") {
-    NavigationView {
-        MainView(store: Store(initialState: MainStore.State(vehicles: [
-            .init(brand: "Lexus", model: "CT200H", mileage: "120000", registrationDate: Date(timeIntervalSince1970: 1322784000), plate: "BZ-029-YV", documents: [])
-        ])) {
-            MainStore()
-        })
+        MainView(
+            store: Store(
+                initialState: MainStore.State(
+                    selectedVehicle: Shared(value: .init(
+                        brand: "Lexus",
+                        model: "CT200H",
+                        mileage: "120000",
+                        registrationDate: Date(timeIntervalSince1970: 1322784000),
+                        plate: "BZ-029-YV",
+                        documents: []
+                    )),
+                    currentVehicleTotalCost: 1645,
+                    currentVehicleMonthlyExpenses: [
+                        MonthlyExpense(month: 1, amount: 540),   // Janvier
+                        MonthlyExpense(month: 2, amount: 0),     // Février (vide)
+                        MonthlyExpense(month: 3, amount: 80),    // Mars
+                        MonthlyExpense(month: 4, amount: 0),     // Avril (vide)
+                        MonthlyExpense(month: 5, amount: 350),   // Mai
+                        MonthlyExpense(month: 6, amount: 0),     // Juin (vide)
+                        MonthlyExpense(month: 7, amount: 180),   // Juillet
+                        MonthlyExpense(month: 8, amount: 95),    // Août
+                        MonthlyExpense(month: 9, amount: 0),     // Septembre (vide)
+                        MonthlyExpense(month: 10, amount: 400),  // Octobre
+                        MonthlyExpense(month: 11, amount: 0),    // Novembre (vide)
+                        MonthlyExpense(month: 12, amount: 0)     // Décembre (vide)
+                    ]
+                ),
+                reducer: { MainStore() }
+            )
+        )
     }
 }

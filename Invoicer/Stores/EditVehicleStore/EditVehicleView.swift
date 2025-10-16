@@ -36,7 +36,7 @@ struct EditVehicleView: View {
 
     var body: some View {
         ZStack {
-            Color("background")
+            Color(.secondarySystemBackground)
                 .ignoresSafeArea()
 
             // Form ScrollView

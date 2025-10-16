@@ -18,6 +18,8 @@ struct MainStore {
         @Presents var deleteAlert: AlertState<Action.Alert>?
         @Presents var vehiclesList: VehiclesListModalStore.State?
         @Presents var addDocument: AddDocumentStore.State?
+        var currentVehicleTotalCost: Double = 0
+        var currentVehicleMonthlyExpenses: [MonthlyExpense] = []
 
         var currentVehicle: Vehicle? {
             selectedVehicle
@@ -44,6 +46,9 @@ struct MainStore {
         case deleteVehicleTapped
         case deleteAlert(PresentationAction<Alert>)
         case vehicleDeleted
+        case calculateTotalCost
+        case totalCostCalculated(Double)
+        case monthlyExpensesCalculated([MonthlyExpense])
 
         enum Alert: Equatable {
             case confirmDelete
@@ -51,7 +56,8 @@ struct MainStore {
     }
     
     @Dependency(\.fileStorageService) var fileStorageService
-    
+    @Dependency(\.vehicleCostCalculator) var costCalculator
+
     var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
@@ -63,7 +69,8 @@ struct MainStore {
                 
             case .vehiclesLoaded(let vehicles):
                 state.$vehicles.withLock { $0 = vehicles }
-                return .none
+                // Recalculer le coût total après le chargement des véhicules
+                return .send(.calculateTotalCost)
                 
             case .showVehicleDetail(let vehicle):
                 state.vehicleDetail = VehicleDetailsStore.State()
@@ -150,7 +157,32 @@ struct MainStore {
             case .vehiclesList:
                 return .none
 
+            case .addDocument(.dismiss):
+                // Recalculer le coût total après la fermeture du modal d'ajout de document
+                return .send(.calculateTotalCost)
+
             case .addDocument:
+                return .none
+
+            case .calculateTotalCost:
+                let documents = state.currentVehicleDocuments
+                return .run { send in
+                    let total = costCalculator.calculateTotalCost(documents)
+                    await send(.totalCostCalculated(total))
+
+                    // Calculate monthly expenses for current year
+                    let calendar = Calendar.current
+                    let currentYear = calendar.component(.year, from: Date())
+                    let monthlyExpenses = costCalculator.calculateMonthlyExpenses(documents, for: currentYear)
+                    await send(.monthlyExpensesCalculated(monthlyExpenses))
+                }
+
+            case .totalCostCalculated(let total):
+                state.currentVehicleTotalCost = total
+                return .none
+
+            case .monthlyExpensesCalculated(let expenses):
+                state.currentVehicleMonthlyExpenses = expenses
                 return .none
             }
         }

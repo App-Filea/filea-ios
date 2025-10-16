@@ -102,7 +102,7 @@ struct AddVehicleMultiStepView: View {
             VStack(spacing: 32) {
                 VStack(spacing: 16) {
                     // Header with progress indicator
-                    HStack(spacing: 0) {
+                    HStack(spacing: 1) {
                         ForEach(0..<totalSteps, id: \.self) { step in
                             ZStack {
                                 Circle()

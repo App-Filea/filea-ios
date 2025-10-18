@@ -8,6 +8,23 @@
 import SwiftUI
 import ComposableArchitecture
 
+private struct IsSelectedKey: EnvironmentKey {
+    static let defaultValue: Bool = false
+}
+
+extension EnvironmentValues {
+    var isSelected: Bool {
+        get { self[IsSelectedKey.self] }
+        set { self[IsSelectedKey.self] = newValue }
+    }
+}
+
+extension View {
+    func selected(_ isSelected: Bool) -> some View {
+        environment(\.isSelected, isSelected)
+    }
+}
+
 struct AddVehicleStepView: View {
     let step: AddVehicleStep
     @Bindable var store: StoreOf<AddVehicleStore>
@@ -75,36 +92,65 @@ struct AddVehicleStepView: View {
             // Sélection du type de véhicule
             ForEach(VehicleType.allCases) { type in
                 Button(action: {
-                    store.vehicleType = type
-                }) {
-                    HStack(spacing: Spacing.md) {
-                        if let iconName = type.iconName {
-                            Image(systemName: iconName)
-                                .font(Typography.title2)
-                                .foregroundStyle(store.vehicleType == type ? ColorTokens.onActionPrimary : ColorTokens.textPrimary)
-                                .scaleEffect(x: type.shouldFlipIcon ? -1 : 1, y: 1)
-                        }
-
-                        Text(type.displayName)
-                            .bodyDefaultSemibold()
-                            .foregroundStyle(store.vehicleType == type ? ColorTokens.onActionPrimary : ColorTokens.textPrimary)
-
-                        Spacer()
-
-                        if store.vehicleType == type {
-                            Image(systemName: "checkmark.circle.fill")
-                                .foregroundStyle(ColorTokens.onActionPrimary)
-                        }
+                    if store.vehicleType == type {
+                        store.vehicleType = nil
+                    } else {
+                        store.vehicleType = type
                     }
-                    .padding(.horizontal, Spacing.lg)
-                    .padding(.vertical, Spacing.lg)
+                }) {
+                    HStack {
+                        Text(type.displayName)
+                            .font(Typography.button)
+                            .foregroundStyle(store.vehicleType == type ? ColorTokens.onActionPrimary : ColorTokens.textPrimary)
+                        Spacer()
+                        Circle()
+                            .frame(width: 18, height: 18)
+                            .foregroundStyle(.clear) // cercle de base transparent
+                            .background(
+                                Circle()
+                                    .stroke(ColorTokens.border.opacity(0.5), lineWidth: 1) // bordure toujours visible
+                            )
+                            .overlay(
+                                Group {
+                                    if store.vehicleType == type {
+                                        Image(systemName: "checkmark.circle")
+                                            .resizable()
+                                            .scaledToFit()
+                                            .foregroundStyle(ColorTokens.onActionPrimary)
+                                    }
+                                }
+                            )
+                    }
+                    .padding(Spacing.md)
                     .background(
-                        RoundedRectangle(cornerRadius: Radius.md)
-                            .fill(store.vehicleType == type ? ColorTokens.actionPrimary : ColorTokens.surfaceSecondary)
-                            .stroke(store.vehicleType == type ? ColorTokens.actionPrimary : ColorTokens.border, lineWidth: 2)
+                        ZStack {
+                            if store.vehicleType == type {
+                                // Gradient background pour l'état sélectionné
+                                RoundedRectangle(cornerRadius: Radius.md)
+                                    .fill(
+                                        LinearGradient(
+                                            gradient: Gradient(colors: [
+                                                ColorTokens.actionPrimary.opacity(0.8),
+                                                ColorTokens.actionPrimary
+                                            ]),
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        )
+                                    )
+                                    .shadow(color: ColorTokens.shadow, radius: Spacing.xs, x: 0, y: 4)
+                            } else {
+                                // Background non sélectionné avec effet glass
+                                RoundedRectangle(cornerRadius: Radius.md)
+                                    .fill(ColorTokens.surfaceSecondary)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: Radius.md)
+                                            .stroke(ColorTokens.border.opacity(0.5), lineWidth: 1)
+                                    )
+                            }
+                        }
                     )
+                    .cornerRadius(8)
                 }
-                .buttonStyle(.plain)
             }
 
             // Séparateur
@@ -186,7 +232,7 @@ struct AddVehicleStepView: View {
                                                 endPoint: .bottomTrailing
                                             )
                                         )
-                                        .shadow(color: ColorTokens.shadow, radius: Spacing.xs, x: 0, y: 4)
+                                        .shadow(color: ColorTokens.actionPrimary.opacity(0.5), radius: Spacing.xs, x: 0, y: 4)
                                 } else {
                                     // Background non sélectionné avec effet glass
                                     RoundedRectangle(cornerRadius: Radius.md)
@@ -459,6 +505,8 @@ struct AddVehicleStepView: View {
             AddVehicleStore()
         }
     )
+    .padding(.vertical)
+    .background(ColorTokens.background)
 }
 
 #Preview("Brand and Model Step") {

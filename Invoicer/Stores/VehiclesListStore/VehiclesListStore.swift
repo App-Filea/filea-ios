@@ -20,7 +20,6 @@ struct VehiclesListStore {
     }
 
     enum Action: Equatable {
-        case loadVehicles
         case vehiclesLoaded([Vehicle])
         case showAddVehicle
         case selectVehicle(Vehicle)
@@ -32,18 +31,6 @@ struct VehiclesListStore {
     var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
-            case .loadVehicles:
-                state.isLoading = true
-                return .run { send in
-                    do {
-                        let loadedVehicles = try await vehicleRepository.loadAll()
-                        await send(.vehiclesLoaded(loadedVehicles))
-                    } catch {
-                        print("❌ [VehiclesListStore] Erreur lors du chargement: \(error.localizedDescription)")
-                        await send(.vehiclesLoaded([]))
-                    }
-                }
-
             case .vehiclesLoaded(let vehicles):
                 state.isLoading = false
                 state.$vehicles.withLock { $0 = vehicles }

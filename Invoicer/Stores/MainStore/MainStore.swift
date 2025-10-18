@@ -34,7 +34,6 @@ struct MainStore {
         case vehicleDetail(PresentationAction<VehicleDetailsStore.Action>)
         case vehiclesList(PresentationAction<VehiclesListModalStore.Action>)
         case addDocument(PresentationAction<AddDocumentStore.Action>)
-        case loadVehicles
         case vehiclesLoaded([Vehicle])
         case showAddVehicle
         case showVehicleDetail(Vehicle)
@@ -61,17 +60,6 @@ struct MainStore {
     var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
-            case .loadVehicles:
-                return .run { send in
-                    do {
-                        let loadedVehicles = try await vehicleRepository.loadAll()
-                        await send(.vehiclesLoaded(loadedVehicles))
-                    } catch {
-                        // Handle error - for now just send empty array
-                        await send(.vehiclesLoaded([]))
-                    }
-                }
-                
             case .vehiclesLoaded(let vehicles):
                 state.$vehicles.withLock { $0 = vehicles }
                 // Recalculer le coût total après le chargement des véhicules

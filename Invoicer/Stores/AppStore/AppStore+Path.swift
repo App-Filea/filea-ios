@@ -11,6 +11,10 @@ extension AppStore {
 
     func switchAccordingActions(_ stackAction: StackAction<Path.State, Path.Action>, state: inout AppStore.State) -> Effect<AppStore.Action> {
         switch stackAction {
+        // Handle storage configuration completion
+        case .element(id: _, action: .storageOnboarding(.folderSaved)):
+            return .send(.storageConfigured)
+
         // Navigation from VehiclesListView
         case .element(id: _, action: .vehiclesList(.selectVehicle)):
             state.path.append(.main(MainStore.State()))

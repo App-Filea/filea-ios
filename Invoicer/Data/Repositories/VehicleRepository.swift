@@ -38,19 +38,21 @@ private enum VehicleRepositoryKey: DependencyKey {
 final class VehicleRepository: VehicleRepositoryProtocol, @unchecked Sendable {
     private let logger = Logger(subsystem: AppConstants.bundleIdentifier, category: "VehicleRepository")
     private let fileManager = FileManager.default
+    @Dependency(\.storageManager) var storageManager
 
     // MARK: - Paths
 
-    private var documentsDirectory: URL {
-        fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
-    }
-
     private var vehiclesDirectory: URL {
-        documentsDirectory.appendingPathComponent(AppConstants.vehiclesDirectoryName)
+        get async throws {
+            try await storageManager.getVehiclesDirectory()
+        }
     }
 
     private var vehiclesFileURL: URL {
-        vehiclesDirectory.appendingPathComponent(AppConstants.vehiclesFileName)
+        get async throws {
+            let vehiclesDir = try await vehiclesDirectory
+            return vehiclesDir.appendingPathComponent(AppConstants.vehiclesFileName)
+        }
     }
 
     // MARK: - Initialization
@@ -65,23 +67,25 @@ final class VehicleRepository: VehicleRepositoryProtocol, @unchecked Sendable {
         logger.info("🚀 Initialisation du storage des véhicules...")
 
         do {
-            try fileManager.createDirectoryIfNeeded(at: vehiclesDirectory)
-            try createVehiclesFileIfNeeded()
+            let vehiclesDir = try await vehiclesDirectory
+            try fileManager.createDirectoryIfNeeded(at: vehiclesDir)
+            try await createVehiclesFileIfNeeded()
             logger.info("✅ Storage véhicules initialisé")
         } catch {
             logger.error("❌ Erreur initialisation storage: \(error.localizedDescription)")
         }
     }
 
-    private func createVehiclesFileIfNeeded() throws {
-        guard !fileManager.fileExists(at: vehiclesFileURL) else {
+    private func createVehiclesFileIfNeeded() async throws {
+        let vehiclesFile = try await vehiclesFileURL
+        guard !fileManager.fileExists(at: vehiclesFile) else {
             logger.info("📄 Le fichier vehicles.json existe déjà")
             return
         }
 
         let emptyVehiclesList: [Vehicle] = []
         let jsonData = try JSONEncoder().encode(emptyVehiclesList)
-        try jsonData.write(to: vehiclesFileURL)
+        try jsonData.write(to: vehiclesFile)
         logger.info("📄 Fichier vehicles.json créé avec succès")
     }
 
@@ -90,12 +94,13 @@ final class VehicleRepository: VehicleRepositoryProtocol, @unchecked Sendable {
     func loadAll() async throws -> [Vehicle] {
         logger.info("📖 Chargement de tous les véhicules...")
 
-        guard fileManager.fileExists(at: vehiclesFileURL) else {
+        let vehiclesFile = try await vehiclesFileURL
+        guard fileManager.fileExists(at: vehiclesFile) else {
             logger.warning("⚠️ Le fichier vehicles.json n'existe pas encore")
             return []
         }
 
-        let jsonData = try Data(contentsOf: vehiclesFileURL)
+        let jsonData = try Data(contentsOf: vehiclesFile)
         var vehicles = try JSONDecoder().decode([Vehicle].self, from: jsonData)
         logger.info("✅ \(vehicles.count) véhicule(s) chargé(s)")
 
@@ -116,7 +121,7 @@ final class VehicleRepository: VehicleRepositoryProtocol, @unchecked Sendable {
         logger.info("💾 Sauvegarde du véhicule: \(vehicle.brand) \(vehicle.model)")
 
         // Create vehicle directory
-        try createVehicleDirectory(for: vehicle)
+        try await createVehicleDirectory(for: vehicle)
 
         var vehicles = try await loadAll()
         vehicles.append(vehicle)
@@ -138,7 +143,7 @@ final class VehicleRepository: VehicleRepositoryProtocol, @unchecked Sendable {
 
         // Handle directory rename if brand or model changed
         if oldVehicle.brand != vehicle.brand || oldVehicle.model != vehicle.model {
-            try renameVehicleDirectory(from: oldVehicle, to: vehicle)
+            try await renameVehicleDirectory(from: oldVehicle, to: vehicle)
         }
 
         vehicles[index] = vehicle
@@ -158,7 +163,7 @@ final class VehicleRepository: VehicleRepositoryProtocol, @unchecked Sendable {
         let vehicle = vehicles[index]
 
         // Delete vehicle directory
-        let vehicleDirectoryURL = vehicleDirectory(for: vehicle)
+        let vehicleDirectoryURL = try await vehicleDirectory(for: vehicle)
         try fileManager.safelyDelete(at: vehicleDirectoryURL)
         logger.info("🗂️ Dossier du véhicule supprimé")
 
@@ -176,7 +181,8 @@ final class VehicleRepository: VehicleRepositoryProtocol, @unchecked Sendable {
 
     private func saveAll(_ vehicles: [Vehicle]) async throws {
         let jsonData = try JSONEncoder().encode(vehicles)
-        try jsonData.write(to: vehiclesFileURL)
+        let vehiclesFile = try await vehiclesFileURL
+        try jsonData.write(to: vehiclesFile)
         logger.info("💾 Liste des véhicules sauvegardée (\(vehicles.count) véhicules)")
     }
 
@@ -203,19 +209,19 @@ final class VehicleRepository: VehicleRepositoryProtocol, @unchecked Sendable {
         return cleanedVehicles
     }
 
-    private func createVehicleDirectory(for vehicle: Vehicle) throws {
-        let directoryURL = vehicleDirectory(for: vehicle)
+    private func createVehicleDirectory(for vehicle: Vehicle) async throws {
+        let directoryURL = try await vehicleDirectory(for: vehicle)
         try fileManager.createDirectoryIfNeeded(at: directoryURL)
         logger.info("📁 Dossier véhicule créé: \(directoryURL.lastPathComponent)")
     }
 
-    private func renameVehicleDirectory(from oldVehicle: Vehicle, to newVehicle: Vehicle) throws {
-        let oldDirectoryURL = vehicleDirectory(for: oldVehicle)
-        let newDirectoryURL = vehicleDirectory(for: newVehicle)
+    private func renameVehicleDirectory(from oldVehicle: Vehicle, to newVehicle: Vehicle) async throws {
+        let oldDirectoryURL = try await vehicleDirectory(for: oldVehicle)
+        let newDirectoryURL = try await vehicleDirectory(for: newVehicle)
 
         guard fileManager.fileExists(at: oldDirectoryURL) else {
             logger.warning("⚠️ Ancien dossier introuvable, création du nouveau")
-            try createVehicleDirectory(for: newVehicle)
+            try await createVehicleDirectory(for: newVehicle)
             return
         }
 
@@ -223,8 +229,9 @@ final class VehicleRepository: VehicleRepositoryProtocol, @unchecked Sendable {
         logger.info("📁 Dossier renommé: \(oldDirectoryURL.lastPathComponent) → \(newDirectoryURL.lastPathComponent)")
     }
 
-    private func vehicleDirectory(for vehicle: Vehicle) -> URL {
-        vehiclesDirectory.appendingPathComponent("\(vehicle.brand)\(vehicle.model)")
+    private func vehicleDirectory(for vehicle: Vehicle) async throws -> URL {
+        let vehiclesDir = try await vehiclesDirectory
+        return vehiclesDir.appendingPathComponent("\(vehicle.brand)\(vehicle.model)")
     }
 }
 

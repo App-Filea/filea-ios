@@ -101,6 +101,9 @@ enum AppConstants {
 
         /// Key for storing filter preferences
         static let filterPreferences = "filterPreferences"
+
+        /// Key for storing the security-scoped bookmark data
+        static let storageBookmark = "storageBookmark"
     }
 
     // MARK: - Notification Names

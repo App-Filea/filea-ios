@@ -18,10 +18,14 @@ struct AppStore {
         @Shared(.lastOpenedVehicleId) var lastOpenedVehicleId: UUID?
         var path = StackState<Path.State>()
         var isStorageInitialized = false
+        var isStorageConfigured = false
     }
 
     enum Action: Equatable {
         case initiate
+        case checkStorage
+        case storageStateChecked(VehicleStorageManager.StorageState)
+        case storageConfigured
         case initiateCompleted
         case path(StackActionOf<Path>)
         case initializeStorage
@@ -33,11 +37,43 @@ struct AppStore {
     }
 
     @Dependency(\.vehicleRepository) var vehicleRepository
+    @Dependency(\.storageManager) var storageManager
 
     var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
             case .initiate:
+                // First, check if storage is configured
+                return .send(.checkStorage)
+
+            case .checkStorage:
+                return .run { send in
+                    let storageState = await storageManager.restorePersistentFolder()
+                    await send(.storageStateChecked(storageState))
+                }
+
+            case .storageStateChecked(let storageState):
+                switch storageState {
+                case .notConfigured, .invalidAccess:
+                    // Storage not configured or invalid, show onboarding
+                    state.isStorageConfigured = false
+                    state.path.removeAll()
+                    state.path.append(.storageOnboarding(StorageOnboardingStore.State()))
+                    return .none
+
+                case .configured:
+                    // Storage is configured, proceed with normal initialization
+                    state.isStorageConfigured = true
+                    return .send(.initializeStorage)
+                }
+
+            case .storageConfigured:
+                // Called when storage is successfully configured from onboarding
+                state.isStorageConfigured = true
+                return .send(.initializeStorage)
+
+            case .initializeStorage:
+                // Now load vehicles from storage
                 return .run { send in
                     do {
                         let vehicles = try await vehicleRepository.loadAll()
@@ -47,6 +83,10 @@ struct AppStore {
                         await send(.vehiclesLoaded([]))
                     }
                 }
+
+            case .storageInitialized:
+                state.isStorageInitialized = true
+                return .none
 
             case .vehiclesLoaded(let vehicles):
                 state.$vehicles.withLock { $0 = vehicles }
@@ -93,13 +133,6 @@ struct AppStore {
                 return .none
 
             case .path(let action): return switchAccordingActions(action, state: &state)
-            case .initializeStorage:
-                // L'initialisation du storage se fait automatiquement dans vehicleRepository.loadAll()
-                return .send(.storageInitialized)
-
-            case .storageInitialized:
-                state.isStorageInitialized = true
-                return .none
 
             case .reselectVehicleIfNeeded:
                 // Si le véhicule sélectionné n'existe plus ou est nil
@@ -150,6 +183,7 @@ struct AppStore {
     struct Path {
         @ObservableState
         enum State: Equatable {
+            case storageOnboarding(StorageOnboardingStore.State)
             case vehiclesList(VehiclesListStore.State)
             case main(MainStore.State)
             case vehicleDetails(VehicleDetailsStore.State)
@@ -157,9 +191,11 @@ struct AppStore {
             case editVehicle(EditVehicleStore.State)
             case documentDetail(DocumentDetailCoordinatorStore.State)
             case editDocument(EditDocumentStore.State)
+            case settings(SettingsStore.State)
         }
 
         enum Action: Equatable {
+            case storageOnboarding(StorageOnboardingStore.Action)
             case vehiclesList(VehiclesListStore.Action)
             case main(MainStore.Action)
             case vehicleDetails(VehicleDetailsStore.Action)
@@ -167,8 +203,10 @@ struct AppStore {
             case editVehicle(EditVehicleStore.Action)
             case documentDetail(DocumentDetailCoordinatorStore.Action)
             case editDocument(EditDocumentStore.Action)
+            case settings(SettingsStore.Action)
         }
         var body: some ReducerOf<Self> {
+            Scope(state: \.storageOnboarding, action: \.storageOnboarding) { StorageOnboardingStore() }
             Scope(state: \.vehiclesList, action: \.vehiclesList) { VehiclesListStore() }
             Scope(state: \.main, action: \.main) { MainStore() }
             Scope(state: \.vehicleDetails, action: \.vehicleDetails) { VehicleDetailsStore() }
@@ -176,6 +214,7 @@ struct AppStore {
             Scope(state: \.editVehicle, action: \.editVehicle) { EditVehicleStore() }
             Scope(state: \.documentDetail, action: \.documentDetail) { DocumentDetailCoordinatorStore() }
             Scope(state: \.editDocument, action: \.editDocument) { EditDocumentStore() }
+            Scope(state: \.settings, action: \.settings) { SettingsStore() }
         }
     }
 }

@@ -51,15 +51,14 @@ final class DocumentRepository: DocumentRepositoryProtocol, @unchecked Sendable 
     private let fileManager = FileManager.default
 
     @Dependency(\.vehicleRepository) var vehicleRepository
+    @Dependency(\.storageManager) var storageManager
 
     // MARK: - Paths
 
-    private var documentsDirectory: URL {
-        fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
-    }
-
     private var vehiclesDirectory: URL {
-        documentsDirectory.appendingPathComponent(AppConstants.vehiclesDirectoryName)
+        get async throws {
+            try await storageManager.getVehiclesDirectory()
+        }
     }
 
     // MARK: - Public Methods
@@ -73,7 +72,7 @@ final class DocumentRepository: DocumentRepositoryProtocol, @unchecked Sendable 
 
         // Generate unique filename
         let filename = generateFilename(extension: "jpg")
-        let vehicleDirectoryURL = vehicleDirectory(for: vehicle)
+        let vehicleDirectoryURL = try await vehicleDirectory(for: vehicle)
         let imageFileURL = vehicleDirectoryURL.appendingPathComponent(filename)
 
         // Save image to disk
@@ -114,7 +113,7 @@ final class DocumentRepository: DocumentRepositoryProtocol, @unchecked Sendable 
         // Generate unique filename with original extension
         let fileExtension = fileURL.pathExtension
         let filename = generateFilename(extension: fileExtension)
-        let vehicleDirectoryURL = vehicleDirectory(for: vehicle)
+        let vehicleDirectoryURL = try await vehicleDirectory(for: vehicle)
         let destinationFileURL = vehicleDirectoryURL.appendingPathComponent(filename)
 
         // Copy file with security-scoped access
@@ -205,7 +204,7 @@ final class DocumentRepository: DocumentRepositoryProtocol, @unchecked Sendable 
 
         // Generate new unique filename
         let filename = generateFilename(extension: "jpg")
-        let vehicleDirectoryURL = vehicleDirectory(for: vehicle)
+        let vehicleDirectoryURL = try await vehicleDirectory(for: vehicle)
         let newFileURL = vehicleDirectoryURL.appendingPathComponent(filename)
 
         // Ensure filenames are different
@@ -234,8 +233,9 @@ final class DocumentRepository: DocumentRepositoryProtocol, @unchecked Sendable 
 
     // MARK: - Private Helpers
 
-    private func vehicleDirectory(for vehicle: Vehicle) -> URL {
-        vehiclesDirectory.appendingPathComponent("\(vehicle.brand)\(vehicle.model)")
+    private func vehicleDirectory(for vehicle: Vehicle) async throws -> URL {
+        let vehiclesDir = try await vehiclesDirectory
+        return vehiclesDir.appendingPathComponent("\(vehicle.brand)\(vehicle.model)")
     }
 
     private func generateFilename(extension fileExtension: String) -> String {

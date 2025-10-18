@@ -61,6 +61,58 @@ extension FileManager {
         }
     }
 
+    /// Creates a directory using NSFileCoordinator for File Provider compatibility
+    /// Use this method when working with iCloud Drive, Google Drive, or other File Providers
+    /// - Parameters:
+    ///   - url: The URL where the directory should be created
+    ///   - createIntermediates: Whether to create intermediate directories
+    /// - Throws: An error if directory creation fails
+    func createDirectoryCoordinated(
+        at url: URL,
+        withIntermediateDirectories createIntermediates: Bool = true
+    ) throws {
+        var isDirectory: ObjCBool = false
+        let exists = fileExists(atPath: url.path, isDirectory: &isDirectory)
+
+        if exists && isDirectory.boolValue {
+            // Directory already exists
+            return
+        }
+
+        if exists && !isDirectory.boolValue {
+            throw FileManagerError.notADirectory(url)
+        }
+
+        // Use NSFileCoordinator for File Provider compatibility
+        let coordinator = NSFileCoordinator(filePresenter: nil)
+        var coordinationError: NSError?
+        var creationError: Error?
+
+        coordinator.coordinate(
+            writingItemAt: url,
+            options: .forDeleting, // This tells the system we want write access
+            error: &coordinationError
+        ) { coordinatedURL in
+            do {
+                try createDirectory(
+                    at: coordinatedURL,
+                    withIntermediateDirectories: createIntermediates,
+                    attributes: nil
+                )
+            } catch {
+                creationError = error
+            }
+        }
+
+        if let error = coordinationError {
+            throw error
+        }
+
+        if let error = creationError {
+            throw error
+        }
+    }
+
     /// Safely deletes a file or directory at the given URL
     /// - Parameter url: The URL of the file or directory to delete
     /// - Throws: An error if deletion fails

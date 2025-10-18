@@ -1,16 +1,16 @@
 //
-//  DocumentPickerView.swift
+//  FolderPickerView.swift
 //  Invoicer
 //
 //  Created by Claude on 2025-01-18.
-//  SwiftUI wrapper for UIDocumentPickerViewController
+//  SwiftUI wrapper for UIDocumentPickerViewController for folder selection
 //
 
 import SwiftUI
 import UniformTypeIdentifiers
 
 /// A SwiftUI view that presents UIDocumentPickerViewController for directory selection
-struct DocumentPickerView: UIViewControllerRepresentable {
+struct FolderPickerView: UIViewControllerRepresentable {
 
     /// Binding to control whether the picker is presented
     @Binding var isPresented: Bool
@@ -91,11 +91,11 @@ struct DocumentPickerView: UIViewControllerRepresentable {
 // MARK: - Preview
 
 #if DEBUG
-struct DocumentPickerView_Previews: PreviewProvider {
+struct FolderPickerView_Previews: PreviewProvider {
     static var previews: some View {
-        Text("Document Picker Preview")
+        Text("Folder Picker Preview")
             .sheet(isPresented: .constant(true)) {
-                DocumentPickerView(
+                FolderPickerView(
                     isPresented: .constant(true),
                     onFolderSelected: { url in
                         print("Selected folder: \(url)")

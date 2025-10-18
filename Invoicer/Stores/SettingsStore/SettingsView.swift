@@ -55,7 +55,7 @@ struct SettingsView: View {
             } header: {
                 Label("Stockage", systemImage: "externaldrive")
             } footer: {
-                Text("Tous vos véhicules et documents sont stockés dans ce dossier. Changer d'emplacement effacera les données actuelles.")
+                Text("💡 Vos données sont stockées dans ce dossier. Vous pouvez le changer, mais vous devrez re-sélectionner le même dossier ou un nouveau pour accéder à vos données.")
             }
 
             // App Info Section
@@ -84,16 +84,19 @@ struct SettingsView: View {
         }
         .alert(
             "Changer d'emplacement de stockage",
-            isPresented: $store.showChangeStorageConfirmation
+            isPresented: Binding(
+                get: { store.showChangeStorageConfirmation },
+                set: { if !$0 { store.send(.cancelChangeStorage) } }
+            )
         ) {
             Button("Annuler", role: .cancel) {
                 store.send(.cancelChangeStorage)
             }
-            Button("Continuer", role: .destructive) {
+            Button("Continuer") {
                 store.send(.confirmChangeStorage)
             }
         } message: {
-            Text("Attention : Changer d'emplacement de stockage effacera toutes vos données actuelles. Cette action est irréversible.")
+            Text("Vous allez changer de dossier de stockage.\n\n✅ Vos données actuelles restent dans l'ancien dossier.\n\n💡 Pour les retrouver, sélectionnez le même dossier. Pour un nouveau départ, choisissez un nouveau dossier.")
         }
         .alert(
             "Erreur",
@@ -110,9 +113,15 @@ struct SettingsView: View {
                 Text(errorMessage)
             }
         }
-        .sheet(isPresented: $store.isSelectingNewFolder) {
-            DocumentPickerView(
-                isPresented: $store.isSelectingNewFolder,
+        .sheet(isPresented: Binding(
+            get: { store.isSelectingNewFolder },
+            set: { if !$0 { store.send(.folderSelectionCancelled) } }
+        )) {
+            FolderPickerView(
+                isPresented: Binding(
+                    get: { store.isSelectingNewFolder },
+                    set: { if !$0 { store.send(.folderSelectionCancelled) } }
+                ),
                 onFolderSelected: { url in
                     store.send(.folderSelected(url))
                 },

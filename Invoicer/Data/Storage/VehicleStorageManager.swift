@@ -29,7 +29,7 @@ actor VehicleStorageManager {
     // MARK: - Storage State
 
     /// Represents the current state of storage configuration
-    enum StorageState {
+    enum StorageState: Equatable {
         case notConfigured
         case configured(URL)
         case invalidAccess
@@ -55,15 +55,11 @@ actor VehicleStorageManager {
             throw StorageError.securityScopedResourceAccessFailed
         }
 
-        defer {
-            url.stopAccessingSecurityScopedResource()
-            logger.debug("✅ Stopped accessing security-scoped resource")
-        }
-
         // Create the security-scoped bookmark
+        // Note: On iOS, bookmarks from UIDocumentPicker are automatically security-scoped
         do {
             let bookmarkData = try url.bookmarkData(
-                options: .withSecurityScope,
+                options: [],
                 includingResourceValuesForKeys: nil,
                 relativeTo: nil
             )
@@ -74,9 +70,20 @@ actor VehicleStorageManager {
 
             logger.info("✅ Security-scoped bookmark created and saved")
 
-            // Set the root URL
+            // Set the root URL and mark that we're accessing the resource
             self.rootURL = url
+            self.isAccessingSecurityScopedResource = true
+
+            logger.info("🔓 Security-scoped resource access is now active")
+
+            // Create the Vehicles directory immediately while security-scoped access is active
+            // Use NSFileCoordinator for File Provider compatibility (iCloud, Google Drive, etc.)
+            let vehiclesURL = url.appendingPathComponent(AppConstants.vehiclesDirectoryName)
+            try fileManager.createDirectoryCoordinated(at: vehiclesURL)
+            logger.info("📁 Vehicles directory created successfully")
         } catch {
+            // If bookmark creation failed, stop accessing the resource
+            url.stopAccessingSecurityScopedResource()
             logger.error("❌ Failed to create bookmark: \(error.localizedDescription)")
             throw StorageError.bookmarkCreationFailed
         }
@@ -94,11 +101,12 @@ actor VehicleStorageManager {
         }
 
         // Resolve the bookmark to get the URL
+        // Note: On iOS, use empty options to resolve security-scoped bookmarks
         do {
             var isStale = false
             let url = try URL(
                 resolvingBookmarkData: bookmarkData,
-                options: .withSecurityScope,
+                options: [],
                 relativeTo: nil,
                 bookmarkDataIsStale: &isStale
             )
@@ -134,6 +142,17 @@ actor VehicleStorageManager {
             self.isAccessingSecurityScopedResource = true
             logger.info("✅ Persistent folder restored: \(url.path)")
 
+            // Ensure the Vehicles directory exists
+            // Use NSFileCoordinator for File Provider compatibility
+            let vehiclesURL = url.appendingPathComponent(AppConstants.vehiclesDirectoryName)
+            do {
+                try fileManager.createDirectoryCoordinated(at: vehiclesURL)
+                logger.info("📁 Vehicles directory verified/created")
+            } catch {
+                logger.error("❌ Failed to create vehicles directory during restore: \(error.localizedDescription)")
+                // Continue anyway - it will be retried later if needed
+            }
+
             return .configured(url)
         } catch {
             logger.error("❌ Failed to resolve bookmark: \(error.localizedDescription)")
@@ -162,7 +181,7 @@ actor VehicleStorageManager {
             .appendingPathComponent(name)
 
         do {
-            try fileManager.createDirectoryIfNeeded(at: folderURL)
+            try fileManager.createDirectoryCoordinated(at: folderURL)
             logger.info("📁 Vehicle folder created: \(name)")
             return folderURL
         } catch {
@@ -189,7 +208,7 @@ actor VehicleStorageManager {
             .appendingPathComponent(vehicleName)
 
         // Ensure the vehicle folder exists
-        try fileManager.createDirectoryIfNeeded(at: vehicleFolderURL)
+        try fileManager.createDirectoryCoordinated(at: vehicleFolderURL)
 
         let fileURL = vehicleFolderURL.appendingPathComponent(filename)
 
@@ -224,24 +243,17 @@ actor VehicleStorageManager {
         logger.info("✅ Storage configuration reset")
     }
 
-    /// Returns the vehicles directory URL (creates it if necessary)
+    /// Returns the vehicles directory URL
+    /// Note: The directory is created when storage is first configured or restored
     /// - Returns: The vehicles directory URL
-    /// - Throws: StorageError if not configured or folder cannot be created
+    /// - Throws: StorageError if not configured
     func getVehiclesDirectory() async throws -> URL {
         guard let rootURL = rootURL else {
             logger.error("❌ Cannot get vehicles directory - storage not configured")
             throw StorageError.notConfigured
         }
 
-        let vehiclesURL = rootURL.appendingPathComponent(AppConstants.vehiclesDirectoryName)
-
-        do {
-            try fileManager.createDirectoryIfNeeded(at: vehiclesURL)
-            return vehiclesURL
-        } catch {
-            logger.error("❌ Failed to create vehicles directory: \(error.localizedDescription)")
-            throw StorageError.folderCreationFailed(AppConstants.vehiclesDirectoryName)
-        }
+        return rootURL.appendingPathComponent(AppConstants.vehiclesDirectoryName)
     }
 
     // MARK: - Cleanup

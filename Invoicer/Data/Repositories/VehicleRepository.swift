@@ -58,22 +58,14 @@ final class VehicleRepository: VehicleRepositoryProtocol, @unchecked Sendable {
     // MARK: - Initialization
 
     init() {
-        Task {
-            await initializeStorage()
-        }
+        // Don't initialize storage here - it will be initialized when first accessed
+        logger.info("📦 VehicleRepository créé (lazy initialization)")
     }
 
-    private func initializeStorage() async {
-        logger.info("🚀 Initialisation du storage des véhicules...")
-
-        do {
-            let vehiclesDir = try await vehiclesDirectory
-            try fileManager.createDirectoryIfNeeded(at: vehiclesDir)
-            try await createVehiclesFileIfNeeded()
-            logger.info("✅ Storage véhicules initialisé")
-        } catch {
-            logger.error("❌ Erreur initialisation storage: \(error.localizedDescription)")
-        }
+    /// Ensures the storage is initialized before any operation
+    /// Note: The Vehicles directory is created by VehicleStorageManager, we only need to create the JSON file
+    private func ensureStorageInitialized() async throws {
+        try await createVehiclesFileIfNeeded()
     }
 
     private func createVehiclesFileIfNeeded() async throws {
@@ -93,6 +85,8 @@ final class VehicleRepository: VehicleRepositoryProtocol, @unchecked Sendable {
 
     func loadAll() async throws -> [Vehicle] {
         logger.info("📖 Chargement de tous les véhicules...")
+
+        try await ensureStorageInitialized()
 
         let vehiclesFile = try await vehiclesFileURL
         guard fileManager.fileExists(at: vehiclesFile) else {
@@ -120,6 +114,8 @@ final class VehicleRepository: VehicleRepositoryProtocol, @unchecked Sendable {
     func save(_ vehicle: Vehicle) async throws {
         logger.info("💾 Sauvegarde du véhicule: \(vehicle.brand) \(vehicle.model)")
 
+        try await ensureStorageInitialized()
+
         // Create vehicle directory
         try await createVehicleDirectory(for: vehicle)
 
@@ -132,6 +128,8 @@ final class VehicleRepository: VehicleRepositoryProtocol, @unchecked Sendable {
 
     func update(_ vehicle: Vehicle) async throws {
         logger.info("✏️ Mise à jour du véhicule: \(vehicle.id)")
+
+        try await ensureStorageInitialized()
 
         var vehicles = try await loadAll()
 
@@ -153,6 +151,8 @@ final class VehicleRepository: VehicleRepositoryProtocol, @unchecked Sendable {
 
     func delete(_ vehicleId: UUID) async throws {
         logger.info("🗑️ Suppression du véhicule: \(vehicleId)")
+
+        try await ensureStorageInitialized()
 
         var vehicles = try await loadAll()
 
@@ -211,7 +211,7 @@ final class VehicleRepository: VehicleRepositoryProtocol, @unchecked Sendable {
 
     private func createVehicleDirectory(for vehicle: Vehicle) async throws {
         let directoryURL = try await vehicleDirectory(for: vehicle)
-        try fileManager.createDirectoryIfNeeded(at: directoryURL)
+        try fileManager.createDirectoryCoordinated(at: directoryURL)
         logger.info("📁 Dossier véhicule créé: \(directoryURL.lastPathComponent)")
     }
 

@@ -62,7 +62,9 @@ struct StorageOnboardingStore {
                         try await storageManager.saveStorageFolder(url)
                         await send(.folderSaved)
                     } catch {
-                        await send(.saveFailed(error.localizedDescription))
+                        // Provide user-friendly error messages
+                        let friendlyMessage = Self.getFriendlyErrorMessage(from: error, url: url)
+                        await send(.saveFailed(friendlyMessage))
                     }
                 }
 
@@ -86,5 +88,35 @@ struct StorageOnboardingStore {
                 return .none
             }
         }
+    }
+
+    // MARK: - Helper Methods
+
+    /// Converts technical errors into user-friendly messages with helpful guidance
+    private static func getFriendlyErrorMessage(from error: Error, url: URL) -> String {
+        let errorDescription = error.localizedDescription.lowercased()
+        let urlPath = url.path.lowercased()
+
+        // Permission denied errors
+        if errorDescription.contains("permission") || errorDescription.contains("denied") {
+            if urlPath.contains("file provider storage") || urlPath.contains("sur mon iphone") {
+                return "❌ Impossible de créer un dossier ici.\n\n💡 Conseil : Choisissez plutôt iCloud Drive ou créez d'abord un sous-dossier dans un emplacement existant."
+            } else {
+                return "❌ Impossible d'accéder à ce dossier.\n\nVérifiez que vous avez les permissions nécessaires."
+            }
+        }
+
+        // Bookmark creation errors
+        if errorDescription.contains("bookmark") {
+            return "❌ Impossible de sauvegarder l'emplacement.\n\n💡 Essayez de choisir un autre dossier ou redémarrez l'application."
+        }
+
+        // Access errors
+        if errorDescription.contains("access") {
+            return "❌ Impossible d'accéder au dossier sélectionné.\n\n💡 Assurez-vous que le dossier existe toujours et qu'il est accessible."
+        }
+
+        // Generic fallback with the original error
+        return "❌ Une erreur s'est produite.\n\n💡 Essayez de sélectionner un autre emplacement (iCloud Drive recommandé).\n\nDétails : \(error.localizedDescription)"
     }
 }

@@ -15,6 +15,7 @@ struct AppStore {
     struct State: Equatable {
         @Shared(.vehicles) var vehicles: [Vehicle] = []
         @Shared(.selectedVehicle) var selectedVehicle: Vehicle?
+        @Shared(.lastOpenedVehicleId) var lastOpenedVehicleId: UUID?
         var path = StackState<Path.State>()
         var isStorageInitialized = false
     }
@@ -31,15 +32,20 @@ struct AppStore {
         case navigateToVehiclesList
     }
 
-    @Dependency(\.fileStorageService) var fileStorageService
+    @Dependency(\.vehicleRepository) var vehicleRepository
 
     var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
             case .initiate:
                 return .run { send in
-                    let vehicles = await fileStorageService.loadVehicles()
-                    await send(.vehiclesLoaded(vehicles))
+                    do {
+                        let vehicles = try await vehicleRepository.loadAll()
+                        await send(.vehiclesLoaded(vehicles))
+                    } catch {
+                        print("❌ [AppStore] Erreur lors du chargement: \(error.localizedDescription)")
+                        await send(.vehiclesLoaded([]))
+                    }
                 }
 
             case .vehiclesLoaded(let vehicles):
@@ -50,34 +56,46 @@ struct AppStore {
                 // Clear the path first to reset navigation
                 state.path.removeAll()
 
-                // Logique de sélection intelligente du véhicule
-                if !state.vehicles.isEmpty {
-                    // 1. Chercher un véhicule principal
-                    if let primaryVehicle = state.vehicles.first(where: { $0.isPrimary }) {
-                        state.$selectedVehicle.withLock { $0 = primaryVehicle }
-                        state.path.append(.main(MainStore.State()))
-                    }
-                    // 2. Si un seul véhicule (même secondaire), le sélectionner
-                    else if state.vehicles.count == 1 {
-                        state.$selectedVehicle.withLock { $0 = state.vehicles.first }
-                        state.path.append(.main(MainStore.State()))
-                    }
-                    // 3. Si plusieurs véhicules mais aucun principal → afficher la liste
-                    else {
-                        state.path.append(.vehiclesList(VehiclesListStore.State()))
-                    }
+                if state.vehicles.isEmpty {
+                    // Aucun véhicule → Navigation vers création de véhicule
+                    state.path.append(.addVehicle(AddVehicleStore.State()))
+                } else if state.vehicles.count == 1 {
+                    // Un seul véhicule → Le sélectionner et naviguer
+                    let vehicle = state.vehicles[0]
+                    state.$selectedVehicle.withLock { $0 = vehicle }
+                    state.$lastOpenedVehicleId.withLock { $0 = vehicle.id }
+                    state.path.append(.main(MainStore.State()))
                 } else {
-                    // Si pas de véhicules → push VehiclesListView
-                    state.path.append(.vehiclesList(VehiclesListStore.State()))
+                    // Plusieurs véhicules → Logique de sélection intelligente
+                    var selectedVehicle: Vehicle?
+
+                    // 1. Chercher le dernier véhicule ouvert
+                    if let lastId = state.lastOpenedVehicleId,
+                       let lastVehicle = state.vehicles.first(where: { $0.id == lastId }) {
+                        selectedVehicle = lastVehicle
+                    }
+                    // 2. Sinon, chercher un véhicule principal
+                    else if let primaryVehicle = state.vehicles.first(where: { $0.isPrimary }) {
+                        selectedVehicle = primaryVehicle
+                    }
+                    // 3. Sinon, prendre le premier véhicule
+                    else {
+                        selectedVehicle = state.vehicles.first
+                    }
+
+                    // Sélectionner le véhicule trouvé et naviguer
+                    if let vehicle = selectedVehicle {
+                        state.$selectedVehicle.withLock { $0 = vehicle }
+                        state.$lastOpenedVehicleId.withLock { $0 = vehicle.id }
+                        state.path.append(.main(MainStore.State()))
+                    }
                 }
                 return .none
 
             case .path(let action): return switchAccordingActions(action, state: &state)
             case .initializeStorage:
-                return .run { send in
-                    await fileStorageService.initializeStorage()
-                    await send(.storageInitialized)
-                }
+                // L'initialisation du storage se fait automatiquement dans vehicleRepository.loadAll()
+                return .send(.storageInitialized)
 
             case .storageInitialized:
                 state.isStorageInitialized = true
@@ -104,9 +122,15 @@ struct AppStore {
             case .vehicleListChanged:
                 // Recharger les véhicules depuis le storage
                 return .run { send in
-                    let loadedVehicles = await fileStorageService.loadVehicles()
-                    await send(.vehiclesLoaded(loadedVehicles))
-                    await send(.navigateToVehiclesList)
+                    do {
+                        let loadedVehicles = try await vehicleRepository.loadAll()
+                        await send(.vehiclesLoaded(loadedVehicles))
+                        await send(.navigateToVehiclesList)
+                    } catch {
+                        print("❌ [AppStore] Erreur lors du rechargement: \(error.localizedDescription)")
+                        await send(.vehiclesLoaded([]))
+                        await send(.navigateToVehiclesList)
+                    }
                 }
 
             case .navigateToVehiclesList:

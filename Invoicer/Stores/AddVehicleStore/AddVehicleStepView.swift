@@ -28,15 +28,15 @@ struct AddVehicleStepView: View {
         VStack(spacing: 0) {
             // Content
             contentForStep
-                .padding(.horizontal, .gutterMD)
+                .padding(.horizontal, Spacing.md)
 
             // Validation error
             if let errorMessage = validationResult.errorMessage, store.showValidationError {
                 Text(errorMessage)
                     .bodyXSmallRegular()
-                    .foregroundStyle(Color.red)
-                    .padding(.horizontal, .gutterMD)
-                    .padding(.bottom, .stackSM)
+                    .foregroundStyle(ColorTokens.error)
+                    .padding(.horizontal, Spacing.md)
+                    .padding(.bottom, Spacing.sm)
             }
         }
         .sheet(isPresented: $showDatePicker) {
@@ -71,37 +71,37 @@ struct AddVehicleStepView: View {
     // MARK: - Step Contents
 
     private var vehicleTypeContent: some View {
-        VStack(spacing: .stackMD) {
+        VStack(spacing: Spacing.md) {
             // Sélection du type de véhicule
             ForEach(VehicleType.allCases) { type in
                 Button(action: {
                     store.vehicleType = type
                 }) {
-                    HStack(spacing: .inlineMD) {
+                    HStack(spacing: Spacing.md) {
                         if let iconName = type.iconName {
                             Image(systemName: iconName)
-                                .font(.title2)
-                                .foregroundStyle(store.vehicleType == type ? Color.white : Color(.label))
+                                .font(Typography.title2)
+                                .foregroundStyle(store.vehicleType == type ? ColorTokens.onActionPrimary : ColorTokens.textPrimary)
                                 .scaleEffect(x: type.shouldFlipIcon ? -1 : 1, y: 1)
                         }
 
                         Text(type.displayName)
                             .bodyDefaultSemibold()
-                            .foregroundStyle(store.vehicleType == type ? Color.white : Color(.label))
+                            .foregroundStyle(store.vehicleType == type ? ColorTokens.onActionPrimary : ColorTokens.textPrimary)
 
                         Spacer()
 
                         if store.vehicleType == type {
                             Image(systemName: "checkmark.circle.fill")
-                                .foregroundStyle(Color.white)
+                                .foregroundStyle(ColorTokens.onActionPrimary)
                         }
                     }
-                    .padding(.horizontal, .insetLG)
-                    .padding(.vertical, .insetLG)
+                    .padding(.horizontal, Spacing.lg)
+                    .padding(.vertical, Spacing.lg)
                     .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(store.vehicleType == type ? Color(.systemPurple) : Color(.secondarySystemBackground))
-                            .stroke(store.vehicleType == type ? Color(.systemPurple) : Color(.separator), lineWidth: 2)
+                        RoundedRectangle(cornerRadius: Radius.md)
+                            .fill(store.vehicleType == type ? ColorTokens.actionPrimary : ColorTokens.surfaceSecondary)
+                            .stroke(store.vehicleType == type ? ColorTokens.actionPrimary : ColorTokens.border, lineWidth: 2)
                     )
                 }
                 .buttonStyle(.plain)
@@ -109,12 +109,12 @@ struct AddVehicleStepView: View {
 
             // Séparateur
             Rectangle()
-                .fill(Color(.separator))
+                .fill(ColorTokens.border)
                 .frame(height: 1)
-                .padding(.vertical, .stackSM)
+                .padding(.vertical, Spacing.sm)
 
             // Sélection Principal/Secondaire
-            HStack(spacing: .inlineMD) {
+            HStack(spacing: Spacing.md) {
                 // Bouton Principal
                 Button(action: {
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
@@ -123,33 +123,33 @@ struct AddVehicleStepView: View {
                 }) {
                     Text("Principal")
                         .bodyDefaultSemibold()
-                        .foregroundStyle(store.isPrimary ? Color.white : Color(.label))
+                        .foregroundStyle(store.isPrimary ? ColorTokens.onActionPrimary : ColorTokens.textPrimary)
                         .frame(maxWidth: .infinity)
-                        .padding(.horizontal, .insetLG)
-                        .padding(.vertical, .insetLG)
+                        .padding(.horizontal, Spacing.lg)
+                        .padding(.vertical, Spacing.lg)
                         .background(
                             ZStack {
                                 if store.isPrimary {
                                     // Gradient background pour l'état sélectionné
-                                    RoundedRectangle(cornerRadius: 16)
+                                    RoundedRectangle(cornerRadius: Radius.md)
                                         .fill(
                                             LinearGradient(
                                                 gradient: Gradient(colors: [
-                                                    Color.purple.opacity(0.9),
-                                                    Color.purple
+                                                    ColorTokens.actionPrimary.opacity(0.9),
+                                                    ColorTokens.actionPrimary
                                                 ]),
                                                 startPoint: .topLeading,
                                                 endPoint: .bottomTrailing
                                             )
                                         )
-                                        .shadow(color: Color.purple.opacity(0.4), radius: 8, x: 0, y: 4)
+                                        .shadow(color: ColorTokens.shadow, radius: Spacing.xs, x: 0, y: 4)
                                 } else {
                                     // Background non sélectionné avec effet glass
-                                    RoundedRectangle(cornerRadius: 16)
-                                        .fill(Color(.secondarySystemBackground))
+                                    RoundedRectangle(cornerRadius: Radius.md)
+                                        .fill(ColorTokens.surfaceSecondary)
                                         .overlay(
-                                            RoundedRectangle(cornerRadius: 16)
-                                                .stroke(Color(.separator).opacity(0.5), lineWidth: 1)
+                                            RoundedRectangle(cornerRadius: Radius.md)
+                                                .stroke(ColorTokens.border.opacity(0.5), lineWidth: 1)
                                         )
                                 }
                             }
@@ -167,33 +167,33 @@ struct AddVehicleStepView: View {
                 }) {
                     Text("Secondaire")
                         .bodyDefaultSemibold()
-                        .foregroundStyle(!store.isPrimary ? Color.white : Color(.label))
+                        .foregroundStyle(!store.isPrimary ? ColorTokens.onActionPrimary : ColorTokens.textPrimary)
                         .frame(maxWidth: .infinity)
-                        .padding(.horizontal, .insetLG)
-                        .padding(.vertical, .insetLG)
+                        .padding(.horizontal, Spacing.lg)
+                        .padding(.vertical, Spacing.lg)
                         .background(
                             ZStack {
                                 if !store.isPrimary {
                                     // Gradient background pour l'état sélectionné
-                                    RoundedRectangle(cornerRadius: 16)
+                                    RoundedRectangle(cornerRadius: Radius.md)
                                         .fill(
                                             LinearGradient(
                                                 gradient: Gradient(colors: [
-                                                    Color.purple.opacity(0.9),
-                                                    Color.purple
+                                                    ColorTokens.actionPrimary.opacity(0.9),
+                                                    ColorTokens.actionPrimary
                                                 ]),
                                                 startPoint: .topLeading,
                                                 endPoint: .bottomTrailing
                                             )
                                         )
-                                        .shadow(color: Color.purple.opacity(0.4), radius: 8, x: 0, y: 4)
+                                        .shadow(color: ColorTokens.shadow, radius: Spacing.xs, x: 0, y: 4)
                                 } else {
                                     // Background non sélectionné avec effet glass
-                                    RoundedRectangle(cornerRadius: 16)
-                                        .fill(Color(.secondarySystemBackground))
+                                    RoundedRectangle(cornerRadius: Radius.md)
+                                        .fill(ColorTokens.surfaceSecondary)
                                         .overlay(
-                                            RoundedRectangle(cornerRadius: 16)
-                                                .stroke(Color(.separator).opacity(0.5), lineWidth: 1)
+                                            RoundedRectangle(cornerRadius: Radius.md)
+                                                .stroke(ColorTokens.border.opacity(0.5), lineWidth: 1)
                                         )
                                 }
                             }
@@ -207,35 +207,34 @@ struct AddVehicleStepView: View {
     }
 
     private var brandAndModelContent: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: Spacing.md) {
             // Brand field
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: Spacing.xxxs) {
                 Text("Marque")
-                    .font(.footnote)
-                    .fontWeight(.semibold)
-                    .foregroundStyle(Color(.secondaryLabel))
+                    .font(Typography.footnote)
+                    .foregroundStyle(ColorTokens.textSecondary)
 
-                HStack(alignment: .top, spacing: 4) {
+                HStack(alignment: .top, spacing: Spacing.xxs) {
                     Image(systemName: "info.circle")
-                        .font(.caption2)
-                        .foregroundStyle(Color(.tertiaryLabel))
+                        .font(Typography.caption2)
+                        .foregroundStyle(ColorTokens.textTertiary)
 
                     Text("Champ D.1 de la carte grise")
-                        .font(.caption)
-                        .foregroundStyle(Color(.tertiaryLabel))
+                        .font(Typography.caption1)
+                        .foregroundStyle(ColorTokens.textTertiary)
                 }
-                .padding(.bottom, 4)
+                .padding(.bottom, Spacing.xxs)
 
                 TextField("TOYOTA, BMW, MERCEDES...", text: $store.brand)
                     .bodyDefaultRegular()
-                    .foregroundColor(Color(.label))
-                    .accentColor(Color.purple)
+                    .foregroundColor(ColorTokens.textPrimary)
+                    .accentColor(ColorTokens.actionPrimary)
                     .textFieldStyle(.plain)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 16)
+                    .padding(.horizontal, Spacing.md)
+                    .padding(.vertical, Spacing.md)
                     .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(!validationResult.isValid && store.showValidationError && store.brand.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? Color.red : Color(.separator), lineWidth: 2)
+                        RoundedRectangle(cornerRadius: Radius.md)
+                            .stroke(!validationResult.isValid && store.showValidationError && store.brand.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? ColorTokens.error : ColorTokens.border, lineWidth: 2)
                             .animation(.easeInOut(duration: 0.3), value: !validationResult.isValid && store.showValidationError)
                     )
                     .submitLabel(.next)
@@ -243,74 +242,72 @@ struct AddVehicleStepView: View {
             }
 
             // Model field
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: Spacing.xxxs) {
                 Text("Modèle")
-                    .font(.footnote)
-                    .fontWeight(.semibold)
-                    .foregroundStyle(Color(.secondaryLabel))
+                    .font(Typography.footnote)
+                    .foregroundStyle(ColorTokens.textSecondary)
 
-                HStack(alignment: .top, spacing: 4) {
+                HStack(alignment: .top, spacing: Spacing.xxs) {
                     Image(systemName: "info.circle")
-                        .font(.caption2)
-                        .foregroundStyle(Color(.tertiaryLabel))
+                        .font(Typography.caption2)
+                        .foregroundStyle(ColorTokens.textTertiary)
 
                     Text("Champ D.2 de la carte grise")
-                        .font(.caption)
-                        .foregroundStyle(Color(.tertiaryLabel))
+                        .font(Typography.caption1)
+                        .foregroundStyle(ColorTokens.textTertiary)
                 }
-                .padding(.bottom, 4)
+                .padding(.bottom, Spacing.xxs)
 
                 TextField("COROLLA, X3, CLASSE A...", text: $store.model)
                     .bodyDefaultRegular()
-                    .foregroundColor(Color(.label))
-                    .accentColor(Color.purple)
+                    .foregroundColor(ColorTokens.textPrimary)
+                    .accentColor(ColorTokens.actionPrimary)
                     .textFieldStyle(.plain)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 16)
+                    .padding(.horizontal, Spacing.md)
+                    .padding(.vertical, Spacing.md)
                     .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(!validationResult.isValid && store.showValidationError && store.model.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? Color.red : Color(.separator), lineWidth: 2)
+                        RoundedRectangle(cornerRadius: Radius.md)
+                            .stroke(!validationResult.isValid && store.showValidationError && store.model.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? ColorTokens.error : ColorTokens.border, lineWidth: 2)
                             .animation(.easeInOut(duration: 0.3), value: !validationResult.isValid && store.showValidationError)
                     )
                     .submitLabel(.next)
                     .autocapitalization(.allCharacters)
             }
         }
-        .padding(16)
-        .background(Color(.systemBackground))
-        .cornerRadius(16)
+        .padding(Spacing.md)
+        .background(ColorTokens.surfacePrimary)
+        .cornerRadius(Radius.md)
     }
 
     private var detailsContent: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: Spacing.md) {
             // Plate field
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: Spacing.xxxs) {
                 Text("Immatriculation")
-                    .font(.footnote)
-                    .fontWeight(.semibold)
-                    .foregroundStyle(Color(.secondaryLabel))
+                    .font(Typography.footnote)
+                    .foregroundStyle(ColorTokens.textSecondary)
 
-                HStack(alignment: .top, spacing: 4) {
+                HStack(alignment: .top, spacing: Spacing.xxs) {
                     Image(systemName: "info.circle")
-                        .font(.caption2)
-                        .foregroundStyle(Color(.tertiaryLabel))
+                        .font(Typography.caption2)
+                        .foregroundStyle(ColorTokens.textTertiary)
 
                     Text("Champ A de la carte grise")
-                        .font(.caption)
-                        .foregroundStyle(Color(.tertiaryLabel))
+                        .font(Typography.caption1)
+                        .foregroundStyle(ColorTokens.textTertiary)
                 }
-                .padding(.bottom, 4)
+                .padding(.bottom, Spacing.xxs)
 
                 TextField("AB-123-CD", text: $store.plate)
                     .bodyDefaultRegular()
-                    .foregroundColor(Color(.label))
-                    .accentColor(Color.purple)
+                    .foregroundColor(ColorTokens.textPrimary)
+                    .accentColor(ColorTokens.actionPrimary)
                     .textFieldStyle(.plain)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 16)
+                    .padding(.horizontal, Spacing.md)
+                    .padding(.vertical, Spacing.md)
                     .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(!validationResult.isValid && store.showValidationError && store.plate.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? Color.red : Color(.separator), lineWidth: 2)
+                        RoundedRectangle(cornerRadius: Radius.md)
+                            .stroke(!validationResult.isValid && store.showValidationError && store.plate.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? ColorTokens.error : ColorTokens.border, lineWidth: 2)
                             .animation(.easeInOut(duration: 0.3), value: !validationResult.isValid && store.showValidationError)
                     )
                     .submitLabel(.next)
@@ -318,59 +315,57 @@ struct AddVehicleStepView: View {
             }
 
             // Mileage field
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: Spacing.xxxs) {
                 Text("Kilométrage")
-                    .font(.footnote)
-                    .fontWeight(.semibold)
-                    .foregroundStyle(Color(.secondaryLabel))
+                    .font(Typography.footnote)
+                    .foregroundStyle(ColorTokens.textSecondary)
 
-                HStack(alignment: .top, spacing: 4) {
+                HStack(alignment: .top, spacing: Spacing.xxs) {
                     Image(systemName: "info.circle")
-                        .font(.caption2)
-                        .foregroundStyle(Color(.tertiaryLabel))
+                        .font(Typography.caption2)
+                        .foregroundStyle(ColorTokens.textTertiary)
 
                     Text("Consultez votre compteur")
-                        .font(.caption)
-                        .foregroundStyle(Color(.tertiaryLabel))
+                        .font(Typography.caption1)
+                        .foregroundStyle(ColorTokens.textTertiary)
                 }
-                .padding(.bottom, 4)
+                .padding(.bottom, Spacing.xxs)
 
                 HStack {
                     TextField("120000", text: $store.mileage)
                         .bodyDefaultRegular()
-                        .foregroundColor(Color(.label))
-                        .accentColor(Color.purple)
+                        .foregroundColor(ColorTokens.textPrimary)
+                        .accentColor(ColorTokens.actionPrimary)
                         .textFieldStyle(.plain)
 
                     Text("KM")
                         .bodyDefaultRegular()
-                        .foregroundColor(Color(.secondaryLabel))
+                        .foregroundColor(ColorTokens.textSecondary)
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 16)
+                .padding(.horizontal, Spacing.md)
+                .padding(.vertical, Spacing.md)
                 .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color(.separator), lineWidth: 2)
+                    RoundedRectangle(cornerRadius: Radius.md)
+                        .stroke(ColorTokens.border, lineWidth: 2)
                 )
             }
 
             // Date field
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: Spacing.xxxs) {
                 Text("Mise en circulation")
-                    .font(.footnote)
-                    .fontWeight(.semibold)
-                    .foregroundStyle(Color(.secondaryLabel))
+                    .font(Typography.footnote)
+                    .foregroundStyle(ColorTokens.textSecondary)
 
-                HStack(alignment: .top, spacing: 4) {
+                HStack(alignment: .top, spacing: Spacing.xxs) {
                     Image(systemName: "info.circle")
-                        .font(.caption2)
-                        .foregroundStyle(Color(.tertiaryLabel))
+                        .font(Typography.caption2)
+                        .foregroundStyle(ColorTokens.textTertiary)
 
                     Text("Champ B de la carte grise")
-                        .font(.caption)
-                        .foregroundStyle(Color(.tertiaryLabel))
+                        .font(Typography.caption1)
+                        .foregroundStyle(ColorTokens.textTertiary)
                 }
-                .padding(.bottom, 4)
+                .padding(.bottom, Spacing.xxs)
 
                 Button(action: {
                     showDatePicker = true
@@ -378,31 +373,31 @@ struct AddVehicleStepView: View {
                     HStack {
                         Text(formatDate(store.registrationDate))
                             .bodyDefaultRegular()
-                            .foregroundStyle(Color(.label))
+                            .foregroundStyle(ColorTokens.textPrimary)
 
                         Spacer()
 
                         Image(systemName: "calendar")
-                            .foregroundStyle(Color(.secondaryLabel))
+                            .foregroundStyle(ColorTokens.textSecondary)
                     }
-                    .padding(.horizontal, .insetLG)
-                    .padding(.vertical, .insetLG)
+                    .padding(.horizontal, Spacing.lg)
+                    .padding(.vertical, Spacing.lg)
                     .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color(.secondarySystemBackground))
-                            .stroke(Color(.separator), lineWidth: 2)
+                        RoundedRectangle(cornerRadius: Radius.md)
+                            .fill(ColorTokens.surfaceSecondary)
+                            .stroke(ColorTokens.border, lineWidth: 2)
                     )
                 }
                 .buttonStyle(.plain)
             }
         }
-        .padding(16)
-        .background(Color(.systemBackground))
-        .cornerRadius(16)
+        .padding(Spacing.md)
+        .background(ColorTokens.surfacePrimary)
+        .cornerRadius(Radius.md)
     }
 
     private var summaryContent: some View {
-        VStack(alignment: .leading, spacing: .stackLG) {
+        VStack(alignment: .leading, spacing: Spacing.lg) {
             if let vehicleType = store.vehicleType {
                 summaryRow(title: "Type", value: vehicleType.displayName, icon: vehicleType.iconName, iconFlipped: vehicleType.shouldFlipIcon)
             }
@@ -412,36 +407,36 @@ struct AddVehicleStepView: View {
             summaryRow(title: "Kilométrage", value: store.mileage.isEmpty ? "Non renseigné" : "\(store.mileage) KM", icon: "gauge")
             summaryRow(title: "Date de mise en circulation", value: formatDate(store.registrationDate), icon: "calendar")
         }
-        .padding(.vertical, .stackMD)
+        .padding(.vertical, Spacing.md)
     }
 
     private func summaryRow(title: String, value: String, icon: String?, iconFlipped: Bool = false) -> some View {
-        HStack(alignment: .top, spacing: .inlineMD) {
+        HStack(alignment: .top, spacing: Spacing.md) {
             if let icon = icon {
                 Image(systemName: icon)
-                    .font(.title3)
-                    .foregroundStyle(Color.purple)
+                    .font(Typography.title3)
+                    .foregroundStyle(ColorTokens.actionPrimary)
                     .frame(width: 28)
                     .scaleEffect(x: iconFlipped ? -1 : 1, y: 1)
             }
 
-            VStack(alignment: .leading, spacing: .stackXS) {
+            VStack(alignment: .leading, spacing: Spacing.xs) {
                 Text(title)
                     .bodyXSmallSemibold()
-                    .foregroundStyle(Color(.secondaryLabel))
+                    .foregroundStyle(ColorTokens.textSecondary)
 
                 Text(value)
                     .bodyDefaultSemibold()
-                    .foregroundStyle(Color(.label))
+                    .foregroundStyle(ColorTokens.textPrimary)
             }
 
             Spacer()
         }
-        .padding(.horizontal, .insetLG)
-        .padding(.vertical, .insetMD)
+        .padding(.horizontal, Spacing.lg)
+        .padding(.vertical, Spacing.md)
         .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.secondarySystemBackground))
+            RoundedRectangle(cornerRadius: Radius.md)
+                .fill(ColorTokens.surfaceSecondary)
         )
     }
 

@@ -31,7 +31,7 @@ struct VehicleDetailsStore {
         }
     }
     
-    @Dependency(\.fileStorageService) var fileStorageService
+    @Dependency(\.vehicleRepository) var vehicleRepository
     @Dependency(\.dismiss) var dismiss
     
     var body: some ReducerOf<Self> {

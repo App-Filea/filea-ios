@@ -14,6 +14,7 @@ struct VehiclesListModalStore {
     struct State: Equatable {
         @Shared(.vehicles) var vehicles: [Vehicle] = []
         @Shared(.selectedVehicle) var selectedVehicle: Vehicle?
+        @Shared(.lastOpenedVehicleId) var lastOpenedVehicleId: UUID?
         @Presents var addVehicle: AddVehicleStore.State?
         var isLoading = false
     }
@@ -27,7 +28,7 @@ struct VehiclesListModalStore {
         case addVehicle(PresentationAction<AddVehicleStore.Action>)
     }
 
-    @Dependency(\.fileStorageService) var fileStorageService
+    @Dependency(\.vehicleRepository) var vehicleRepository
     @Dependency(\.dismiss) var dismiss
 
     var body: some ReducerOf<Self> {
@@ -36,8 +37,13 @@ struct VehiclesListModalStore {
             case .loadVehicles:
                 state.isLoading = true
                 return .run { send in
-                    let loadedVehicles = await fileStorageService.loadVehicles()
-                    await send(.vehiclesLoaded(loadedVehicles))
+                    do {
+                        let loadedVehicles = try await vehicleRepository.loadAll()
+                        await send(.vehiclesLoaded(loadedVehicles))
+                    } catch {
+                        print("❌ [VehiclesListModalStore] Erreur lors du chargement: \(error.localizedDescription)")
+                        await send(.vehiclesLoaded([]))
+                    }
                 }
 
             case .vehiclesLoaded(let vehicles):
@@ -50,8 +56,9 @@ struct VehiclesListModalStore {
                 return .none
 
             case .selectVehicle(let vehicle):
-                // Update selected vehicle before dismissing
+                // Update selected vehicle and save last opened ID before dismissing
                 state.$selectedVehicle.withLock { $0 = vehicle }
+                state.$lastOpenedVehicleId.withLock { $0 = vehicle.id }
                 return .run { _ in
                     await dismiss()
                 }

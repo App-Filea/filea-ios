@@ -55,16 +55,21 @@ struct MainStore {
         }
     }
     
-    @Dependency(\.fileStorageService) var fileStorageService
-    @Dependency(\.vehicleCostCalculator) var costCalculator
+    @Dependency(\.vehicleRepository) var vehicleRepository
+    @Dependency(\.statisticsRepository) var statisticsRepository
 
     var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
             case .loadVehicles:
                 return .run { send in
-                    let loadedVehicles = await fileStorageService.loadVehicles()
-                    await send(.vehiclesLoaded(loadedVehicles))
+                    do {
+                        let loadedVehicles = try await vehicleRepository.loadAll()
+                        await send(.vehiclesLoaded(loadedVehicles))
+                    } catch {
+                        // Handle error - for now just send empty array
+                        await send(.vehiclesLoaded([]))
+                    }
                 }
                 
             case .vehiclesLoaded(let vehicles):
@@ -124,8 +129,13 @@ struct MainStore {
                     return .none
                 }
                 return .run { send in
-                    await fileStorageService.deleteVehicle(vehicleId)
-                    await send(.vehicleDeleted)
+                    do {
+                        try await vehicleRepository.delete(vehicleId)
+                        await send(.vehicleDeleted)
+                    } catch {
+                        // Handle error - for now just continue
+                        await send(.vehicleDeleted)
+                    }
                 }
 
             case .deleteAlert:
@@ -167,13 +177,13 @@ struct MainStore {
             case .calculateTotalCost:
                 let documents = state.currentVehicleDocuments
                 return .run { send in
-                    let total = costCalculator.calculateTotalCost(documents)
+                    let total = statisticsRepository.calculateTotalCost(for: documents)
                     await send(.totalCostCalculated(total))
 
                     // Calculate monthly expenses for current year
                     let calendar = Calendar.current
                     let currentYear = calendar.component(.year, from: Date())
-                    let monthlyExpenses = costCalculator.calculateMonthlyExpenses(documents, for: currentYear)
+                    let monthlyExpenses = statisticsRepository.calculateMonthlyExpenses(for: documents, year: currentYear)
                     await send(.monthlyExpensesCalculated(monthlyExpenses))
                 }
 

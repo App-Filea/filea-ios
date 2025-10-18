@@ -32,7 +32,7 @@ struct AddVehicleStore {
         case setShowValidationError(Bool)
     }
 
-    @Dependency(\.fileStorageService) var fileStorageService
+    @Dependency(\.vehicleRepository) var vehicleRepository
     @Dependency(\.dismiss) var dismiss
 
     var body: some ReducerOf<Self> {
@@ -67,13 +67,19 @@ struct AddVehicleStore {
                 )
 
                 return .run { [vehicles = state.vehicles] send in
-                    // Sauvegarder tous les véhicules mis à jour
-                    for existingVehicle in vehicles {
-                        await fileStorageService.updateVehicle(existingVehicle.id, with: existingVehicle)
+                    do {
+                        // Sauvegarder tous les véhicules mis à jour
+                        for existingVehicle in vehicles {
+                            try await vehicleRepository.update(existingVehicle)
+                        }
+                        // Sauvegarder le nouveau véhicule
+                        try await vehicleRepository.save(vehicle)
+                        await send(.vehicleSaved(vehicle))
+                    } catch {
+                        print("❌ [AddVehicleStore] Erreur lors de la sauvegarde: \(error.localizedDescription)")
+                        // Continue anyway to update UI
+                        await send(.vehicleSaved(vehicle))
                     }
-                    // Sauvegarder le nouveau véhicule
-                    await fileStorageService.saveVehicle(vehicle)
-                    await send(.vehicleSaved(vehicle))
                 }
 
             case .vehicleSaved(let vehicle):

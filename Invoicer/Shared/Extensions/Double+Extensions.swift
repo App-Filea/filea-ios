@@ -24,7 +24,7 @@ extension Double {
 
     /// Formats the double as a compact currency string (e.g., "1,2K €" for 1234.56)
     var asCompactCurrencyString: String {
-        let absValue = abs(self)
+        let absValue = Swift.abs(self)
         let sign = self < 0 ? "-" : ""
 
         if absValue >= 1_000_000 {

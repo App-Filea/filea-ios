@@ -42,6 +42,11 @@ struct VehicleDetailsStore {
                 state.editVehicle = EditVehicleStore.State(vehicle: vehicle)
                 return .none
 
+            case .editVehicle(.presented(.vehicleUpdated)):
+                // Vehicle has been updated, close the sheet
+                state.editVehicle = nil
+                return .none
+
             case .editVehicle:
                 return .none
 

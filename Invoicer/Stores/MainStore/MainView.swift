@@ -19,12 +19,10 @@ struct MainView: View {
                 .ignoresSafeArea()
                 mainContentView
         }
-//        .onAppear {
-//            if store.vehicles.isEmpty {
-//                store.send(.loadVehicles)
-//            }
-//            store.send(.calculateTotalCost)
-//        }
+        .onAppear {
+            // Calculate statistics when the view appears
+            store.send(.calculateTotalCost)
+        }
         .navigationBarBackButtonHidden()
         .alert($store.scope(state: \.deleteAlert, action: \.deleteAlert))
         .fullScreenCover(item: $store.scope(state: \.vehiclesList, action: \.vehiclesList)) { store in

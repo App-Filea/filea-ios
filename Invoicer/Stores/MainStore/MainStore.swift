@@ -156,13 +156,18 @@ struct MainStore {
                 state.vehicleDetail = nil
                 return .none
 
+            case .vehicleDetail(.presented(.editVehicle(.presented(.vehicleUpdated)))):
+                // Vehicle has been edited, recalculate statistics
+                return .send(.calculateTotalCost)
+
             case .vehicleDetail:
                 return .none
 
             case .vehiclesList(.presented(.selectVehicle)):
                 // Selection and dismiss handled by VehiclesListModalStore
                 state.vehiclesList = nil
-                return .none
+                // Recalculate statistics for the newly selected vehicle
+                return .send(.calculateTotalCost)
 
             case .vehiclesList:
                 return .none

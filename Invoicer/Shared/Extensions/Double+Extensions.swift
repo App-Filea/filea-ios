@@ -22,6 +22,23 @@ extension Double {
         return formatter.string(from: NSNumber(value: self)) ?? "0,00 €"
     }
 
+    /// Formats the double as a compact string without decimals (e.g., "1234K", "2M")
+    /// Can be used for any unit (currency, distance, etc.)
+    var asCompactString: String {
+        let absValue = Swift.abs(self)
+        let sign = self < 0 ? "-" : ""
+
+        if absValue >= 1_000_000 {
+            let millions = Int(absValue / 1_000_000)
+            return "\(sign)\(millions)M"
+        } else if absValue >= 1_000 {
+            let thousands = Int(absValue / 1_000)
+            return "\(sign)\(thousands)K"
+        } else {
+            return "\(sign)\(Int(absValue))"
+        }
+    }
+
     /// Formats the double as a compact currency string (e.g., "1,2K €" for 1234.56)
     var asCompactCurrencyString: String {
         let absValue = Swift.abs(self)
@@ -47,6 +64,65 @@ extension Double {
         formatter.maximumFractionDigits = 0
         formatter.currencyGroupingSeparator = " "
         return formatter.string(from: NSNumber(value: self)) ?? "0 €"
+    }
+
+    /// Formats the double adaptively: compact format with smart decimals for large values (≥10K), full format for smaller values
+    /// Examples: 1645000000 → "1645M €", 1500000 → "1,5M €", 5000 → "5 000,00 €", 850 → "850,00 €"
+    var asCurrencyStringAdaptive: String {
+        let absValue = Swift.abs(self)
+        let sign = self < 0 ? "-" : ""
+
+        if absValue >= 1_000_000 {
+            let millions = absValue / 1_000_000
+            // Check if it's a round number (no decimals)
+            if millions.truncatingRemainder(dividingBy: 1) == 0 {
+                return "\(sign)\(Int(millions))M €"
+            } else {
+                return String(format: "\(sign)%.1fM €", millions)
+            }
+        } else if absValue >= 10_000 {
+            let thousands = absValue / 1_000
+            // Check if it's a round number (no decimals)
+            if thousands.truncatingRemainder(dividingBy: 1) == 0 {
+                return "\(sign)\(Int(thousands))K €"
+            } else {
+                return String(format: "\(sign)%.1fK €", thousands)
+            }
+        } else {
+            return asCurrencyStringNoDecimals
+        }
+    }
+
+    /// Formats the double as kilometers with adaptive compact format and smart decimals for large values (≥10K)
+    /// Examples: 125000 → "125K km", 12500 → "12,5K km", 5000 → "5 000 km", 850 → "850 km"
+    var asKilometersAdaptive: String {
+        let absValue = Swift.abs(self)
+        let sign = self < 0 ? "-" : ""
+
+        if absValue >= 1_000_000 {
+            let millions = absValue / 1_000_000
+            // Check if it's a round number (no decimals)
+            if millions.truncatingRemainder(dividingBy: 1) == 0 {
+                return "\(sign)\(Int(millions))M km"
+            } else {
+                return String(format: "\(sign)%.1fM km", millions)
+            }
+        } else if absValue >= 10_000 {
+            let thousands = absValue / 1_000
+            // Check if it's a round number (no decimals)
+            if thousands.truncatingRemainder(dividingBy: 1) == 0 {
+                return "\(sign)\(Int(thousands))K km"
+            } else {
+                return String(format: "\(sign)%.1fK km", thousands)
+            }
+        } else {
+            let formatter = NumberFormatter()
+            formatter.numberStyle = .decimal
+            formatter.locale = Locale(identifier: "fr_FR")
+            formatter.groupingSeparator = " "
+            formatter.maximumFractionDigits = 0
+            return (formatter.string(from: NSNumber(value: self)) ?? "\(Int(self))") + " km"
+        }
     }
 
     // MARK: - Number Formatting

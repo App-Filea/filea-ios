@@ -41,7 +41,7 @@ struct DocumentDetailView: View {
                                 HStack {
                                     Text("Kilométrage:")
                                         .fontWeight(.medium)
-                                    Text(document.mileage.isEmpty ? "Non renseigné" : "\(document.mileage) km")
+                                    Text(document.mileage.isEmpty ? "Non renseigné" : document.mileage.asFormattedMileage)
                                         .foregroundColor(document.mileage.isEmpty ? .secondary : .primary)
                                 }
                                 

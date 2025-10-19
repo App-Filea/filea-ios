@@ -102,7 +102,8 @@ extension String {
 
     // MARK: - Mileage
 
-    /// Formats the string as a mileage display (e.g., "12 345 km")
+    /// Formats the string as a mileage display with adaptive compact format
+    /// Examples: "125000" → "125K km", "5000" → "5 000 km", "850" → "850 km"
     var asFormattedMileage: String {
         let trimmed = self.trimmed
         guard !trimmed.isEmpty else { return "" }
@@ -111,14 +112,9 @@ extension String {
         let cleaned = trimmed.replacingOccurrences(of: " ", with: "")
                             .replacingOccurrences(of: "km", with: "", options: .caseInsensitive)
 
-        // Format with spaces as thousands separators
-        if let value = Int(cleaned) {
-            let formatter = NumberFormatter()
-            formatter.numberStyle = .decimal
-            formatter.groupingSeparator = " "
-            if let formatted = formatter.string(from: NSNumber(value: value)) {
-                return "\(formatted) km"
-            }
+        // Convert to Double and use adaptive kilometers format
+        if let value = Double(cleaned) {
+            return value.asKilometersAdaptive
         }
 
         return "\(trimmed) km"

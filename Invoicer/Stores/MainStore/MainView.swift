@@ -21,7 +21,7 @@ struct MainView: View {
         }
         .onAppear {
             // Calculate statistics when the view appears
-            store.send(.calculateTotalCost)
+            store.send(.setupVehicleStatistics)
         }
         .navigationBarBackButtonHidden()
         .alert($store.scope(state: \.deleteAlert, action: \.deleteAlert))
@@ -113,9 +113,9 @@ struct MainView: View {
 
     // MARK: - Documents List View
     private var documentsListView: some View {
-        LazyVStack(spacing: 0) {
+        LazyVStack(spacing: Spacing.sm) {
             ForEach(store.currentVehicleDocuments.groupedByMonth(), id: \.title) { section in
-                VStack(alignment: .leading, spacing: Spacing.md) {
+                VStack(alignment: .leading, spacing: Spacing.sm) {
                     Text(section.title)
                         .titleGroup()
                         .foregroundStyle(ColorTokens.textSecondary)
@@ -124,7 +124,6 @@ struct MainView: View {
                         eventElement(of: document)
                     }
                 }
-                .padding(.vertical, Spacing.xs)
             }
         }
     }
@@ -192,7 +191,7 @@ struct MainView: View {
             // Total cost card
             StatCard(
                 title: "Coût total",
-                value: store.currentVehicleTotalCost.asCurrencyStringNoDecimals,
+                value: store.currentVehicleTotalCost.asCurrencyStringAdaptive,
                 subtitle: "Sur l'année en cours",
                 icon: nil,
                 accentColor: ColorTokens.actionPrimary,
@@ -202,10 +201,16 @@ struct MainView: View {
             // Alerts card
             StatCard(
                 title: "Alertes",
-                value: "0",
-                subtitle: "Nécessite votre attention",
-                icon: "exclamationmark.triangle.fill",
-                accentColor: ColorTokens.warning,
+                value: "\(store.currentVehicleIncompleteDocumentsCount)",
+                subtitle: store.currentVehicleIncompleteDocumentsCount == 0
+                    ? "Tout est en ordre"
+                    : "Nécessite votre attention",
+                icon: store.currentVehicleIncompleteDocumentsCount == 0
+                    ? "checkmark.circle.fill"
+                    : "exclamationmark.triangle.fill",
+                accentColor: store.currentVehicleIncompleteDocumentsCount == 0
+                    ? ColorTokens.success
+                    : ColorTokens.warning,
                 action: nil
             )
         }
@@ -241,9 +246,11 @@ struct MainView: View {
                         mileage: "120000",
                         registrationDate: Date(timeIntervalSince1970: 1322784000),
                         plate: "BZ-029-YV",
-                        documents: []
+                        documents: [
+                            .init(fileURL: "", name: "Vidange", date: .now, mileage: "100000", type: .entretien)
+                        ]
                     )),
-                    currentVehicleTotalCost: 1645,
+                    currentVehicleTotalCost: 1234,
                     currentVehicleMonthlyExpenses: [
                         MonthlyExpense(month: 1, amount: 540),   // Janvier
                         MonthlyExpense(month: 2, amount: 0),     // Février (vide)

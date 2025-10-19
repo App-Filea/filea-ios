@@ -115,7 +115,7 @@ struct VehiclesListModalView: View {
                     HStack(spacing: 0) {
                         Text(vehicle.plate)
                         Spacer()
-                        Text(vehicle.mileage != nil ? "\(vehicle.mileage!) km" : "Non renseigné")
+                        Text(vehicle.mileage?.asFormattedMileage ?? "Non renseigné")
                         Spacer()
                         Text("\(vehicle.registrationDate.shortDateString)")
                     }

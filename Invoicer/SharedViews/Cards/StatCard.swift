@@ -59,6 +59,7 @@ struct StatCard: View {
                         Image(systemName: icon)
                             .font(.title2.weight(.semibold))
                             .foregroundStyle(accentColor)
+                            .frame(width: 28, height: 28)
                     }
 
                     Text(value)

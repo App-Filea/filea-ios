@@ -35,7 +35,8 @@ struct DocumentDetailStore {
         case goBack
     }
     
-    @Dependency(\.fileStorageService) var fileStorageService
+    @Dependency(\.vehicleRepository) var vehicleRepository
+    @Dependency(\.documentRepository) var documentRepository
     
     var body: some ReducerOf<Self> {
         Reduce { state, action in
@@ -43,13 +44,17 @@ struct DocumentDetailStore {
             case .loadDocument:
                 print("📖 [DocumentDetailStore] Chargement du document: \(state.documentId)")
                 return .run { [vehicleId = state.vehicleId, documentId = state.documentId] send in
-                    let vehicles = await fileStorageService.loadVehicles()
-                    if let vehicle = vehicles.first(where: { $0.id == vehicleId }),
-                       let document = vehicle.documents.first(where: { $0.id == documentId }) {
-                        print("✅ [DocumentDetailStore] Document trouvé: \(document.fileURL)")
-                        await send(.documentLoaded(document))
-                    } else {
-                        print("❌ [DocumentDetailStore] Document non trouvé avec ID: \(documentId)")
+                    do {
+                        if let vehicle = try await vehicleRepository.find(by: vehicleId),
+                           let document = vehicle.documents.first(where: { $0.id == documentId }) {
+                            print("✅ [DocumentDetailStore] Document trouvé: \(document.fileURL)")
+                            await send(.documentLoaded(document))
+                        } else {
+                            print("❌ [DocumentDetailStore] Document non trouvé avec ID: \(documentId)")
+                            await send(.documentLoaded(nil))
+                        }
+                    } catch {
+                        print("❌ [DocumentDetailStore] Erreur lors du chargement: \(error.localizedDescription)")
                         await send(.documentLoaded(nil))
                     }
                 }
@@ -108,8 +113,13 @@ struct DocumentDetailStore {
                     state.showCamera = false
                     
                     return .run { [vehicleId = state.vehicleId, documentId = state.documentId] send in
-                        await fileStorageService.replaceDocumentPhoto(documentId, in: vehicleId, with: capturedImage)
-                        await send(.photoReplaced)
+                        do {
+                            try await documentRepository.replacePhoto(documentId, for: vehicleId, with: capturedImage)
+                            await send(.photoReplaced)
+                        } catch {
+                            print("❌ [DocumentDetailStore] Erreur lors du remplacement: \(error.localizedDescription)")
+                            await send(.photoReplaced)
+                        }
                     }
                 } else {
                     print("❌ [DocumentDetailStore] Photo annulée avec le bouton 'Annuler' dans l'interface iOS")
@@ -133,9 +143,14 @@ struct DocumentDetailStore {
                 }
                 print("🗑️ [DocumentDetailStore] Début de la suppression du document: \(state.documentId)")
                 state.isLoading = true
-                return .run { [vehicleId = state.vehicleId, document] send in
-                    await fileStorageService.deleteDocument(document, for: vehicleId)
-                    await send(.documentDeleted)
+                return .run { [vehicleId = state.vehicleId, documentId = state.documentId] send in
+                    do {
+                        try await documentRepository.delete(documentId, for: vehicleId)
+                        await send(.documentDeleted)
+                    } catch {
+                        print("❌ [DocumentDetailStore] Erreur lors de la suppression: \(error.localizedDescription)")
+                        await send(.documentDeleted)
+                    }
                 }
                 
             case .documentDeleted:

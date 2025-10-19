@@ -65,7 +65,8 @@ struct EditDocumentStore {
         case documentSaveFailed
     }
     
-    @Dependency(\.fileStorageService) var fileStorageService
+    @Dependency(\.documentRepository) var documentRepository
+    @Dependency(\.vehicleRepository) var vehicleRepository
     @Dependency(\.dismiss) var dismiss
     
     var body: some ReducerOf<Self> {
@@ -106,9 +107,10 @@ struct EditDocumentStore {
                 
                 return .run { [vehicleId = state.vehicleId, document = updatedDocument] send in
                     do {
-                        await fileStorageService.updateDocument(document, for: vehicleId)
+                        try await documentRepository.update(document, for: vehicleId)
                         await send(.documentSaved)
                     } catch {
+                        print("❌ [EditDocumentStore] Erreur lors de la mise à jour: \(error.localizedDescription)")
                         await send(.documentSaveFailed)
                     }
                 }
@@ -122,13 +124,16 @@ struct EditDocumentStore {
                 state.isLoading = false
                 // Recharger le véhicule pour mettre à jour la liste des documents dans @Shared
                 return .run { [vehicleId = state.vehicleId, vehicles = state.$vehicles] send in
-                    let updatedVehicles = await fileStorageService.loadVehicles()
-                    if let updatedVehicle = updatedVehicles.first(where: { $0.id == vehicleId }) {
-                        await vehicles.withLock { vehicles in
-                            if let index = vehicles.firstIndex(where: { $0.id == vehicleId }) {
-                                vehicles[index] = updatedVehicle
+                    do {
+                        if let updatedVehicle = try await vehicleRepository.find(by: vehicleId) {
+                            await vehicles.withLock { vehicles in
+                                if let index = vehicles.firstIndex(where: { $0.id == vehicleId }) {
+                                    vehicles[index] = updatedVehicle
+                                }
                             }
                         }
+                    } catch {
+                        print("❌ [EditDocumentStore] Erreur lors du rechargement du véhicule: \(error.localizedDescription)")
                     }
                     await dismiss()
                 }

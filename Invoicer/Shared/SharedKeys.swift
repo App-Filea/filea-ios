@@ -20,3 +20,9 @@ extension SharedReaderKey where Self == InMemoryKey<Vehicle?>.Default {
         Self[.inMemory("selectedVehicle"), default: nil]
     }
 }
+
+extension SharedReaderKey where Self == AppStorageKey<UUID?>.Default {
+    static var lastOpenedVehicleId: Self {
+        Self[.appStorage("lastOpenedVehicleId"), default: nil]
+    }
+}

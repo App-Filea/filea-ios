@@ -43,7 +43,7 @@ struct FileDocumentDetailStore {
         case showEditDocument
     }
     
-    @Dependency(\.fileStorageService) var fileStorageService
+    @Dependency(\.vehicleRepository) var vehicleRepository
     
     var body: some ReducerOf<Self> {
         Reduce { state, action in
@@ -51,13 +51,17 @@ struct FileDocumentDetailStore {
             case .loadDocument:
                 print("📖 [FileDocumentDetailStore] Chargement du document fichier: \(state.documentId)")
                 return .run { [vehicleId = state.vehicleId, documentId = state.documentId] send in
-                    let vehicles = await fileStorageService.loadVehicles()
-                    if let vehicle = vehicles.first(where: { $0.id == vehicleId }),
-                       let document = vehicle.documents.first(where: { $0.id == documentId }) {
-                        print("✅ [FileDocumentDetailStore] Document fichier trouvé: \(document.fileURL)")
-                        await send(.documentLoaded(document))
-                    } else {
-                        print("❌ [FileDocumentDetailStore] Document fichier non trouvé avec ID: \(documentId)")
+                    do {
+                        if let vehicle = try await vehicleRepository.find(by: vehicleId),
+                           let document = vehicle.documents.first(where: { $0.id == documentId }) {
+                            print("✅ [FileDocumentDetailStore] Document fichier trouvé: \(document.fileURL)")
+                            await send(.documentLoaded(document))
+                        } else {
+                            print("❌ [FileDocumentDetailStore] Document fichier non trouvé avec ID: \(documentId)")
+                            await send(.documentLoaded(nil))
+                        }
+                    } catch {
+                        print("❌ [FileDocumentDetailStore] Erreur lors du chargement: \(error.localizedDescription)")
                         await send(.documentLoaded(nil))
                     }
                 }

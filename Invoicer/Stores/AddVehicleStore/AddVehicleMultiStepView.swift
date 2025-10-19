@@ -20,8 +20,8 @@ struct ProgressArcView: View {
             .stroke(
                 AngularGradient(
                     gradient: Gradient(colors: [
-                        Color(.secondarySystemFill),
-                        Color(.systemPurple)
+                        ColorTokens.surfaceSecondary,
+                        ColorTokens.actionPrimary
                     ]),
                     center: .center,
                     startAngle: .degrees(0),
@@ -29,7 +29,7 @@ struct ProgressArcView: View {
                 ),
                 style: StrokeStyle(lineWidth: 3, lineCap: .round)
             )
-            .frame(width: 20, height: 20)
+            .frame(width: Spacing.lg, height: Spacing.lg)
             .rotationEffect(.degrees(rotationAngle + 90))
             .opacity(arcOpacity)
             .onAppear {
@@ -96,19 +96,19 @@ struct AddVehicleMultiStepView: View {
 
     var body: some View {
         ZStack {
-            Color(.secondarySystemBackground)
+            ColorTokens.background
                 .ignoresSafeArea()
 
-            VStack(spacing: 32) {
-                VStack(spacing: 16) {
+            VStack(spacing: Spacing.xl) {
+                VStack(spacing: Spacing.md) {
                     // Header with progress indicator
-                    HStack(spacing: 1) {
+                    HStack(spacing: Spacing.xxxs) {
                         ForEach(0..<totalSteps, id: \.self) { step in
                             ZStack {
                                 Circle()
                                     .stroke(lineWidth: 3)
-                                    .frame(width: 20, height: 20)
-                                    .foregroundStyle(step < currentStep.rawValue ? Color(.systemPurple) : Color(.secondarySystemFill))
+                                    .frame(width: Spacing.lg, height: Spacing.lg)
+                                    .foregroundStyle(step < currentStep.rawValue ? ColorTokens.actionPrimary : ColorTokens.surfaceSecondary)
 
                                 // Arc de cercle animé pour l'étape actuelle
                                 if step == currentStep.rawValue {
@@ -119,8 +119,8 @@ struct AddVehicleMultiStepView: View {
                                 if step < currentStep.rawValue {
                                     Image(systemName: "checkmark.circle.fill")
                                         .resizable()
-                                        .frame(width: 20, height: 20)
-                                        .foregroundStyle(Color.purple)
+                                        .frame(width: Spacing.lg, height: Spacing.lg)
+                                        .foregroundStyle(ColorTokens.actionPrimary)
                                         .transition(.scale)
                                 }
                             }
@@ -128,11 +128,11 @@ struct AddVehicleMultiStepView: View {
                                 ZStack(alignment: .leading){
                                     Rectangle()
                                         .frame(height: 3)
-                                        .foregroundStyle(Color(.secondarySystemFill))
+                                        .foregroundStyle(ColorTokens.surfaceSecondary)
                                     Rectangle()
                                         .frame(height: 3)
                                         .frame(maxWidth: step >= currentStep.rawValue ? 0 : .infinity, alignment: .leading)
-                                        .foregroundStyle(Color(.systemPurple))
+                                        .foregroundStyle(ColorTokens.actionPrimary)
                                 }
                             }
                         }
@@ -149,9 +149,8 @@ struct AddVehicleMultiStepView: View {
                         })
                         Spacer()
                         Text(currentStep.title)
-                            .font(.title2)
-                            .fontWeight(.bold)
-                            .foregroundStyle(Color(.label))
+                            .font(Typography.title2)
+                            .foregroundStyle(ColorTokens.textPrimary)
                             .multilineTextAlignment(.center)
                         Spacer()
                         Button("Suivant", action: {
@@ -190,14 +189,14 @@ struct AddVehicleMultiStepView: View {
                         })
                     }
                 }
-                .padding(.horizontal, 16)
+                .padding(.horizontal, Spacing.md)
                 Text(currentStep.subtitle)
                     .bodyDefaultRegular()
-                    .foregroundStyle(Color(.secondaryLabel))
+                    .foregroundStyle(ColorTokens.textSecondary)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
                     .frame(height: 40, alignment: .top)
-                    .padding(.horizontal, 16)
+                    .padding(.horizontal, Spacing.md)
 
                 // Horizontal scrolling steps
                 ScrollView(.horizontal) {

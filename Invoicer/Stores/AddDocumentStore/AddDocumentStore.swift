@@ -59,7 +59,8 @@ struct AddDocumentStore {
         case setShowValidationError(Bool)
     }
 
-    @Dependency(\.fileStorageService) var fileStorageService
+    @Dependency(\.documentRepository) var documentRepository
+    @Dependency(\.vehicleRepository) var vehicleRepository
     @Dependency(\.dismiss) var dismiss
 
     var body: some ReducerOf<Self> {
@@ -132,16 +133,20 @@ struct AddDocumentStore {
                     }
 
                     return .run { [vehicleId = state.vehicleId, name = state.documentName, date = state.documentDate, mileage = state.documentMileage, type = state.documentType] send in
-                        await fileStorageService.saveDocument(
-                            image: image,
-                            for: vehicleId,
-                            name: name,
-                            date: date,
-                            mileage: mileage,
-                            type: type,
-                            amount: amount
-                        )
-                        await send(.documentSaved)
+                        do {
+                            let metadata = DocumentMetadata(
+                                name: name,
+                                date: date,
+                                mileage: mileage,
+                                type: type,
+                                amount: amount
+                            )
+                            _ = try await documentRepository.save(image: image, for: vehicleId, metadata: metadata)
+                            await send(.documentSaved)
+                        } catch {
+                            print("❌ [AddDocumentStore] Erreur lors de la sauvegarde de l'image: \(error.localizedDescription)")
+                            await send(.documentSaved)
+                        }
                     }
 
                 case .file:
@@ -151,16 +156,20 @@ struct AddDocumentStore {
                     }
 
                     return .run { [vehicleId = state.vehicleId, name = state.documentName, date = state.documentDate, mileage = state.documentMileage, type = state.documentType] send in
-                        await fileStorageService.saveDocument(
-                            fileURL: fileURL,
-                            for: vehicleId,
-                            name: name,
-                            date: date,
-                            mileage: mileage,
-                            type: type,
-                            amount: amount
-                        )
-                        await send(.documentSaved)
+                        do {
+                            let metadata = DocumentMetadata(
+                                name: name,
+                                date: date,
+                                mileage: mileage,
+                                type: type,
+                                amount: amount
+                            )
+                            _ = try await documentRepository.save(fileURL: fileURL, for: vehicleId, metadata: metadata)
+                            await send(.documentSaved)
+                        } catch {
+                            print("❌ [AddDocumentStore] Erreur lors de la sauvegarde du fichier: \(error.localizedDescription)")
+                            await send(.documentSaved)
+                        }
                     }
 
                 case .none:
@@ -172,20 +181,23 @@ struct AddDocumentStore {
                 state.isLoading = false
                 // Recharger le véhicule pour mettre à jour la liste des documents
                 return .run { [vehicleId = state.vehicleId, vehicles = state.$vehicles, selectedVehicle = state.$selectedVehicle] send in
-                    let updatedVehicles = await fileStorageService.loadVehicles()
-                    if let updatedVehicle = updatedVehicles.first(where: { $0.id == vehicleId }) {
-                        await vehicles.withLock { vehicles in
-                            if let index = vehicles.firstIndex(where: { $0.id == vehicleId }) {
-                                vehicles[index] = updatedVehicle
+                    do {
+                        if let updatedVehicle = try await vehicleRepository.find(by: vehicleId) {
+                            await vehicles.withLock { vehicles in
+                                if let index = vehicles.firstIndex(where: { $0.id == vehicleId }) {
+                                    vehicles[index] = updatedVehicle
+                                }
                             }
-                        }
 
-                        // Also update selectedVehicle if it's the same vehicle
-                        await selectedVehicle.withLock { selected in
-                            if selected?.id == vehicleId {
-                                selected = updatedVehicle
+                            // Also update selectedVehicle if it's the same vehicle
+                            await selectedVehicle.withLock { selected in
+                                if selected?.id == vehicleId {
+                                    selected = updatedVehicle
+                                }
                             }
                         }
+                    } catch {
+                        print("❌ [AddDocumentStore] Erreur lors du rechargement du véhicule: \(error.localizedDescription)")
                     }
                     await dismiss()
                 }

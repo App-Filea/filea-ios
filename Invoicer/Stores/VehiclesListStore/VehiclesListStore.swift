@@ -14,6 +14,7 @@ struct VehiclesListStore {
     struct State: Equatable {
         @Shared(.vehicles) var vehicles: [Vehicle] = []
         @Shared(.selectedVehicle) var selectedVehicle: Vehicle?
+        @Shared(.lastOpenedVehicleId) var lastOpenedVehicleId: UUID?
         @Presents var addVehicle: AddVehicleStore.State?
         var isLoading = false
     }
@@ -26,7 +27,7 @@ struct VehiclesListStore {
         case addVehicle(PresentationAction<AddVehicleStore.Action>)
     }
 
-    @Dependency(\.fileStorageService) var fileStorageService
+    @Dependency(\.vehicleRepository) var vehicleRepository
 
     var body: some ReducerOf<Self> {
         Reduce { state, action in
@@ -34,8 +35,13 @@ struct VehiclesListStore {
             case .loadVehicles:
                 state.isLoading = true
                 return .run { send in
-                    let loadedVehicles = await fileStorageService.loadVehicles()
-                    await send(.vehiclesLoaded(loadedVehicles))
+                    do {
+                        let loadedVehicles = try await vehicleRepository.loadAll()
+                        await send(.vehiclesLoaded(loadedVehicles))
+                    } catch {
+                        print("❌ [VehiclesListStore] Erreur lors du chargement: \(error.localizedDescription)")
+                        await send(.vehiclesLoaded([]))
+                    }
                 }
 
             case .vehiclesLoaded(let vehicles):
@@ -48,8 +54,9 @@ struct VehiclesListStore {
                 return .none
 
             case .selectVehicle(let vehicle):
-                // Update selected vehicle (navigation handled by AppStore+Path)
+                // Update selected vehicle and save last opened ID (navigation handled by AppStore+Path)
                 state.$selectedVehicle.withLock { $0 = vehicle }
+                state.$lastOpenedVehicleId.withLock { $0 = vehicle.id }
                 return .none
 
             case .addVehicle:

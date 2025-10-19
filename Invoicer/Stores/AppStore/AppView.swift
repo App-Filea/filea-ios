@@ -19,6 +19,10 @@ struct AppView: View {
                 }
         } destination: { store in
             switch store.state {
+            case .storageOnboarding:
+                if let store = store.scope(state: \.storageOnboarding, action: \.storageOnboarding) {
+                    StorageOnboardingView(store: store)
+                }
             case .vehiclesList:
                 if let store = store.scope(state: \.vehiclesList, action: \.vehiclesList) {
                     VehiclesListView(store: store)
@@ -46,6 +50,10 @@ struct AppView: View {
             case .editDocument:
                 if let store = store.scope(state: \.editDocument, action: \.editDocument) {
                     EditDocumentView(store: store)
+                }
+            case .settings:
+                if let store = store.scope(state: \.settings, action: \.settings) {
+                    SettingsView(store: store)
                 }
             }
         }

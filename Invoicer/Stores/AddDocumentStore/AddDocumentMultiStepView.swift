@@ -18,11 +18,11 @@ struct AddDocumentMultiStepView: View {
 
     var body: some View {
         ZStack {
-            Color(.secondarySystemBackground)
+            ColorTokens.surfaceSecondary
                 .ignoresSafeArea()
 
-            VStack(spacing: 32) {
-                VStack(spacing: 16) {
+            VStack(spacing: Spacing.xl) {
+                VStack(spacing: Spacing.md) {
                     HStack {
                         Button("Retour", action: {
                             if let previousStep = currentStep.previous {
@@ -31,14 +31,13 @@ struct AddDocumentMultiStepView: View {
                                 store.send(.cancelCreation)
                             }
                         })
-                        .foregroundStyle(Color(.systemPurple))
+                        .foregroundStyle(ColorTokens.actionPrimary)
 
                         Spacer()
 
                         Text(currentStep.title)
-                            .font(.title2)
-                            .fontWeight(.bold)
-                            .foregroundStyle(Color(.label))
+                            .font(Typography.title2)
+                            .foregroundStyle(ColorTokens.textPrimary)
                             .multilineTextAlignment(.center)
 
                         Spacer()
@@ -67,42 +66,42 @@ struct AddDocumentMultiStepView: View {
                                 }
                             }
                         })
-                        .foregroundStyle(Color(.systemPurple))
+                        .foregroundStyle(ColorTokens.actionPrimary)
                         .disabled(store.isLoading)
                     }
                 }
-                .padding(.horizontal, 16)
+                .padding(.horizontal, Spacing.md)
 
                 Text(currentStep.subtitle)
                     .bodyDefaultRegular()
-                    .foregroundStyle(Color(.secondaryLabel))
+                    .foregroundStyle(ColorTokens.textSecondary)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
                     .frame(height: 40, alignment: .top)
-                    .padding(.horizontal, 16)
+                    .padding(.horizontal, Spacing.md)
 
                 // Validation error
                 if store.showValidationError {
-                    HStack(spacing: 8) {
+                    HStack(spacing: Spacing.xs) {
                         Image(systemName: "exclamationmark.triangle.fill")
-                            .foregroundStyle(.yellow)
+                            .foregroundStyle(ColorTokens.warning)
                         Text(currentStep.validate(
                             hasSource: store.hasSourceSelected,
                             name: store.documentName,
                             mileage: store.documentMileage,
                             amount: store.documentAmount
                         ).error ?? "")
-                            .font(.caption)
-                            .foregroundStyle(Color(.label))
+                            .font(Typography.caption1)
+                            .foregroundStyle(ColorTokens.textPrimary)
                     }
-                    .padding(12)
-                    .background(Color(.systemYellow).opacity(0.1))
-                    .cornerRadius(8)
+                    .padding(Spacing.sm)
+                    .background(ColorTokens.warning.opacity(0.1))
+                    .cornerRadius(Radius.sm)
                     .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(Color(.systemYellow), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: Radius.sm)
+                            .stroke(ColorTokens.warning, lineWidth: 1)
                     )
-                    .padding(.horizontal, 16)
+                    .padding(.horizontal, Spacing.md)
                     .transition(.scale.combined(with: .opacity))
                 }
 

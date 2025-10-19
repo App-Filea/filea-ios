@@ -40,7 +40,8 @@ struct DocumentDetailCoordinatorStore {
         case goBack
     }
     
-    @Dependency(\.fileStorageService) var fileStorageService
+    @Dependency(\.vehicleRepository) var vehicleRepository
+    @Dependency(\.documentRepository) var documentRepository
     @Dependency(\.dismiss) var dismiss
     
     var body: some ReducerOf<Self> {
@@ -49,14 +50,18 @@ struct DocumentDetailCoordinatorStore {
             case .determineDocumentType:
                 print("🔍 [DocumentDetailCoordinator] Détermination du type de document: \(state.documentId)")
                 return .run { [vehicleId = state.vehicleId, documentId = state.documentId] send in
-                    let vehicles = await fileStorageService.loadVehicles()
-                    if let vehicle = vehicles.first(where: { $0.id == vehicleId }),
-                       let document = vehicle.documents.first(where: { $0.id == documentId }) {
-                        
-                        let documentType = await determineDocumentType(from: document.fileURL)
-                        await send(.documentTypeDetected(documentType))
-                    } else {
-                        print("❌ [DocumentDetailCoordinator] Document non trouvé")
+                    do {
+                        if let vehicle = try await vehicleRepository.find(by: vehicleId),
+                           let document = vehicle.documents.first(where: { $0.id == documentId }) {
+
+                            let documentType = await determineDocumentType(from: document.fileURL)
+                            await send(.documentTypeDetected(documentType))
+                        } else {
+                            print("❌ [DocumentDetailCoordinator] Document non trouvé")
+                            await send(.documentTypeDetected(.unknown))
+                        }
+                    } catch {
+                        print("❌ [DocumentDetailCoordinator] Erreur lors du chargement: \(error.localizedDescription)")
                         await send(.documentTypeDetected(.unknown))
                     }
                 }
@@ -142,10 +147,11 @@ struct DocumentDetailCoordinatorStore {
             case .requestDeletion(let documentId):
                 print("🗑️ [DocumentDetailCoordinator] Début de la suppression du document: \(documentId)")
                 return .run { [vehicleId = state.vehicleId] send in
-                    let vehicles = await fileStorageService.loadVehicles()
-                    if let vehicle = vehicles.first(where: { $0.id == vehicleId }),
-                       let document = vehicle.documents.first(where: { $0.id == documentId }) {
-                        await fileStorageService.deleteDocument(document, for: vehicleId)
+                    do {
+                        try await documentRepository.delete(documentId, for: vehicleId)
+                        await send(.documentDeleted)
+                    } catch {
+                        print("❌ [DocumentDetailCoordinator] Erreur lors de la suppression: \(error.localizedDescription)")
                         await send(.documentDeleted)
                     }
                 }
@@ -154,13 +160,16 @@ struct DocumentDetailCoordinatorStore {
                 print("🗑️ [DocumentDetailCoordinator] Document supprimé, mise à jour réactive")
                 // Recharger le véhicule pour mettre à jour la liste des documents
                 return .run { [vehicleId = state.vehicleId, vehicles = state.$vehicles] send in
-                    let updatedVehicles = await fileStorageService.loadVehicles()
-                    if let updatedVehicle = updatedVehicles.first(where: { $0.id == vehicleId }) {
-                        await vehicles.withLock { vehicles in
-                            if let index = vehicles.firstIndex(where: { $0.id == vehicleId }) {
-                                vehicles[index] = updatedVehicle
+                    do {
+                        if let updatedVehicle = try await vehicleRepository.find(by: vehicleId) {
+                            await vehicles.withLock { vehicles in
+                                if let index = vehicles.firstIndex(where: { $0.id == vehicleId }) {
+                                    vehicles[index] = updatedVehicle
+                                }
                             }
                         }
+                    } catch {
+                        print("❌ [DocumentDetailCoordinator] Erreur lors du rechargement du véhicule: \(error.localizedDescription)")
                     }
                     await dismiss()
                 }
@@ -168,10 +177,13 @@ struct DocumentDetailCoordinatorStore {
             case .showEditDocument:
                 state.isLoading = true
                 return .run { [vehicleId = state.vehicleId, documentId = state.documentId] send in
-                    let vehicles = await fileStorageService.loadVehicles()
-                    if let vehicle = vehicles.first(where: { $0.id == vehicleId }),
-                       let document = vehicle.documents.first(where: { $0.id == documentId }) {
-                        await send(.editDocumentLoaded(document))
+                    do {
+                        if let vehicle = try await vehicleRepository.find(by: vehicleId),
+                           let document = vehicle.documents.first(where: { $0.id == documentId }) {
+                            await send(.editDocumentLoaded(document))
+                        }
+                    } catch {
+                        print("❌ [DocumentDetailCoordinator] Erreur lors du chargement du document: \(error.localizedDescription)")
                     }
                 }
                 

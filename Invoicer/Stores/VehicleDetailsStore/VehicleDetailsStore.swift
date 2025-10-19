@@ -31,7 +31,7 @@ struct VehicleDetailsStore {
         }
     }
     
-    @Dependency(\.fileStorageService) var fileStorageService
+    @Dependency(\.vehicleRepository) var vehicleRepository
     @Dependency(\.dismiss) var dismiss
     
     var body: some ReducerOf<Self> {
@@ -40,6 +40,11 @@ struct VehicleDetailsStore {
             case .editVehicleTapped:
                 guard let vehicle = state.selectedVehicle else { return .none }
                 state.editVehicle = EditVehicleStore.State(vehicle: vehicle)
+                return .none
+
+            case .editVehicle(.presented(.vehicleUpdated)):
+                // Vehicle has been updated, close the sheet
+                state.editVehicle = nil
                 return .none
 
             case .editVehicle:

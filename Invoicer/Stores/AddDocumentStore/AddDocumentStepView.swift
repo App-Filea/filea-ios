@@ -20,7 +20,7 @@ struct AddDocumentStepView: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 24) {
+            VStack(spacing: Spacing.lg) {
                 switch step {
                 case .selectSource:
                     selectSourceView
@@ -28,8 +28,8 @@ struct AddDocumentStepView: View {
                     metadataView
                 }
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 24)
+            .padding(.horizontal, Spacing.md)
+            .padding(.vertical, Spacing.lg)
         }
         .scrollDismissesKeyboard(.interactively)
         .fullScreenCover(isPresented: $store.showCamera) {
@@ -56,9 +56,9 @@ struct AddDocumentStepView: View {
     // MARK: - Select Source View
 
     private var selectSourceView: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: Spacing.lg) {
             // Source Selection Buttons
-            VStack(spacing: 16) {
+            VStack(spacing: Spacing.md) {
                 SourceButton(
                     icon: "camera.fill",
                     title: "Prendre une Photo",
@@ -86,11 +86,11 @@ struct AddDocumentStepView: View {
     }
 
     private var previewSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: Spacing.md) {
             HStack {
                 Text("Aperçu")
-                    .font(.headline)
-                    .foregroundStyle(Color(.label))
+                    .font(Typography.headline)
+                    .foregroundStyle(ColorTokens.textPrimary)
 
                 Spacer()
 
@@ -99,8 +99,8 @@ struct AddDocumentStepView: View {
                 } label: {
                     Label("Supprimer", systemImage: "xmark.circle.fill")
                         .labelStyle(.iconOnly)
-                        .foregroundStyle(Color(.systemRed))
-                        .font(.title3)
+                        .foregroundStyle(ColorTokens.error)
+                        .font(Typography.title3)
                 }
             }
 
@@ -110,79 +110,79 @@ struct AddDocumentStepView: View {
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(maxHeight: 300)
-                    .cornerRadius(12)
+                    .cornerRadius(Radius.md)
                     .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color(.systemPurple), lineWidth: 2)
+                        RoundedRectangle(cornerRadius: Radius.md)
+                            .stroke(ColorTokens.actionPrimary, lineWidth: 2)
                     )
 
                 Button {
                     store.send(.showCamera)
                 } label: {
                     Label("Reprendre la Photo", systemImage: "camera.fill")
-                        .font(.subheadline.weight(.medium))
-                        .foregroundStyle(Color(.systemPurple))
+                        .font(Typography.subheadline)
+                        .foregroundStyle(ColorTokens.actionPrimary)
                 }
             } else if let fileName = store.selectedFileName, store.documentSource == .file {
                 // File Preview
-                HStack(spacing: 12) {
+                HStack(spacing: Spacing.sm) {
                     Image(systemName: fileIcon(for: fileName))
-                        .font(.title)
-                        .foregroundStyle(Color(.systemPurple))
+                        .font(Typography.title1)
+                        .foregroundStyle(ColorTokens.actionPrimary)
 
-                    VStack(alignment: .leading, spacing: 4) {
+                    VStack(alignment: .leading, spacing: Spacing.xxs) {
                         Text(fileName)
-                            .font(.subheadline.weight(.medium))
-                            .foregroundStyle(Color(.label))
+                            .font(Typography.subheadline)
+                            .foregroundStyle(ColorTokens.textPrimary)
                             .lineLimit(2)
 
                         Text(fileType(for: fileName))
-                            .font(.caption)
-                            .foregroundStyle(Color(.secondaryLabel))
+                            .font(Typography.caption1)
+                            .foregroundStyle(ColorTokens.textSecondary)
                     }
 
                     Spacer()
                 }
-                .padding(16)
-                .background(Color(.systemBackground))
-                .cornerRadius(12)
+                .padding(Spacing.md)
+                .background(ColorTokens.surfacePrimary)
+                .cornerRadius(Radius.md)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color(.systemPurple), lineWidth: 2)
+                    RoundedRectangle(cornerRadius: Radius.md)
+                        .stroke(ColorTokens.actionPrimary, lineWidth: 2)
                 )
 
                 Button {
                     store.send(.showFilePicker)
                 } label: {
                     Label("Choisir un Autre Fichier", systemImage: "folder.fill")
-                        .font(.subheadline.weight(.medium))
-                        .foregroundStyle(Color(.systemPurple))
+                        .font(Typography.subheadline)
+                        .foregroundStyle(ColorTokens.actionPrimary)
                 }
             }
         }
-        .padding(16)
-        .background(Color(.systemBackground))
-        .cornerRadius(12)
+        .padding(Spacing.md)
+        .background(ColorTokens.surfacePrimary)
+        .cornerRadius(Radius.md)
     }
 
     // MARK: - Metadata View
 
     private var metadataView: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: Spacing.lg) {
             // Document Name
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: Spacing.xs) {
                 Text("Nom du document")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(Color(.label))
+                    .font(Typography.subheadline)
+                    .foregroundStyle(ColorTokens.textPrimary)
 
                 TextField("Ex: Vidange moteur", text: $store.documentName)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 16)
-                    .background(Color(.systemBackground))
-                    .cornerRadius(12)
+                    .padding(.horizontal, Spacing.md)
+                    .padding(.vertical, Spacing.md)
+                    .background(ColorTokens.surfacePrimary)
+                    .cornerRadius(Radius.md)
                     .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(focusedField == .documentName ? Color(.systemPurple) : Color(.separator), lineWidth: 2)
+                        RoundedRectangle(cornerRadius: Radius.md)
+                            .stroke(focusedField == .documentName ? ColorTokens.actionPrimary : ColorTokens.border, lineWidth: 2)
                     )
                     .focused($focusedField, equals: .documentName)
                     .submitLabel(.next)
@@ -190,10 +190,10 @@ struct AddDocumentStepView: View {
             }
 
             // Document Type
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: Spacing.xs) {
                 Text("Type de document")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(Color(.label))
+                    .font(Typography.subheadline)
+                    .foregroundStyle(ColorTokens.textPrimary)
 
                 Menu {
                     ForEach(DocumentCategory.allCases, id: \.self) { category in
@@ -217,54 +217,54 @@ struct AddDocumentStepView: View {
                 } label: {
                     HStack {
                         Image(systemName: store.documentType.imageName)
-                            .foregroundStyle(Color(.systemPurple))
+                            .foregroundStyle(ColorTokens.actionPrimary)
                         Text(store.documentType.displayName)
-                            .foregroundStyle(Color(.label))
+                            .foregroundStyle(ColorTokens.textPrimary)
                         Spacer()
                         Image(systemName: "chevron.up.chevron.down")
-                            .font(.caption)
-                            .foregroundStyle(Color(.tertiaryLabel))
+                            .font(Typography.caption1)
+                            .foregroundStyle(ColorTokens.textTertiary)
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 16)
-                    .background(Color(.systemBackground))
-                    .cornerRadius(12)
+                    .padding(.horizontal, Spacing.md)
+                    .padding(.vertical, Spacing.md)
+                    .background(ColorTokens.surfacePrimary)
+                    .cornerRadius(Radius.md)
                     .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color(.separator), lineWidth: 2)
+                        RoundedRectangle(cornerRadius: Radius.md)
+                            .stroke(ColorTokens.border, lineWidth: 2)
                     )
                 }
             }
 
-            HStack(spacing: 12) {
+            HStack(spacing: Spacing.sm) {
                 // Mileage
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: Spacing.xs) {
                     Text("Kilométrage")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(Color(.label))
+                        .font(Typography.subheadline)
+                        .foregroundStyle(ColorTokens.textPrimary)
 
                     HStack {
                         TextField("120000", text: $store.documentMileage)
                             .keyboardType(.numberPad)
                             .focused($focusedField, equals: .mileage)
                         Text("km")
-                            .foregroundStyle(Color(.secondaryLabel))
+                            .foregroundStyle(ColorTokens.textSecondary)
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 16)
-                    .background(Color(.systemBackground))
-                    .cornerRadius(12)
+                    .padding(.horizontal, Spacing.md)
+                    .padding(.vertical, Spacing.md)
+                    .background(ColorTokens.surfacePrimary)
+                    .cornerRadius(Radius.md)
                     .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(focusedField == .mileage ? Color(.systemPurple) : Color(.separator), lineWidth: 2)
+                        RoundedRectangle(cornerRadius: Radius.md)
+                            .stroke(focusedField == .mileage ? ColorTokens.actionPrimary : ColorTokens.border, lineWidth: 2)
                     )
                 }
 
                 // Date
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: Spacing.xs) {
                     Text("Date")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(Color(.label))
+                        .font(Typography.subheadline)
+                        .foregroundStyle(ColorTokens.textPrimary)
 
                     Button {
                         focusedField = nil
@@ -272,43 +272,43 @@ struct AddDocumentStepView: View {
                     } label: {
                         HStack {
                             Text(formatDate(store.documentDate))
-                                .foregroundStyle(Color(.label))
+                                .foregroundStyle(ColorTokens.textPrimary)
                             Spacer()
                             Image(systemName: "calendar")
-                                .foregroundStyle(Color(.secondaryLabel))
+                                .foregroundStyle(ColorTokens.textSecondary)
                         }
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 16)
-                        .background(Color(.systemBackground))
-                        .cornerRadius(12)
+                        .padding(.horizontal, Spacing.md)
+                        .padding(.vertical, Spacing.md)
+                        .background(ColorTokens.surfacePrimary)
+                        .cornerRadius(Radius.md)
                         .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color(.separator), lineWidth: 2)
+                            RoundedRectangle(cornerRadius: Radius.md)
+                                .stroke(ColorTokens.border, lineWidth: 2)
                         )
                     }
                 }
             }
 
             // Amount
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: Spacing.xs) {
                 Text("Montant")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(Color(.label))
+                    .font(Typography.subheadline)
+                    .foregroundStyle(ColorTokens.textPrimary)
 
                 HStack {
                     TextField("0,00", text: $store.documentAmount)
                         .keyboardType(.decimalPad)
                         .focused($focusedField, equals: .amount)
                     Text("€")
-                        .foregroundStyle(Color(.secondaryLabel))
+                        .foregroundStyle(ColorTokens.textSecondary)
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 16)
-                .background(Color(.systemBackground))
-                .cornerRadius(12)
+                .padding(.horizontal, Spacing.md)
+                .padding(.vertical, Spacing.md)
+                .background(ColorTokens.surfacePrimary)
+                .cornerRadius(Radius.md)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(focusedField == .amount ? Color(.systemPurple) : Color(.separator), lineWidth: 2)
+                    RoundedRectangle(cornerRadius: Radius.md)
+                        .stroke(focusedField == .amount ? ColorTokens.actionPrimary : ColorTokens.border, lineWidth: 2)
                 )
             }
         }
@@ -318,8 +318,8 @@ struct AddDocumentStepView: View {
                 Button("Terminé") {
                     focusedField = nil
                 }
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(Color(.systemPurple))
+                .font(Typography.subheadline)
+                .foregroundStyle(ColorTokens.actionPrimary)
             }
         }
     }
@@ -363,8 +363,8 @@ struct AnimatedCameraIcon: View {
 
     var body: some View {
         Image(systemName: "camera.fill")
-            .font(.title2)
-            .foregroundStyle(isSelected ? Color(.systemPurple) : Color(.secondaryLabel))
+            .font(Typography.title2)
+            .foregroundStyle(isSelected ? ColorTokens.actionPrimary : ColorTokens.textSecondary)
             .scaleEffect(pulseScale)
             .frame(width: 40)
             .onAppear {
@@ -404,8 +404,8 @@ struct AnimatedFolderIcon: View {
 
     var body: some View {
         Image(systemName: "folder.fill")
-            .font(.title2)
-            .foregroundStyle(isSelected ? Color(.systemPurple) : Color(.secondaryLabel))
+            .font(Typography.title2)
+            .foregroundStyle(isSelected ? ColorTokens.actionPrimary : ColorTokens.textSecondary)
             .scaleEffect(pulseScale)
             .rotationEffect(.degrees(rotationAngle))
             .frame(width: 40)
@@ -472,7 +472,7 @@ struct SourceButton: View {
 
             action()
         }) {
-            HStack(spacing: 16) {
+            HStack(spacing: Spacing.md) {
                 // Animated icon based on type
                 if icon == "camera.fill" {
                     AnimatedCameraIcon(isSelected: isSelected)
@@ -480,35 +480,35 @@ struct SourceButton: View {
                     AnimatedFolderIcon(isSelected: isSelected)
                 } else {
                     Image(systemName: icon)
-                        .font(.title2)
-                        .foregroundStyle(isSelected ? Color(.systemPurple) : Color(.secondaryLabel))
+                        .font(Typography.title2)
+                        .foregroundStyle(isSelected ? ColorTokens.actionPrimary : ColorTokens.textSecondary)
                         .frame(width: 40)
                 }
 
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: Spacing.xxs) {
                     Text(title)
-                        .font(.headline)
-                        .foregroundStyle(isSelected ? Color(.systemPurple) : Color(.label))
+                        .font(Typography.headline)
+                        .foregroundStyle(isSelected ? ColorTokens.actionPrimary : ColorTokens.textPrimary)
                     Text(subtitle)
-                        .font(.subheadline)
-                        .foregroundStyle(Color(.secondaryLabel))
+                        .font(Typography.subheadline)
+                        .foregroundStyle(ColorTokens.textSecondary)
                 }
 
                 Spacer()
 
                 if isSelected {
                     Image(systemName: "checkmark.circle.fill")
-                        .font(.title3)
-                        .foregroundStyle(Color(.systemPurple))
+                        .font(Typography.title3)
+                        .foregroundStyle(ColorTokens.actionPrimary)
                         .transition(.scale.combined(with: .opacity))
                 }
             }
-            .padding(20)
-            .background(Color(.systemBackground))
-            .cornerRadius(12)
+            .padding(Spacing.lg)
+            .background(ColorTokens.surfacePrimary)
+            .cornerRadius(Radius.md)
             .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(isSelected ? Color(.systemPurple) : Color(.separator), lineWidth: isSelected ? 2 : 1)
+                RoundedRectangle(cornerRadius: Radius.md)
+                    .stroke(isSelected ? ColorTokens.actionPrimary : ColorTokens.border, lineWidth: isSelected ? 2 : 1)
             )
             .scaleEffect(isPressed ? 0.97 : 1.0)
         }

@@ -58,7 +58,7 @@ struct EditVehicleStore {
         case goBack
     }
     
-    @Dependency(\.fileStorageService) var fileStorageService
+    @Dependency(\.vehicleRepository) var vehicleRepository
     @Dependency(\.dismiss) var dismiss
     
     var body: some ReducerOf<Self> {
@@ -95,15 +95,21 @@ struct EditVehicleStore {
                 )
 
                 return .run { [vehicles = state.vehicles, originalVehicleId = state.originalVehicle.id] send in
-                    // Sauvegarder tous les véhicules mis à jour
-                    for existingVehicle in vehicles {
-                        if existingVehicle.id != originalVehicleId {
-                            await fileStorageService.updateVehicle(existingVehicle.id, with: existingVehicle)
+                    do {
+                        // Sauvegarder tous les véhicules mis à jour
+                        for existingVehicle in vehicles {
+                            if existingVehicle.id != originalVehicleId {
+                                try await vehicleRepository.update(existingVehicle)
+                            }
                         }
+                        // Mettre à jour le véhicule actuel
+                        try await vehicleRepository.update(updatedVehicle)
+                        await send(.vehicleUpdated)
+                    } catch {
+                        print("❌ [EditVehicleStore] Erreur lors de la mise à jour: \(error.localizedDescription)")
+                        // Continue anyway to update UI
+                        await send(.vehicleUpdated)
                     }
-                    // Mettre à jour le véhicule actuel
-                    await fileStorageService.updateVehicle(originalVehicleId, with: updatedVehicle)
-                    await send(.vehicleUpdated)
                 }
 
             case .vehicleUpdated:

@@ -37,7 +37,8 @@ struct PhotoDocumentDetailStore {
         case showEditDocument
     }
     
-    @Dependency(\.fileStorageService) var fileStorageService
+    @Dependency(\.vehicleRepository) var vehicleRepository
+    @Dependency(\.documentRepository) var documentRepository
     
     var body: some ReducerOf<Self> {
         Reduce { state, action in
@@ -45,13 +46,17 @@ struct PhotoDocumentDetailStore {
             case .loadDocument:
                 print("📖 [PhotoDocumentDetailStore] Chargement du document photo: \(state.documentId)")
                 return .run { [vehicleId = state.vehicleId, documentId = state.documentId] send in
-                    let vehicles = await fileStorageService.loadVehicles()
-                    if let vehicle = vehicles.first(where: { $0.id == vehicleId }),
-                       let document = vehicle.documents.first(where: { $0.id == documentId }) {
-                        print("✅ [PhotoDocumentDetailStore] Document photo trouvé: \(document.fileURL)")
-                        await send(.documentLoaded(document))
-                    } else {
-                        print("❌ [PhotoDocumentDetailStore] Document photo non trouvé avec ID: \(documentId)")
+                    do {
+                        if let vehicle = try await vehicleRepository.find(by: vehicleId),
+                           let document = vehicle.documents.first(where: { $0.id == documentId }) {
+                            print("✅ [PhotoDocumentDetailStore] Document photo trouvé: \(document.fileURL)")
+                            await send(.documentLoaded(document))
+                        } else {
+                            print("❌ [PhotoDocumentDetailStore] Document photo non trouvé avec ID: \(documentId)")
+                            await send(.documentLoaded(nil))
+                        }
+                    } catch {
+                        print("❌ [PhotoDocumentDetailStore] Erreur lors du chargement: \(error.localizedDescription)")
                         await send(.documentLoaded(nil))
                     }
                 }
@@ -104,13 +109,18 @@ struct PhotoDocumentDetailStore {
                 if let capturedImage = image {
                     print("✅ [PhotoDocumentDetailStore] Photo acceptée, remplacement en cours...")
                     print("🔍 [PhotoDocumentDetailStore] Taille de la nouvelle image: \(capturedImage.size)")
-                    
+
                     state.isLoading = true
                     state.showCamera = false
-                    
+
                     return .run { [vehicleId = state.vehicleId, documentId = state.documentId] send in
-                        await fileStorageService.replaceDocumentPhoto(documentId, in: vehicleId, with: capturedImage)
-                        await send(.photoReplaced)
+                        do {
+                            try await documentRepository.replacePhoto(documentId, for: vehicleId, with: capturedImage)
+                            await send(.photoReplaced)
+                        } catch {
+                            print("❌ [PhotoDocumentDetailStore] Erreur lors du remplacement de la photo: \(error.localizedDescription)")
+                            await send(.photoReplaced)
+                        }
                     }
                 } else {
                     print("❌ [PhotoDocumentDetailStore] Photo annulée")

@@ -82,18 +82,18 @@ use context7 /apple/human-interface-guidelines consulte [topic]
 - macOS 15.4+ (support partiel)
 - ❌ visionOS désactivé
 
-## Commandes de Build (À NE PAS EXÉCUTER)
+## Commandes de Build
 ```bash
-# Build de l'app (NE PAS EXÉCUTER)
+# Build de l'app 
 xcodebuild -project Invoicer.xcodeproj -scheme Invoicer -configuration Debug build
 
-# Build pour release (NE PAS EXÉCUTER)
+# Build pour release 
 xcodebuild -project Invoicer.xcodeproj -scheme Invoicer -configuration Release build
 
-# Clean build (NE PAS EXÉCUTER)
+# Clean build 
 xcodebuild -project Invoicer.xcodeproj -scheme Invoicer clean
 
-# Tests unitaires (NE PAS EXÉCUTER)
+# Tests unitaires 
 xcodebuild -project Invoicer.xcodeproj -scheme Invoicer -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' test
 
 # Tests UI (NE PAS EXÉCUTER)

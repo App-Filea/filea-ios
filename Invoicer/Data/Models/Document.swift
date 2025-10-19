@@ -95,8 +95,8 @@ struct Document: Codable, Equatable, Identifiable {
     var type: DocumentType
     var amount: Double?
 
-    init(fileURL: String, name: String, date: Date, mileage: String, type: DocumentType, amount: Double? = nil) {
-        self.id = UUID()
+    init(id: UUID? = nil, fileURL: String, name: String, date: Date, mileage: String, type: DocumentType, amount: Double? = nil) {
+        self.id = id ?? UUID()
         self.fileURL = fileURL
         self.name = name
         self.date = date

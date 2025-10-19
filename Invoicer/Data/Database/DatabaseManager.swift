@@ -98,6 +98,17 @@ actor DatabaseManager {
     var queue: DatabaseQueue {
         dbQueue
     }
+
+    /// Vérifie que les tables existent dans la base de données
+    func verifyTablesExist() async throws -> [String] {
+        try await read { db in
+            try String.fetchAll(db, sql: """
+                SELECT name FROM sqlite_master
+                WHERE type='table' AND name NOT LIKE 'sqlite_%'
+                ORDER BY name
+            """)
+        }
+    }
 }
 
 // MARK: - Dependency Key

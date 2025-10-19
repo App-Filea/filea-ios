@@ -11,7 +11,16 @@ import Foundation
 
 extension Vehicle {
     /// Convertit un Vehicle (domain) vers un VehicleRecord (database)
-    func toRecord(folderPath: String) -> VehicleRecord {
+    /// - Parameters:
+    ///   - folderPath: Chemin du dossier du véhicule
+    ///   - createdAt: Date de création (utilise Date() si nil)
+    ///   - updatedAt: Date de modification (utilise Date() si nil)
+    /// - Returns: VehicleRecord pour la persistence
+    func toRecord(
+        folderPath: String,
+        createdAt: Date? = nil,
+        updatedAt: Date? = nil
+    ) -> VehicleRecord {
         VehicleRecord(
             id: id,
             type: type.rawValue,
@@ -22,8 +31,8 @@ extension Vehicle {
             plate: plate,
             isPrimary: isPrimary,
             folderPath: folderPath,
-            createdAt: Date(),
-            updatedAt: Date()
+            createdAt: createdAt ?? Date(),
+            updatedAt: updatedAt ?? Date()
         )
     }
 }
@@ -34,6 +43,7 @@ extension VehicleRecord {
     /// Convertit un VehicleRecord (database) vers un Vehicle (domain)
     func toDomain() -> Vehicle {
         Vehicle(
+            id: id,
             type: VehicleType(rawValue: type) ?? .car,
             brand: brand,
             model: model,
@@ -72,6 +82,7 @@ extension VehicleDTO {
     /// Convertit un VehicleDTO (transfer) vers un Vehicle (domain)
     func toDomain(documents: [Document] = []) -> Vehicle {
         Vehicle(
+            id: id,
             type: VehicleType(rawValue: type) ?? .car,
             brand: brand,
             model: model,

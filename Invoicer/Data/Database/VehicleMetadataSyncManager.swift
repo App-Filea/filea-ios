@@ -218,7 +218,7 @@ actor VehicleMetadataSyncManager {
 
 // MARK: - Errors
 
-enum SyncError: Error, LocalizedError {
+enum SyncError: Error, LocalizedError, Equatable {
     case vehicleNotFound
     case jsonFileNotFound
     case invalidJSON

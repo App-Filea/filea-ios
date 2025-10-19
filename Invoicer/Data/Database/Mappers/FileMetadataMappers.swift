@@ -67,6 +67,7 @@ extension FileMetadataRecord {
             .path
 
         return Document(
+            id: id,
             fileURL: fullPath,
             name: documentName,
             date: date,
@@ -113,6 +114,7 @@ extension FileMetadataDTO {
             .path
 
         return Document(
+            id: id,
             fileURL: fullPath,
             name: documentName,
             date: date,

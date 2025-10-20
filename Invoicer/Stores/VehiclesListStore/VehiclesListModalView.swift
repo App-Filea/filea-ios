@@ -35,7 +35,7 @@ struct VehiclesListModalView: View {
                             .frame(maxWidth: .infinity, alignment: .center)
                             .padding(.horizontal, Spacing.screenMargin)
                         VStack(spacing: Spacing.listItemSpacing) {
-                            ForEach(store.vehicles) { vehicle in
+                            ForEach(store.vehicles.sorted { $0.isPrimary && !$1.isPrimary }) { vehicle in
                                 vehicleCard(vehicle)
                             }
                         }
@@ -64,28 +64,6 @@ struct VehiclesListModalView: View {
             HStack(spacing: 16) {
                 // Vehicle info
                 VStack(alignment: .leading, spacing: 0) {
-                    HStack {
-                        Text(vehicle.isPrimary ? "Principal" : "Secondaire")
-                            .font(Typography.caption2)
-                            .foregroundStyle(vehicle.isPrimary ? .orange : .gray)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 6)
-                            .background(
-                                Capsule()
-                                    .fill(vehicle.isPrimary ? Color.orange.opacity(0.15) : Color.gray.opacity(0.15))
-                            )
-                        
-                        Text(vehicle.type.displayName)
-                            .font(Typography.caption2)
-                            .foregroundStyle(.gray)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 6)
-                            .background(
-                                Capsule()
-                                    .fill(Color.gray.opacity(0.15))
-                            )
-                    }
-                    
                     HStack(alignment: .top, spacing: 0) {
                         VStack(alignment: .leading, spacing: -5) {
                             Text(vehicle.brand.uppercased())

@@ -27,7 +27,7 @@ struct VehiclesListView: View {
                             .frame(maxWidth: .infinity, alignment: .center)
                             .padding([.horizontal, .top], Spacing.screenMargin)
                         VStack(spacing: Spacing.listItemSpacing) {
-                            ForEach(store.vehicles) { vehicle in
+                            ForEach(store.vehicles.sorted { $0.isPrimary && !$1.isPrimary }) { vehicle in
                                 vehicleCard(vehicle)
                             }
                         }
@@ -56,28 +56,6 @@ struct VehiclesListView: View {
             HStack(spacing: 16) {
                 // Vehicle info
                 VStack(alignment: .leading, spacing: 0) {
-                    HStack {
-                        Text(vehicle.isPrimary ? "Principal" : "Secondaire")
-                            .font(Typography.caption2)
-                            .foregroundStyle(vehicle.isPrimary ? .orange : .gray)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 6)
-                            .background(
-                                Capsule()
-                                    .fill(vehicle.isPrimary ? Color.orange.opacity(0.15) : Color.gray.opacity(0.15))
-                            )
-                        
-                        Text(vehicle.type.displayName)
-                            .font(Typography.caption2)
-                            .foregroundStyle(.gray)
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 6)
-                            .background(
-                                Capsule()
-                                    .fill(Color.gray.opacity(0.15))
-                            )
-                    }
-                    
                     HStack(alignment: .top, spacing: 0) {
                         VStack(alignment: .leading, spacing: -5) {
                             Text(vehicle.brand.uppercased())
@@ -135,11 +113,11 @@ struct VehiclesListView: View {
 #Preview("With vehicles") {
     NavigationView {
         VehiclesListView(store: Store(initialState: VehiclesListStore.State(vehicles: [
-            .init(type: .car, brand: "BMW", model: "X5", mileage: "98000", registrationDate: Date(timeIntervalSince1970: 1546300800), plate: "EF-456-GH", isPrimary: true, documents: []),
             .init(type: .bicycle, brand: "Lexus", model: "CT200H", mileage: "120000", registrationDate: Date(timeIntervalSince1970: 1322784000), plate: "BZ-029-YV", documents: []),
             .init(type: .motorcycle, brand: "Tesla", model: "Model 3", mileage: "45000", registrationDate: Date(timeIntervalSince1970: 1577836800), plate: "AB-123-CD", documents: []),
             .init(type: .truck, brand: "BMW", model: "X5", mileage: "98000", registrationDate: Date(timeIntervalSince1970: 1546300800), plate: "EF-456-GH", documents: []),
-            .init(type: .other, brand: "BMW", model: "X5", mileage: "98000", registrationDate: Date(timeIntervalSince1970: 1546300800), plate: "EF-456-GH", documents: [])
+            .init(type: .other, brand: "BMW", model: "X5", mileage: "98000", registrationDate: Date(timeIntervalSince1970: 1546300800), plate: "EF-456-GH", documents: []),
+            .init(type: .car, brand: "Toyota", model: "X5", mileage: "98000", registrationDate: Date(timeIntervalSince1970: 1546300800), plate: "EF-456-GH", isPrimary: true, documents: [])
         ])) {
             VehiclesListStore()
         })

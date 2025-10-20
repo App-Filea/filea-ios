@@ -4,35 +4,33 @@
 //  Created by Léa Dukaez on 09/06/2025.
 //
 
-//import SwiftUI
-//
-//public struct TextPrimaryDefaultButtonStyle: PrimitiveButtonStyle {
-//    @Environment(\.isEnabled) var isEnabled
-//    var size: ButtonSizeStyle
-//    
-//    public func makeBody(configuration: Configuration) -> some View {
-//        configuration.label
-//            .textOnlyPrimary(size: size)
-//            .background(backgroundColor())
-//            .clipShape(RoundedRectangle(cornerRadius: size.cornerRadius, style: .continuous))
-//            .overlay(
-//                RoundedRectangle(cornerRadius: size.cornerRadius, style: .continuous)
-//                    .strokeBorder(NewEvelityColors.Colors.borderNeutral, lineWidth: size.isXLarge ? 3 : 0)
-//            )
-//            .shadow(.extraSmall)
-//            .hapticFeedback(.impact(.medium), configuration: configuration)
-//    }
-//    
-//    private func backgroundColor() -> Color {
-//        isEnabled ? NewEvelityColors.Colors.interactivePrimary : NewEvelityColors.Colors.backgroundNeutral
-//    }
-//}
-//
-//extension PrimitiveButtonStyle where Self == TextPrimaryDefaultButtonStyle {
-//    public static func primary(size: ButtonSizeStyle) -> Self {
-//        .init(size: size)
-//    }
-//}
+import SwiftUI
+
+public struct TextOnlyPrimaryDefaultButtonStyle: ButtonStyle {
+    
+    public func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(Typography.button)
+            .foregroundStyle(ColorTokens.onActionPrimary)
+            .padding(.vertical, Spacing.md)
+            .padding(.horizontal, Spacing.lg)
+            .background(
+                // Background non sélectionné avec effet glass
+                RoundedRectangle(cornerRadius: Radius.full)
+                    .fill(ColorTokens.actionPrimary)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: Radius.full)
+                            .stroke(ColorTokens.border.opacity(0.5), lineWidth: 1)
+                    )
+            )
+    }
+}
+
+extension ButtonStyle where Self == TextOnlyPrimaryDefaultButtonStyle {
+    public static func primaryTextOnly() -> Self {
+        .init()
+    }
+}
 
 //public struct LeftIconPrimaryDefaultButtonStyle: PrimitiveButtonStyle {
 //    @Environment(\.isEnabled) var isEnabled
@@ -117,6 +115,11 @@
 //        .init(size: size)
 //    }
 //}
+
+#Preview("TextOnly button") {
+    Button("Ajouter votre premier véhicule", action: {})
+        .buttonStyle(.primaryTextOnly())
+}
 
 //#Preview("Right icon") {
 //    Button(

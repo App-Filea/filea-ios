@@ -12,81 +12,50 @@ struct VehiclesListModalView: View {
     @Bindable var store: StoreOf<VehiclesListModalStore>
 
     var body: some View {
-        NavigationStack {
-            ZStack(alignment: .bottomTrailing) {
-                Color(.secondarySystemBackground)
-                    .ignoresSafeArea()
+        ZStack(alignment: .bottom) {
+            Color(ColorTokens.background)
+                .ignoresSafeArea()
 
-                if store.vehicles.isEmpty {
-                    emptyStateView
-                } else {
-                    vehiclesListContent
-                }
-
-                // Floating action button
-                Button {
-                    store.send(.showAddVehicle)
-                } label: {
-                    Image(systemName: "plus")
-                        .font(.title2.weight(.semibold))
-                        .foregroundColor(.white)
-                        .frame(width: 60, height: 60)
-                        .background(
-                            Circle()
-                                .fill(.purple)
-                        )
-                        .shadow(color: .black.opacity(0.2), radius: 8, x: 0, y: 4)
-                }
-                .padding(24)
-            }
-            .onAppear {
-                store.send(.loadVehicles)
-            }
-            .navigationTitle("Mes véhicules")
-            .navigationBarTitleDisplayMode(.large)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Fermer") {
-                        store.send(.dismiss)
+            if store.vehicles.isEmpty {
+                EmptyVehiclesListView(onButtonTapped: { store.send(.showAddVehicle) })
+            } else {
+                VStack {
+                    HStack {
+                        Button("Fermer") {
+                            store.send(.dismiss)
+                        }
+                        Spacer()
+                    }
+                    .padding(.horizontal, Spacing.screenMargin)
+                    .padding(.vertical, Spacing.xs)
+                    ScrollView {
+                        Text("Mon garage")
+                            .font(Typography.largeTitle)
+                            .fontWeight(.semibold)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .padding(.horizontal, Spacing.screenMargin)
+                        VStack(spacing: Spacing.listItemSpacing) {
+                            ForEach(store.vehicles.sorted { $0.isPrimary && !$1.isPrimary }) { vehicle in
+                                vehicleCard(vehicle)
+                            }
+                        }
+                        .padding(Spacing.screenMargin)
                     }
                 }
-            }
-            .fullScreenCover(item: $store.scope(state: \.addVehicle, action: \.addVehicle)) { store in
-                    AddVehicleMultiStepView(store: store)
-            }
-        }
-    }
-
-    // MARK: - Empty State
-    private var emptyStateView: some View {
-        VStack(spacing: 16) {
-            Spacer()
-            Image(systemName: "car.fill")
-                .font(.system(size: 60))
-                .foregroundStyle(.blue)
-            Text("Aucun véhicule enregistré")
-                .font(.headline)
-                .foregroundStyle(Color(.label))
-            Text("Commencez par ajouter votre premier véhicule")
-                .font(.subheadline)
-                .foregroundStyle(Color(.secondaryLabel))
-            Spacer()
-        }
-        .padding()
-    }
-
-    // MARK: - Vehicles List
-    private var vehiclesListContent: some View {
-        ScrollView {
-            VStack(spacing: 12) {
-                ForEach(store.vehicles) { vehicle in
-                    vehicleCard(vehicle)
+                .safeAreaInset(edge: .bottom) {
+                    Button(action: {}) {
+                        Text("Ajouter un nouveau véhicule")
+                    }
+                    .buttonStyle(.primaryTextOnly())
                 }
             }
-            .padding(16)
+        }
+        .navigationBarBackButtonHidden()
+        .fullScreenCover(item: $store.scope(state: \.addVehicle, action: \.addVehicle)) { store in
+                AddVehicleMultiStepView(store: store)
         }
     }
-
+    
     // MARK: - Vehicle Card
     private func vehicleCard(_ vehicle: Vehicle) -> some View {
         Button {
@@ -95,21 +64,17 @@ struct VehiclesListModalView: View {
             HStack(spacing: 16) {
                 // Vehicle info
                 VStack(alignment: .leading, spacing: 0) {
-                    Text(vehicle.isPrimary ? "Véhicule principal" : "Véhicule secondaire")
-                        .font(.footnote)
-                        .foregroundStyle(Color(.secondaryLabel))
-                    
                     HStack(alignment: .top, spacing: 0) {
                         VStack(alignment: .leading, spacing: -5) {
                             Text(vehicle.brand.uppercased())
                                 .font(.largeTitle)
                                 .fontWeight(.black)
                                 .kerning(-1)
-                                .foregroundStyle(Color(.label))
+                                .foregroundStyle(ColorTokens.label)
 
                             Text(vehicle.model)
                                 .font(.headline)
-                                .foregroundStyle(Color(.label))
+                                .foregroundStyle(ColorTokens.label)
                         }
                         Spacer()
                         // Vehicle type icon
@@ -118,8 +83,8 @@ struct VehiclesListModalView: View {
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
                                 .fontWeight(.bold)
-                                .foregroundStyle(Color(.label))
-                                .frame(maxWidth: 128)
+                                .foregroundStyle(ColorTokens.label)
+                                .frame(/*maxWidth: 128, */width: 120, height: 80)
                                 .scaleEffect(x: vehicle.type.shouldFlipIcon ? -1 : 1, y: 1)
                                 .offset(x: 60, y: -10)
                         }
@@ -128,22 +93,23 @@ struct VehiclesListModalView: View {
                     HStack(spacing: 0) {
                         Text(vehicle.plate)
                         Spacer()
-                        Text(vehicle.mileage != nil ? "\(vehicle.mileage!) km" : "Non renseigné")
+                        Text(vehicle.mileage?.asFormattedMileage ?? "Non renseigné")
                         Spacer()
-                        Text("\(vehicle.registrationDate, style: .date)")
+                        Text("\(vehicle.registrationDate.shortDateString)")
                     }
                     .font(.footnote)
                     .foregroundStyle(Color(.secondaryLabel))
                 }
             }
-            .padding(16)
+            .padding(Spacing.screenMargin)
             .background(Color(.systemBackground))
             .cornerRadius(16)
+            .shadow(color: ColorTokens.shadow, radius: Spacing.xs, x: 0, y: 4)
         }
         .buttonStyle(.plain)
     }
-
 }
+
 
 #Preview("Empty list") {
     VehiclesListModalView(store: Store(initialState: VehiclesListModalStore.State()) {

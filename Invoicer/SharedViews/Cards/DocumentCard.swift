@@ -21,12 +21,12 @@ struct DocumentCard: View {
     var body: some View {
         Button(action: action) {
             HStack(spacing: Spacing.sm) {
-                // Document type icon
-                Image(systemName: document.type.imageName)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 24, height: 24)
-                    .foregroundStyle(ColorTokens.textSecondary)
+                // Thumbnail
+                ThumbnailView(
+                    fileURL: document.fileURL,
+                    width: 60,
+                    height: 80
+                )
 
                 // Document info
                 VStack(alignment: .leading, spacing: Spacing.xxs) {
@@ -67,17 +67,6 @@ struct DocumentCard: View {
                             .foregroundStyle(ColorTokens.textSecondary)
                     }
 
-                    // Incomplete badge
-                    if document.amount == nil {
-                        HStack(spacing: Spacing.xxs) {
-                            Image(systemName: "exclamationmark.triangle.fill")
-                                .font(.caption2)
-                            Text("Incomplet")
-                                .font(Typography.caption2.weight(.medium))
-                        }
-                        .foregroundStyle(ColorTokens.warning)
-                    }
-
                     // Mileage
                     HStack(spacing: Spacing.xxs) {
                         Image(systemName: "gauge.open.with.lines.needle.33percent")
@@ -86,25 +75,35 @@ struct DocumentCard: View {
                             .font(Typography.callout)
                     }
                     .foregroundStyle(ColorTokens.textSecondary)
+
+                    // Incomplete badge - positioned below mileage
+                    if document.amount == nil {
+                        HStack(spacing: Spacing.xxs) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .font(.caption2)
+                            Text("Incomplet")
+                                .font(Typography.caption2.weight(.medium))
+                        }
+                        .foregroundStyle(ColorTokens.warning)
+                        .padding(.horizontal, Spacing.xs)
+                        .padding(.vertical, Spacing.xxs)
+                        .background(ColorTokens.warningContainer)
+                        .cornerRadius(Radius.badge)
+                    }
                 }
 
                 Spacer()
-
-                // Thumbnail
-                ThumbnailView(
-                    fileURL: document.fileURL,
-                    width: 60,
-                    height: 80
-                )
 
                 // Chevron
                 Image(systemName: "chevron.right")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(ColorTokens.textTertiary)
             }
-            .padding(.vertical, Spacing.xs)
+            .padding(Spacing.cardPadding)
         }
         .buttonStyle(.plain)
+        .background(ColorTokens.surface)
+        .cornerRadius(Radius.card)
     }
 }
 

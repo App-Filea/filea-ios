@@ -20,6 +20,7 @@ struct MainStore {
         @Presents var addDocument: AddDocumentStore.State?
         var currentVehicleTotalCost: Double = 0
         var currentVehicleMonthlyExpenses: [MonthlyExpense] = []
+        var currentVehicleIncompleteDocumentsCount: Int = 0
 
         var currentVehicle: Vehicle? {
             selectedVehicle
@@ -34,7 +35,6 @@ struct MainStore {
         case vehicleDetail(PresentationAction<VehicleDetailsStore.Action>)
         case vehiclesList(PresentationAction<VehiclesListModalStore.Action>)
         case addDocument(PresentationAction<AddDocumentStore.Action>)
-        case loadVehicles
         case vehiclesLoaded([Vehicle])
         case showAddVehicle
         case showVehicleDetail(Vehicle)
@@ -46,9 +46,10 @@ struct MainStore {
         case deleteVehicleTapped
         case deleteAlert(PresentationAction<Alert>)
         case vehicleDeleted
-        case calculateTotalCost
-        case totalCostCalculated(Double)
-        case monthlyExpensesCalculated([MonthlyExpense])
+        case setupVehicleStatistics
+        case vehicleTotalCostCalculated(Double)
+        case vehicleMonthlyExpensesCalculated([MonthlyExpense])
+        case vehicleIncompleteDocumentsCountCalculated(Int)
 
         enum Alert: Equatable {
             case confirmDelete
@@ -61,21 +62,10 @@ struct MainStore {
     var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
-            case .loadVehicles:
-                return .run { send in
-                    do {
-                        let loadedVehicles = try await vehicleRepository.loadAll()
-                        await send(.vehiclesLoaded(loadedVehicles))
-                    } catch {
-                        // Handle error - for now just send empty array
-                        await send(.vehiclesLoaded([]))
-                    }
-                }
-                
             case .vehiclesLoaded(let vehicles):
                 state.$vehicles.withLock { $0 = vehicles }
                 // Recalculer le coût total après le chargement des véhicules
-                return .send(.calculateTotalCost)
+                return .send(.setupVehicleStatistics)
                 
             case .showVehicleDetail(let vehicle):
                 state.vehicleDetail = VehicleDetailsStore.State()
@@ -158,7 +148,7 @@ struct MainStore {
 
             case .vehicleDetail(.presented(.editVehicle(.presented(.vehicleUpdated)))):
                 // Vehicle has been edited, recalculate statistics
-                return .send(.calculateTotalCost)
+                return .send(.setupVehicleStatistics)
 
             case .vehicleDetail:
                 return .none
@@ -167,37 +157,50 @@ struct MainStore {
                 // Selection and dismiss handled by VehiclesListModalStore
                 state.vehiclesList = nil
                 // Recalculate statistics for the newly selected vehicle
-                return .send(.calculateTotalCost)
+                return .send(.setupVehicleStatistics)
 
             case .vehiclesList:
                 return .none
 
             case .addDocument(.dismiss):
                 // Recalculer le coût total après la fermeture du modal d'ajout de document
-                return .send(.calculateTotalCost)
+                return .send(.setupVehicleStatistics)
 
             case .addDocument:
                 return .none
 
-            case .calculateTotalCost:
+            case .setupVehicleStatistics:
                 let documents = state.currentVehicleDocuments
-                return .run { send in
-                    let total = statisticsRepository.calculateTotalCost(for: documents)
-                    await send(.totalCostCalculated(total))
+                return .merge(
+                    // Effect 1: Calculate total cost
+                    .run { send in
+                        let total = statisticsRepository.calculateTotalCost(for: documents)
+                        await send(.vehicleTotalCostCalculated(total))
+                    },
+                    // Effect 2: Calculate monthly expenses
+                    .run { send in
+                        let calendar = Calendar.current
+                        let currentYear = calendar.component(.year, from: Date())
+                        let monthlyExpenses = statisticsRepository.calculateMonthlyExpenses(for: documents, year: currentYear)
+                        await send(.vehicleMonthlyExpensesCalculated(monthlyExpenses))
+                    },
+                    // Effect 3: Count incomplete documents
+                    .run { send in
+                        let incompleteCount = statisticsRepository.countIncompleteDocuments(for: documents)
+                        await send(.vehicleIncompleteDocumentsCountCalculated(incompleteCount))
+                    }
+                )
 
-                    // Calculate monthly expenses for current year
-                    let calendar = Calendar.current
-                    let currentYear = calendar.component(.year, from: Date())
-                    let monthlyExpenses = statisticsRepository.calculateMonthlyExpenses(for: documents, year: currentYear)
-                    await send(.monthlyExpensesCalculated(monthlyExpenses))
-                }
-
-            case .totalCostCalculated(let total):
+            case .vehicleTotalCostCalculated(let total):
                 state.currentVehicleTotalCost = total
                 return .none
 
-            case .monthlyExpensesCalculated(let expenses):
+            case .vehicleMonthlyExpensesCalculated(let expenses):
                 state.currentVehicleMonthlyExpenses = expenses
+                return .none
+
+            case .vehicleIncompleteDocumentsCountCalculated(let count):
+                state.currentVehicleIncompleteDocumentsCount = count
                 return .none
             }
         }

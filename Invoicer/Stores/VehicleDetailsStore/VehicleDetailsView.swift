@@ -73,7 +73,7 @@ struct MileageCard: View {
                     .foregroundStyle(.secondary)
 
                 if let mileage = mileage, !mileage.isEmpty {
-                    Text("\(mileage) km")
+                    Text(mileage.asFormattedMileage)
                         .font(.system(size: 24, weight: .semibold))
                         .foregroundStyle(.primary)
                 } else {

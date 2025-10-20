@@ -17,6 +17,7 @@ protocol StatisticsRepositoryProtocol: Sendable {
     func calculateMonthlyExpenses(for documents: [Document], year: Int) -> [MonthlyExpense]
     func calculateYearlyTotal(for documents: [Document], year: Int) -> Double
     func calculateAverageMonthlyCost(for documents: [Document], year: Int) -> Double
+    func countIncompleteDocuments(for documents: [Document]) -> Int
     func groupDocumentsByCategory(for documents: [Document]) -> [StatisticsDocumentCategory: [Document]]
     func calculateCategoryTotals(for documents: [Document]) -> [StatisticsDocumentCategory: Double]
 }
@@ -111,6 +112,15 @@ final class StatisticsRepository: StatisticsRepositoryProtocol, @unchecked Senda
         let average = yearlyTotal / Double(monthsWithExpenses)
         logger.info("📈 Moyenne mensuelle: \(average) €")
         return average
+    }
+
+    func countIncompleteDocuments(for documents: [Document]) -> Int {
+        logger.info("📊 Comptage des documents incomplets")
+
+        let count = documents.filter { $0.amount == nil }.count
+
+        logger.info("⚠️ \(count) documents incomplets trouvés")
+        return count
     }
 
     // MARK: - Category Analysis

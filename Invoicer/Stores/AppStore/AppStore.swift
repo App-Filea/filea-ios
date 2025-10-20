@@ -98,7 +98,8 @@ struct AppStore {
 
                 if state.vehicles.isEmpty {
                     // Aucun véhicule → Navigation vers création de véhicule
-                    state.path.append(.addVehicle(AddVehicleStore.State()))
+                    state.path.append(.vehiclesList(VehiclesListStore.State()))
+//                    state.path.append(.addVehicle(AddVehicleStore.State()))
                 } else if state.vehicles.count == 1 {
                     // Un seul véhicule → Le sélectionner et naviguer
                     let vehicle = state.vehicles[0]

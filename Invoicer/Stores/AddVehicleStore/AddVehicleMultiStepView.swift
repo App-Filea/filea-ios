@@ -8,90 +8,24 @@
 import SwiftUI
 import ComposableArchitecture
 
-// MARK: - Progress Arc Component
-struct ProgressArcView: View {
-    @State private var rotationAngle: Double = 0
-    @State private var arcOpacity: Double = 0
-    @State private var animationTask: Task<Void, Never>?
-
-    var body: some View {
-        Circle()
-            .trim(from: 0, to: 0.25)
-            .stroke(
-                AngularGradient(
-                    gradient: Gradient(colors: [
-                        ColorTokens.surfaceSecondary,
-                        ColorTokens.actionPrimary
-                    ]),
-                    center: .center,
-                    startAngle: .degrees(0),
-                    endAngle: .degrees(90)
-                ),
-                style: StrokeStyle(lineWidth: 3, lineCap: .round)
-            )
-            .frame(width: Spacing.lg, height: Spacing.lg)
-            .rotationEffect(.degrees(rotationAngle + 90))
-            .opacity(arcOpacity)
-            .onAppear {
-                // Attendre la fin de l'animation du rectangle (0.4s) puis démarrer
-                Task {
-                    try? await Task.sleep(nanoseconds: 400_000_000)
-                    startRotationAnimation()
-                }
-            }
-            .onDisappear {
-                // Annuler l'animation quand le composant disparaît
-                animationTask?.cancel()
-            }
-    }
-
-    private func startRotationAnimation() {
-        // Annuler l'animation précédente si elle existe
-        animationTask?.cancel()
-
-        // Créer une nouvelle tâche d'animation en boucle
-        animationTask = Task {
-            while !Task.isCancelled {
-                // Fade in au début de la rotation
-                withAnimation(.easeIn(duration: 0.2)) {
-                    arcOpacity = 1.0
-                }
-
-                // Animation de rotation (1 seconde avec easing)
-                withAnimation(.easeInOut(duration: 1.0)) {
-                    rotationAngle = 360
-                }
-
-                // Attendre 0.6s puis fade out
-                try? await Task.sleep(nanoseconds: 600_000_000)
-                guard !Task.isCancelled else { return }
-
-                withAnimation(.easeOut(duration: 0.4)) {
-                    arcOpacity = 0
-                }
-
-                // Attendre 2 secondes puis réinitialiser et recommencer
-                try? await Task.sleep(nanoseconds: 2_000_000_000)
-                guard !Task.isCancelled else { return }
-
-                // Réinitialiser la rotation pour le prochain tour
-                rotationAngle = 0
-            }
-        }
-    }
-}
-
 struct AddVehicleMultiStepView: View {
     @Bindable var store: StoreOf<AddVehicleStore>
-    @State private var scrollPosition: AddVehicleStep? = .type
     @State private var showPrimaryAlert: Bool = false
-    private let totalSteps: Int = AddVehicleStep.allCases.count
-    private var currentStep: AddVehicleStep {
-        scrollPosition ?? .type
-    }
 
     private var existingPrimaryVehicle: Vehicle? {
-        store.vehicles.first(where: { $0.isPrimary })
+        let primaryVehicle = store.vehicles.first(where: { $0.isPrimary })
+        if let vehicle = primaryVehicle {
+            print("🔍 [AddVehicleMultiStepView] Véhicule principal trouvé : \(vehicle.brand) \(vehicle.model)")
+        } else {
+            print("🔍 [AddVehicleMultiStepView] Aucun véhicule principal trouvé")
+        }
+        return primaryVehicle
+    }
+
+    private var isVehicleInformationComplete: Bool {
+        !store.brand.isEmpty &&
+        !store.model.isEmpty &&
+        !store.plate.isEmpty
     }
 
     var body: some View {
@@ -99,160 +33,278 @@ struct AddVehicleMultiStepView: View {
             ColorTokens.background
                 .ignoresSafeArea()
 
-            VStack(spacing: Spacing.xl) {
-                VStack(spacing: Spacing.md) {
-                    // Header with progress indicator
-                    HStack(spacing: Spacing.xxxs) {
-                        ForEach(0..<totalSteps, id: \.self) { step in
-                            ZStack {
-                                Circle()
-                                    .stroke(lineWidth: 3)
-                                    .frame(width: Spacing.lg, height: Spacing.lg)
-                                    .foregroundStyle(step < currentStep.rawValue ? ColorTokens.actionPrimary : ColorTokens.surfaceSecondary)
-
-                                // Arc de cercle animé pour l'étape actuelle
-                                if step == currentStep.rawValue {
-                                    ProgressArcView()
-                                }
-
-                                // Checkmark pour les étapes complétées
-                                if step < currentStep.rawValue {
-                                    Image(systemName: "checkmark.circle.fill")
-                                        .resizable()
-                                        .frame(width: Spacing.lg, height: Spacing.lg)
-                                        .foregroundStyle(ColorTokens.actionPrimary)
-                                        .transition(.scale)
-                                }
-                            }
-                            if step < totalSteps-1 {
-                                ZStack(alignment: .leading){
-                                    Rectangle()
-                                        .frame(height: 3)
-                                        .foregroundStyle(ColorTokens.surfaceSecondary)
-                                    Rectangle()
-                                        .frame(height: 3)
-                                        .frame(maxWidth: step >= currentStep.rawValue ? 0 : .infinity, alignment: .leading)
-                                        .foregroundStyle(ColorTokens.actionPrimary)
-                                }
-                            }
-                        }
+            VStack(spacing: 0) {
+                // Header fixe
+                HStack {
+                    Button("Annuler") {
+                        store.send(.cancelCreation)
                     }
-                    .animation(.default, value: currentStep.rawValue)
-                    
-                    HStack {
-                        Button("Retour", action: {
-                            if let previousStep = currentStep.previous {
-                                scrollPosition = previousStep
-                            } else {
-                                store.send(.cancelCreation)
-                            }
-                        })
-                        Spacer()
-                        Text(currentStep.title)
-                            .font(Typography.title2)
-                            .foregroundStyle(ColorTokens.textPrimary)
-                            .multilineTextAlignment(.center)
-                        Spacer()
-                        Button("Suivant", action: {
-                            // Validate current step
-                            let validation = currentStep.validate(
-                                type: store.vehicleType,
-                                brand: store.brand,
-                                model: store.model,
-                                plate: store.plate,
-                                registrationDate: store.registrationDate,
-                                mileage: store.mileage
-                            )
-
-                            if !validation.isValid {
-                                store.send(.setShowValidationError(true))
-                                return
-                            }
-
-                            store.send(.setShowValidationError(false))
-
-                            // Si on est à l'étape Type et que le véhicule est principal
-                            // et qu'il existe déjà un véhicule principal
-                            if currentStep == .type && store.isPrimary && existingPrimaryVehicle != nil {
-                                showPrimaryAlert = true
-                                return
-                            }
-
-                            if currentStep == .summary {
-                                store.send(.saveVehicle)
-                            }
-                            else {
-                                if let nextStep = currentStep.next {
-                                    scrollPosition = nextStep
-                                }
-                            }
-                        })
+                    Spacer()
+                    Text("Nouveau véhicule")
+                        .font(Typography.headline)
+                        .foregroundStyle(ColorTokens.textPrimary)
+                    Spacer()
+                    Button("Ajouter") {
+                        handleAddButton()
                     }
+                    .disabled(store.isLoading || !isVehicleInformationComplete)
                 }
-                .padding(.horizontal, Spacing.md)
-                Text(currentStep.subtitle)
-                    .bodyDefaultRegular()
-                    .foregroundStyle(ColorTokens.textSecondary)
-                    .multilineTextAlignment(.center)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .frame(height: 40, alignment: .top)
-                    .padding(.horizontal, Spacing.md)
+                .padding(.horizontal, Spacing.screenMargin)
+                .padding(.vertical, Spacing.sm)
+                .background(ColorTokens.background)
 
-                // Horizontal scrolling steps
-                ScrollView(.horizontal) {
-                    LazyHStack(alignment: .top, spacing: 0) {
-                        ForEach(AddVehicleStep.allCases) { step in
-                            AddVehicleStepView(
-                                step: step,
-                                store: store
-                            )
-                            .containerRelativeFrame(.horizontal)
-                            .id(step)
+                // Contenu scrollable - Toutes les étapes affichées
+                ScrollView {
+                    VStack(spacing: Spacing.xl) {
+                        // Étape 1 : Type
+                        VStack(alignment: .leading, spacing: Spacing.xs) {
+                            Text("Type de véhicule")
+                                .font(Typography.subheadline)
+                                .foregroundStyle(ColorTokens.textPrimary)
+
+                            vehicleTypePicker
                         }
+                        .padding(.horizontal, Spacing.md)
+
+                        // Étape 2 : Informations
+                        VStack(alignment: .leading, spacing: Spacing.xs) {
+                            HStack(alignment: .bottom) {
+                                Text("Informations du véhicule")
+                                    .font(Typography.subheadline)
+                                    .foregroundStyle(ColorTokens.textPrimary)
+
+                                Spacer()
+
+                                Button {
+                                    store.send(.scanButtonTapped)
+                                } label: {
+                                    HStack(spacing: Spacing.xxs) {
+                                        Image(systemName: "doc.text.viewfinder")
+                                        Text("Scanner")
+                                    }
+                                    .font(Typography.footnote)
+                                    .foregroundStyle(ColorTokens.actionPrimary)
+                                    .padding(.horizontal, Spacing.sm)
+                                    .padding(.vertical, Spacing.xs)
+                                    .background(ColorTokens.actionPrimary.opacity(0.1))
+                                    .cornerRadius(Radius.sm)
+                                }
+                            }
+
+                            brandAndModelContent
+                        }
+                        .padding(.horizontal, Spacing.md)
+
+                        // Étape 3 : Détails
+                        VStack(alignment: .leading, spacing: Spacing.xs) {
+                            Text("Détails complémentaires")
+                                .font(Typography.subheadline)
+                                .foregroundStyle(ColorTokens.textPrimary)
+
+                            detailsContent
+                        }
+                        .padding(.horizontal, Spacing.md)
                     }
-                    .scrollTargetLayout()
+                    .padding(.vertical, Spacing.lg)
                 }
-                .scrollTargetBehavior(.paging)
-                .scrollPosition(id: $scrollPosition)
-                .animation(.default, value: scrollPosition)
-                .scrollIndicators(.hidden)
-                .scrollDisabled(true)
+                .scrollDismissesKeyboard(.interactively)
             }
         }
-            .navigationBarHidden(true)
-            .alert("Véhicule principal existant", isPresented: $showPrimaryAlert) {
-                Button("Annuler", role: .cancel) { }
-                Button("Continuer") {
-                    if let nextStep = currentStep.next {
-                        scrollPosition = nextStep
-                    }
-                }
-            } message: {
-                if let existingVehicle = existingPrimaryVehicle {
-                    Text("Vous avez déjà un véhicule principal (\(existingVehicle.brand) \(existingVehicle.model)). En créant ce nouveau véhicule comme principal, l'actuel deviendra secondaire.")
-                }
+        .sheet(item: $store.scope(state: \.scanStore, action: \.scanStore)) { scanStore in
+            DocumentScanView(store: scanStore)
+        }
+        .alert("Véhicule principal existant", isPresented: $showPrimaryAlert) {
+            Button("Annuler", role: .cancel) { }
+            Button("Continuer") {
+                store.send(.saveVehicle)
             }
+        } message: {
+            if let existingVehicle = existingPrimaryVehicle {
+                Text("Vous avez déjà un véhicule principal (\(existingVehicle.brand) \(existingVehicle.model)). En créant ce nouveau véhicule comme principal, l'actuel deviendra secondaire.")
+            }
+        }
     }
     
-    // MARK: - Computed Properties
+    // MARK: - Content Components
 
-    private var canProceed: Bool {
-        let validation = currentStep.validate(
-            type: store.vehicleType,
-            brand: store.brand,
-            model: store.model,
-            plate: store.plate,
-            registrationDate: store.registrationDate,
-            mileage: store.mileage
-        )
-        return validation.isValid
+    private var vehicleTypePicker: some View {
+        VStack(alignment: .leading, spacing: Spacing.md) {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: Spacing.xs) {
+                    ForEach(VehicleType.allCases) { type in
+                        Button(action: {
+                            if store.vehicleType == type {
+                                store.vehicleType = nil
+                            } else {
+                                store.vehicleType = type
+                            }
+                        }) {
+                            Image(systemName: type.iconName)
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .scaleEffect(x: type.shouldFlipIcon ? -1 : 1, y: 1)
+                                .foregroundStyle(store.vehicleType == type ? ColorTokens.actionPrimary : ColorTokens.textPrimary)
+                                .frame(height: 40)
+                                .padding(Spacing.cardPadding)
+                                .background(ColorTokens.surfaceDim)
+                                .clipShape(.rect(cornerRadius: Radius.lg))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: Radius.lg)
+                                        .stroke(store.vehicleType == type ? ColorTokens.actionPrimary : ColorTokens.border, lineWidth: store.vehicleType == type ? 3 : 1)
+                                )
+                                .shadow(color: store.vehicleType == type ? ColorTokens.actionPrimary.opacity(0.3) : ColorTokens.shadow.opacity(0.1), radius: store.vehicleType == type ? 8 : 4, x: 0, y: 2)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.horizontal, Spacing.cardPadding)
+                .padding(.vertical, Spacing.xs)
+            }
+        }
+        .padding(.vertical, Spacing.cardPadding)
+        .background(ColorTokens.surfaceElevated)
+        .cornerRadius(Radius.xl, corners: .allCorners)
+    }
+
+    private var brandAndModelContent: some View {
+        VStack(spacing: Spacing.formFieldSpacing) {
+            // Marque
+            VStack(alignment: .leading) {
+                Text("Marque")
+                    .font(Typography.subheadline)
+                    .foregroundStyle(ColorTokens.textPrimary)
+                TextField("TOYOTA, BMW, MERCEDES...", text: $store.brand)
+                    .textInputAutocapitalization(.characters)
+                    .submitLabel(.done)
+                    .padding(Spacing.screenMargin)
+                    .background(ColorTokens.surfaceDim)
+                    .cornerRadius(Radius.textField, corners: .allCorners)
+                Label("Champ D.1 de la carte grise", systemImage: "info.circle")
+                    .font(Typography.footnote)
+                    .foregroundStyle(ColorTokens.textSecondary)
+            }
+
+            // Modèle
+            VStack(alignment: .leading) {
+                Text("Modèle")
+                    .font(Typography.subheadline)
+                    .foregroundStyle(ColorTokens.textPrimary)
+                TextField("COROLLA, X3, CLASSE A...", text: $store.model)
+                    .textInputAutocapitalization(.characters)
+                    .submitLabel(.done)
+                    .padding(Spacing.screenMargin)
+                    .background(ColorTokens.surfaceDim)
+                    .cornerRadius(Radius.textField, corners: .allCorners)
+                Label("Champ D.2 de la carte grise", systemImage: "info.circle")
+                    .font(Typography.footnote)
+                    .foregroundStyle(ColorTokens.textSecondary)
+            }
+
+            // Plaque d'immatriculation
+            VStack(alignment: .leading) {
+                Text("Immatriculation")
+                    .font(Typography.subheadline)
+                    .foregroundStyle(ColorTokens.textPrimary)
+                TextField("AB-123-CD", text: $store.plate)
+                    .textInputAutocapitalization(.characters)
+                    .submitLabel(.done)
+                    .padding(Spacing.screenMargin)
+                    .background(ColorTokens.surfaceDim)
+                    .cornerRadius(Radius.textField, corners: .allCorners)
+                Label("Champ A de la carte grise", systemImage: "info.circle")
+                    .font(Typography.footnote)
+                    .foregroundStyle(ColorTokens.textSecondary)
+            }
+
+            // Date de mise en circulation
+            VStack(alignment: .leading) {
+                Text("Mise en circulation")
+                    .font(Typography.subheadline)
+                    .foregroundStyle(ColorTokens.textPrimary)
+                DatePicker("Date", selection: $store.registrationDate, displayedComponents: .date)
+                    .datePickerStyle(.compact)
+                    .padding(Spacing.sm)
+                    .background(ColorTokens.surfaceDim)
+                    .cornerRadius(Radius.textField, corners: .allCorners)
+                Label("Champ B de la carte grise", systemImage: "info.circle")
+                    .font(Typography.footnote)
+                    .foregroundStyle(ColorTokens.textSecondary)
+            }
+        }
+        .padding(Spacing.cardPadding)
+        .background(ColorTokens.surfaceElevated)
+        .cornerRadius(Radius.xl, corners: .allCorners)
+    }
+
+    private var detailsContent: some View {
+        VStack(alignment: .leading, spacing: Spacing.md) {
+            // Kilométrage
+            VStack(alignment: .leading) {
+                Text("Kilométrage")
+                    .font(Typography.subheadline)
+                    .foregroundStyle(ColorTokens.textPrimary)
+
+                HStack {
+                    TextField("120000", text: $store.mileage)
+                        .keyboardType(.numberPad)
+
+                    Text("km")
+                        .foregroundStyle(ColorTokens.textSecondary)
+                }
+                .padding(Spacing.screenMargin)
+                .background(ColorTokens.surfaceDim)
+                .cornerRadius(Radius.textField, corners: .allCorners)
+
+                Label("Consultez votre compteur", systemImage: "info.circle")
+                    .font(Typography.footnote)
+                    .foregroundStyle(ColorTokens.textSecondary)
+            }
+
+            // Véhicule principal
+            VStack(alignment: .leading, spacing: Spacing.xs) {
+                Toggle(isOn: $store.isPrimary) {
+                    VStack(alignment: .leading, spacing: Spacing.xxs) {
+                        Text("Véhicule principal")
+                            .font(Typography.subheadline)
+                            .foregroundStyle(ColorTokens.textPrimary)
+
+                        Text("Définir comme véhicule principal")
+                            .font(Typography.caption1)
+                            .foregroundStyle(ColorTokens.textSecondary)
+                    }
+                }
+                .toggleStyle(.switch)
+                .tint(ColorTokens.actionPrimary)
+            }
+            .padding(Spacing.md)
+            .background(ColorTokens.surfaceDim)
+            .cornerRadius(Radius.md)
+        }
+        .padding(Spacing.md)
+        .background(ColorTokens.surfaceElevated)
+        .cornerRadius(Radius.md)
+    }
+
+    // MARK: - Actions
+
+    private func handleAddButton() {
+        // Vérifier si un véhicule principal existe déjà
+        if store.isPrimary && existingPrimaryVehicle != nil {
+            print("⚠️ [AddVehicleMultiStepView] Véhicule principal détecté : \(existingPrimaryVehicle!.brand) \(existingPrimaryVehicle!.model)")
+            showPrimaryAlert = true
+            return
+        }
+
+        // Sauvegarder directement
+        print("💾 [AddVehicleMultiStepView] Sauvegarde directe du véhicule")
+        store.send(.saveVehicle)
     }
 }
 
 #Preview {
-//    NavigationStack {
+    NavigationStack {
         AddVehicleMultiStepView(store: Store(initialState: AddVehicleStore.State()) {
             AddVehicleStore()
         })
-//    }
+    }
 }

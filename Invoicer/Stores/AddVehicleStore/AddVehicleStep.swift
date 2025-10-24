@@ -18,7 +18,7 @@ enum AddVehicleStep: Int, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .type: return "Type"
-        case .brandAndModel: return "Identification"
+        case .brandAndModel: return "Informations"
         case .details: return "Détails"
         case .summary: return "Récapitulatif"
         }
@@ -27,8 +27,8 @@ enum AddVehicleStep: Int, CaseIterable, Identifiable {
     var subtitle: String {
         switch self {
         case .type: return "Quel type de véhicule souhaitez-vous ajouter ?"
-        case .brandAndModel: return "Quelle est la marque et le modèle de votre véhicule ?"
-        case .details: return "Complétez les informations du véhicule"
+        case .brandAndModel: return "Renseignez les informations principales de votre véhicule"
+        case .details: return "Complétez les informations complémentaires"
         case .summary: return "Vérifiez les informations saisies"
         }
     }
@@ -62,7 +62,7 @@ enum AddVehicleStep: Int, CaseIterable, Identifiable {
             }
             return (true, nil)
         case .brandAndModel:
-            // Validate both brand and model
+            // Validate brand, model, and plate (date always valid)
             let brandValid = !brand.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             if !brandValid {
                 return (false, "La marque est obligatoire")
@@ -71,15 +71,14 @@ enum AddVehicleStep: Int, CaseIterable, Identifiable {
             if !modelValid {
                 return (false, "Le modèle est obligatoire")
             }
-            return (true, nil)
-        case .details:
-            // Validate plate and date (mileage is optional)
             let plateValid = !plate.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             if !plateValid {
                 return (false, "La plaque d'immatriculation est obligatoire")
             }
-            // Mileage is optional, no validation needed
             // Date always valid, has default value
+            return (true, nil)
+        case .details:
+            // Mileage is optional, isPrimary is always set, no validation needed
             return (true, nil)
         case .summary:
             // Validate all fields

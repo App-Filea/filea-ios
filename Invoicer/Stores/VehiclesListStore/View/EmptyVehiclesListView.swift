@@ -79,21 +79,19 @@ struct EmptyVehiclesListView: View {
     
     @ViewBuilder
     private func CarouselCardView(_ card: VehicleType) -> some View {
-            if let iconName = card.iconName {
-                Image(systemName: iconName)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 100, height: 100)
-                    .padding()
-                    .background(ColorTokens.surface)
-                    .scaleEffect(x: card.shouldFlipIcon ? -1 : 1, y: 1)
-                    .clipShape(.rect(cornerRadius: Radius.lg))
-                    .shadow(color: ColorTokens.shadow, radius: Spacing.xs, x: 0, y: 4)
-                    .scrollTransition(.interactive.threshold(.centered), axis: .horizontal) { content, phase in
-                        content
-                            .offset(y: phase == .identity ? -10 : 0)
-                            .rotationEffect(.degrees(phase.value * 5), anchor: .bottom)
-                    }
+        Image(systemName: card.iconName)
+            .resizable()
+            .aspectRatio(contentMode: .fit)
+            .frame(width: 100, height: 100)
+            .padding()
+            .background(ColorTokens.surface)
+            .scaleEffect(x: card.shouldFlipIcon ? -1 : 1, y: 1)
+            .clipShape(.rect(cornerRadius: Radius.lg))
+            .shadow(color: ColorTokens.shadow, radius: Spacing.xs, x: 0, y: 4)
+            .scrollTransition(.interactive.threshold(.centered), axis: .horizontal) { content, phase in
+                content
+                    .offset(y: phase == .identity ? -10 : 0)
+                    .rotationEffect(.degrees(phase.value * 5), anchor: .bottom)
             }
     }
 }

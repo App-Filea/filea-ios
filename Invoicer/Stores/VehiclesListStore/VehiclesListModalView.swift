@@ -43,7 +43,7 @@ struct VehiclesListModalView: View {
                     }
                 }
                 .safeAreaInset(edge: .bottom) {
-                    Button(action: {}) {
+                    Button(action: { store.send(.showAddVehicle) }) {
                         Text("Ajouter un nouveau véhicule")
                     }
                     .buttonStyle(.primaryTextOnly())
@@ -78,8 +78,7 @@ struct VehiclesListModalView: View {
                         }
                         Spacer()
                         // Vehicle type icon
-                        if let iconName = vehicle.type.iconName {
-                            Image(systemName: iconName)
+                            Image(systemName: vehicle.type.iconName)
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
                                 .fontWeight(.bold)
@@ -87,7 +86,6 @@ struct VehiclesListModalView: View {
                                 .frame(/*maxWidth: 128, */width: 120, height: 80)
                                 .scaleEffect(x: vehicle.type.shouldFlipIcon ? -1 : 1, y: 1)
                                 .offset(x: 60, y: -10)
-                        }
                     }
 
                     HStack(spacing: 0) {

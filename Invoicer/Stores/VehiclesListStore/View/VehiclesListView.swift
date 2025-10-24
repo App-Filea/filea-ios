@@ -15,7 +15,7 @@ struct VehiclesListView: View {
         ZStack(alignment: .bottom) {
             Color(ColorTokens.background)
                 .ignoresSafeArea()
-
+            
             if store.vehicles.isEmpty {
                 EmptyVehiclesListView(onButtonTapped: { store.send(.showAddVehicle) })
             } else {
@@ -44,7 +44,7 @@ struct VehiclesListView: View {
         }
         .navigationBarBackButtonHidden()
         .fullScreenCover(item: $store.scope(state: \.addVehicle, action: \.addVehicle)) { store in
-                AddVehicleMultiStepView(store: store)
+            AddVehicleMultiStepView(store: store)
         }
     }
     
@@ -63,25 +63,23 @@ struct VehiclesListView: View {
                                 .fontWeight(.black)
                                 .kerning(-1)
                                 .foregroundStyle(ColorTokens.label)
-
+                            
                             Text(vehicle.model)
                                 .font(.headline)
                                 .foregroundStyle(ColorTokens.label)
                         }
                         Spacer()
                         // Vehicle type icon
-                        if let iconName = vehicle.type.iconName {
-                            Image(systemName: iconName)
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .fontWeight(.bold)
-                                .foregroundStyle(ColorTokens.label)
-                                .frame(/*maxWidth: 128, */width: 120, height: 80)
-                                .scaleEffect(x: vehicle.type.shouldFlipIcon ? -1 : 1, y: 1)
-                                .offset(x: 60, y: -10)
-                        }
+                        Image(systemName: vehicle.type.iconName)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .fontWeight(.bold)
+                            .foregroundStyle(ColorTokens.label)
+                            .frame(/*maxWidth: 128, */width: 120, height: 80)
+                            .scaleEffect(x: vehicle.type.shouldFlipIcon ? -1 : 1, y: 1)
+                            .offset(x: 60, y: -10)
                     }
-
+                    
                     HStack(spacing: 0) {
                         Text(vehicle.plate)
                         Spacer()

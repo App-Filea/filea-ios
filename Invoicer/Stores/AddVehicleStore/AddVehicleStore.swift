@@ -22,6 +22,7 @@ struct AddVehicleStore {
         var isLoading = false
         var showValidationError = false
         @Shared(.vehicles) var vehicles: [Vehicle] = []
+        @Presents var scanStore: DocumentScanStore.State?
     }
 
     enum Action: Equatable, BindableAction {
@@ -30,6 +31,9 @@ struct AddVehicleStore {
         case vehicleSaved(Vehicle)
         case cancelCreation
         case setShowValidationError(Bool)
+        case scanButtonTapped
+        case scanStore(PresentationAction<DocumentScanStore.Action>)
+        case applyScanData(ScannedVehicleData)
     }
 
     @Dependency(\.vehicleRepository) var vehicleRepository
@@ -41,6 +45,44 @@ struct AddVehicleStore {
         Reduce { state, action in
             switch action {
             case .binding:
+                return .none
+
+            case .scanButtonTapped:
+                print("📸 [AddVehicleStore] Ouverture du scanner")
+                state.scanStore = DocumentScanStore.State()
+                return .none
+
+            case .scanStore(.presented(.confirmData)):
+                // Récupérer les données scannées
+                if let extractedData = state.scanStore?.extractedData {
+                    return .send(.applyScanData(extractedData))
+                }
+                return .none
+
+            case .applyScanData(let data):
+                print("📥 [AddVehicleStore] Application des données scannées")
+
+                if let brand = data.brand {
+                    state.brand = brand
+                    print("   ├─ Marque: \(brand)")
+                }
+                if let model = data.model {
+                    state.model = model
+                    print("   ├─ Modèle: \(model)")
+                }
+                if let plate = data.plate {
+                    state.plate = plate
+                    print("   ├─ Plaque: \(plate)")
+                }
+                if let date = data.registrationDate {
+                    state.registrationDate = date
+                    print("   ├─ Date: \(date)")
+                }
+
+                print("✅ [AddVehicleStore] Données appliquées avec succès\n")
+                return .none
+
+            case .scanStore:
                 return .none
 
             case .saveVehicle:
@@ -92,6 +134,9 @@ struct AddVehicleStore {
                 state.showValidationError = show
                 return .none
             }
+        }
+        .ifLet(\.$scanStore, action: \.scanStore) {
+            DocumentScanStore()
         }
     }
 }

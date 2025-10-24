@@ -10,11 +10,7 @@ import ComposableArchitecture
 
 struct AddDocumentMultiStepView: View {
     @Bindable var store: StoreOf<AddDocumentStore>
-    @State private var scrollPosition: AddDocumentStep? = .selectSource
-    private let totalSteps: Int = AddDocumentStep.allCases.count
-    private var currentStep: AddDocumentStep {
-        scrollPosition ?? .selectSource
-    }
+    @State private var currentStep: AddDocumentStep = .selectSource
 
     var body: some View {
         ZStack {
@@ -22,11 +18,14 @@ struct AddDocumentMultiStepView: View {
                 .ignoresSafeArea()
 
             VStack(spacing: Spacing.xl) {
+                // Header with navigation
                 VStack(spacing: Spacing.md) {
                     HStack {
                         Button("Retour", action: {
                             if let previousStep = currentStep.previous {
-                                scrollPosition = previousStep
+                                withAnimation(.easeInOut(duration: 0.3)) {
+                                    currentStep = previousStep
+                                }
                             } else {
                                 store.send(.cancelCreation)
                             }
@@ -62,7 +61,9 @@ struct AddDocumentMultiStepView: View {
                                 store.send(.saveDocument)
                             } else {
                                 if let nextStep = currentStep.next {
-                                    scrollPosition = nextStep
+                                    withAnimation(.easeInOut(duration: 0.3)) {
+                                        currentStep = nextStep
+                                    }
                                 }
                             }
                         })
@@ -105,25 +106,23 @@ struct AddDocumentMultiStepView: View {
                     .transition(.scale.combined(with: .opacity))
                 }
 
-                // Horizontal scrolling steps
-                ScrollView(.horizontal) {
-                    LazyHStack(alignment: .top, spacing: 0) {
-                        ForEach(AddDocumentStep.allCases) { step in
-                            AddDocumentStepView(
-                                step: step,
-                                store: store
-                            )
-                            .containerRelativeFrame(.horizontal)
-                            .id(step)
-                        }
+                // Vertical scrolling step content with animations
+                ScrollView {
+                    VStack(spacing: Spacing.lg) {
+                        AddDocumentStepView(
+                            step: currentStep,
+                            store: store
+                        )
                     }
-                    .scrollTargetLayout()
+                    .padding(.horizontal, Spacing.md)
+                    .padding(.vertical, Spacing.lg)
                 }
-                .scrollTargetBehavior(.paging)
-                .scrollPosition(id: $scrollPosition)
-                .animation(.default, value: scrollPosition)
-                .scrollIndicators(.hidden)
-                .scrollDisabled(true)
+                .scrollDismissesKeyboard(.interactively)
+                .transition(.asymmetric(
+                    insertion: .scale(scale: 0.95).combined(with: .opacity),
+                    removal: .scale(scale: 1.05).combined(with: .opacity)
+                ))
+                .id(currentStep.id)
             }
         }
         .navigationBarHidden(true)

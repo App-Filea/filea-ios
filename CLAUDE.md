@@ -18,12 +18,16 @@ Les serveurs MCP suivants sont configurés et doivent être utilisés systémati
 - **Swift MCP** : Documentation Swift 6
 - **SwiftUI MCP** : Composants et APIs SwiftUI
 - **Composable Architecture MCP** : Patterns TCA
+- **Swift Dependencies MCP** : Système de dépendances TCA et patterns de mock
+- **Swift Sharing MCP** : @Shared state et persistence
 - **Sharing-GRDB MCP** : Persistence et base de données
 
 ### Règle d'Utilisation Obligatoire
 **TOUJOURS utiliser Context7 et les MCP appropriés** pour toute tâche impliquant :
 - Implémentation de fonctionnalités avec SwiftUI
 - Utilisation de Composable Architecture
+- **Création de Dependencies Client** : Utiliser Swift Dependencies MCP pour le pattern correct
+- **Tests de @Shared state** : Utiliser Swift Sharing MCP pour les patterns de test
 - Intégration de GRDB
 - Questions sur les APIs Swift 6
 - Génération de code avec des dépendances externes
@@ -40,6 +44,8 @@ Avant d'implémenter une fonctionnalité :
 ### Exemples d'Utilisation
 - Pour SwiftUI : "use context7 implémente une vue de liste avec navigation"
 - Pour TCA : "use context7 crée un reducer pour la gestion de formulaire"
+- Pour Dependencies : "use context7 /pointfreeco/swift-dependencies crée un repository client"
+- Pour @Shared : "use context7 /pointfreeco/swift-sharing teste les mutations de @Shared"
 - Pour le Design : "use context7 consulte les HIG pour les spacing et padding recommandés"
 
 ## Conventions de Design
@@ -440,6 +446,215 @@ try dbQueue.write { db in
 }
 ```
 
+## Tests avec Composable Architecture (TCA)
+
+### Pattern de Création de Dependencies Client
+
+**OBLIGATOIRE** : Utiliser le pattern struct + closures @Sendable (Swift 6 compliant).
+
+#### ✅ Pattern Correct
+
+```swift
+// MARK: - Repository Client
+struct VehicleRepositoryClient: Sendable {
+    var loadAll: @Sendable () async throws -> [Vehicle]
+    var save: @Sendable (Vehicle) async throws -> Void
+    var update: @Sendable (Vehicle) async throws -> Void
+    var delete: @Sendable (UUID) async throws -> Void
+    var find: @Sendable (UUID) async throws -> Vehicle?
+}
+
+// MARK: - Dependency Key
+extension VehicleRepositoryClient: DependencyKey {
+    static var liveValue: VehicleRepositoryClient {
+        let repository = VehicleRepository()
+
+        return VehicleRepositoryClient(
+            loadAll: { try await repository.loadAll() },
+            save: { try await repository.save($0) },
+            update: { try await repository.update($0) },
+            delete: { try await repository.delete($0) },
+            find: { try await repository.find($0) }
+        )
+    }
+
+    static var testValue: VehicleRepositoryClient {
+        VehicleRepositoryClient(
+            loadAll: { [] },
+            save: { _ in },
+            update: { _ in },
+            delete: { _ in },
+            find: { _ in nil }
+        )
+    }
+}
+
+// MARK: - Dependency Values
+extension DependencyValues {
+    var vehicleRepository: VehicleRepositoryClient {
+        get { self[VehicleRepositoryClient.self] }
+        set { self[VehicleRepositoryClient.self] = newValue }
+    }
+}
+
+// MARK: - Implementation
+final class VehicleRepository: @unchecked Sendable {
+    // Implémentation concrète...
+}
+```
+
+#### ❌ Pattern Incorrect (Ne PAS utiliser)
+
+```swift
+// ❌ Protocol = difficile à mocker
+protocol VehicleRepositoryProtocol: Sendable {
+    func loadAll() async throws -> [Vehicle]
+}
+
+// ❌ Enum pour DependencyKey = obsolète
+private enum VehicleRepositoryKey: DependencyKey {
+    static let liveValue: VehicleRepositoryProtocol = VehicleRepository()
+}
+```
+
+#### Points Clés
+
+1. **Struct avec closures @Sendable** : Chaque méthode est une closure annotée `@Sendable`
+2. **Extension DependencyKey** : Implémente `liveValue` ET `testValue`
+3. **Pas de protocol** : Le struct EST l'interface
+4. **Implementation @unchecked Sendable** : La classe concrète peut utiliser `@unchecked` si elle contient `FileManager` ou `@Dependency`
+
+### Tests de Store avec TestStore
+
+#### Mock des Dependencies
+
+```swift
+private func givenStore(...) {
+    @Shared(.vehicles) var vehicles = initialVehicles  // ✅ Init @Shared
+
+    store = TestStore(
+        initialState: AddVehicleStore.State(...),
+        reducer: { AddVehicleStore() },
+        withDependencies: { dependencies in
+            // ✅ Mock avec closures
+            dependencies.vehicleRepository.save = { _ in }
+            dependencies.vehicleRepository.loadAll = { [] }
+
+            // ✅ UUID prévisibles
+            dependencies.uuid = .incrementing
+        }
+    )
+}
+```
+
+#### Mock UUID pour Tests Déterministes
+
+```swift
+// Dans withDependencies
+dependencies.uuid = .incrementing  // Génère UUID(0), UUID(1), UUID(2)...
+
+// Dans les tests
+let expectedVehicle = Vehicle.make(
+    id: UUID(0),  // Premier UUID généré par .incrementing
+    brand: "Tesla",
+    model: "Model 3",
+    ...
+)
+```
+
+### Tests de @Shared State
+
+#### Règle Critique : Timing des Mutations
+
+**⚠️ IMPORTANT** : Les mutations de `@Shared` se produisent **là où elles se produisent réellement dans le code**, pas forcément où on pense.
+
+#### Pattern Correct
+
+```swift
+await store.send(.addButtonTapped)
+
+// ✅ Si @Shared est muté dans l'effet .run, asserte ICI
+await store.receive(.saveVehicle) {
+    $0.isLoading = true
+    $0.$vehicles.withLock { vehicles in
+        vehicles = [expectedVehicle]
+    }
+}
+
+// ✅ Si @Shared est muté dans le reducer, asserte ICI
+await store.receive(\.vehicleSaved) {
+    $0.isLoading = false
+    // Pas de mutation de @Shared ici si déjà fait au-dessus
+}
+```
+
+#### Syntaxe withLock
+
+**OBLIGATOIRE** : Toujours utiliser `$0.$shared.withLock { }` pour muter un @Shared dans les tests.
+
+```swift
+// ✅ Correct
+await store.receive(.action) {
+    $0.$vehicles.withLock { vehicles in
+        vehicles = [expectedVehicle]
+    }
+}
+
+// ❌ Incorrect - Ne compile pas ou échoue
+await store.receive(.action) {
+    $0.vehicles = [expectedVehicle]  // ❌ Pas d'accès direct
+}
+```
+
+### Tests d'Actions
+
+#### Case Key Paths pour Actions avec Payload
+
+```swift
+// Action définie
+enum Action {
+    case vehicleSaved(Vehicle)  // Avec payload
+    case loadComplete            // Sans payload
+}
+
+// ✅ Avec payload : utiliser case key path
+await store.receive(\.vehicleSaved) {
+    // Accès au state dans le bloc
+}
+
+// ✅ Sans payload : utiliser case directe
+await store.receive(.loadComplete) {
+    // ...
+}
+```
+
+#### Ordre des Assertions
+
+```swift
+await store.send(.action)           // 1. Envoie l'action
+await store.receive(.effect1) { }   // 2. Reçoit les effets dans l'ordre
+await store.receive(.effect2) { }   // 3. Ordre important !
+```
+
+### Helpers de Test
+
+#### Extension pour Création d'Objets
+
+```swift
+// InvoicerTests/Extensions/Vehicle+.swift
+extension Vehicle {
+    static func make(
+        id: UUID? = nil,  // ⚠️ Laisser nil par défaut pour flexibilité
+        type: VehicleType = .car,
+        brand: String = "",
+        model: String = "",
+        mileage: String? = nil,
+        registrationDate: Date = .now,
+        plate: String = "",
+        isPrimary: Bool = false,
+        documents: [Document] = []
+    ) -> Self {
+        .init(
 ## Conventions de Tests Unitaires
 
 ### Règles Générales
@@ -615,6 +830,66 @@ extension Vehicle {
 }
 ```
 
+### Patterns Given-When-Then
+
+```swift
+func test_example() async {
+    // GIVEN
+    givenStore(initialBrand: "Tesla", initialModel: "Model 3")
+
+    // WHEN
+    await store.send(.addButtonTapped)
+
+    // THEN
+    await store.receive(.saveVehicle) {
+        $0.isLoading = true
+    }
+
+    thenIsFormValid()
+}
+
+private func givenStore(...) { /* setup */ }
+private func thenIsFormValid() {
+    XCTAssertTrue(store.state.isFormValid)
+}
+```
+
+### Erreurs Courantes et Solutions
+
+#### Erreur : "State change does not match expectation"
+
+**Cause** : Mutation de @Shared non assertée au bon endroit
+
+**Solution** : Identifier **où** la mutation se produit réellement (dans `.run` ou dans le reducer) et asserte à cet endroit
+
+```swift
+// Si mutation dans .run de .saveVehicle
+await store.receive(.saveVehicle) {
+    $0.$vehicles.withLock { vehicles in
+        vehicles = [expected]  // ✅ Asserte ici
+    }
+}
+```
+
+#### Erreur : "extraneous argument label 'by:' in call"
+
+**Cause** : Les closures dans les Dependencies Client n'ont **PAS** de labels
+
+**Solution** : Appeler sans label
+
+```swift
+// ✅ Correct
+try await vehicleRepository.find(vehicleId)
+
+// ❌ Incorrect
+try await vehicleRepository.find(by: vehicleId)
+```
+
+#### Erreur : UUID imprévisibles
+
+**Cause** : Pas de mock du générateur UUID
+
+**Solution** : Utiliser `dependencies.uuid = .incrementing`
 **Avantages** :
 - Tous les paramètres optionnels avec valeurs par défaut
 - Plaques uniques générées automatiquement
@@ -801,4 +1076,4 @@ Avant de valider un fichier de test, vérifier :
 ---
 
 **Dernière mise à jour** : 25 Octobre 2025
-**Version** : 2.1 - Ajout des conventions de tests unitaires complètes
+**Version** : 2.1 - Ajout section Tests TCA, Dependencies Client patterns et des conventions de tests unitaires complètes

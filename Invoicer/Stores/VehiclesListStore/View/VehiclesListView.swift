@@ -109,13 +109,14 @@ struct VehiclesListView: View {
 }
 
 #Preview("With vehicles") {
+    @Dependency(\.uuid) var uuid
     NavigationView {
         VehiclesListView(store: Store(initialState: VehiclesListStore.State(vehicles: [
-            .init(type: .bicycle, brand: "Lexus", model: "CT200H", mileage: "120000", registrationDate: Date(timeIntervalSince1970: 1322784000), plate: "BZ-029-YV", documents: []),
-            .init(type: .motorcycle, brand: "Tesla", model: "Model 3", mileage: "45000", registrationDate: Date(timeIntervalSince1970: 1577836800), plate: "AB-123-CD", documents: []),
-            .init(type: .truck, brand: "BMW", model: "X5", mileage: "98000", registrationDate: Date(timeIntervalSince1970: 1546300800), plate: "EF-456-GH", documents: []),
-            .init(type: .other, brand: "BMW", model: "X5", mileage: "98000", registrationDate: Date(timeIntervalSince1970: 1546300800), plate: "EF-456-GH", documents: []),
-            .init(type: .car, brand: "Toyota", model: "X5", mileage: "98000", registrationDate: Date(timeIntervalSince1970: 1546300800), plate: "EF-456-GH", isPrimary: true, documents: [])
+            .init(id: uuid(), type: .bicycle, brand: "Lexus", model: "CT200H", mileage: "120000", registrationDate: Date(timeIntervalSince1970: 1322784000), plate: "BZ-029-YV", documents: []),
+            .init(id: uuid(), type: .motorcycle, brand: "Tesla", model: "Model 3", mileage: "45000", registrationDate: Date(timeIntervalSince1970: 1577836800), plate: "AB-123-CD", documents: []),
+            .init(id: uuid(), type: .truck, brand: "BMW", model: "X5", mileage: "98000", registrationDate: Date(timeIntervalSince1970: 1546300800), plate: "EF-456-GH", documents: []),
+            .init(id: uuid(), type: .other, brand: "BMW", model: "X5", mileage: "98000", registrationDate: Date(timeIntervalSince1970: 1546300800), plate: "EF-456-GH", documents: []),
+            .init(id: uuid(), type: .car, brand: "Toyota", model: "X5", mileage: "98000", registrationDate: Date(timeIntervalSince1970: 1546300800), plate: "EF-456-GH", isPrimary: true, documents: [])
         ])) {
             VehiclesListStore()
         })

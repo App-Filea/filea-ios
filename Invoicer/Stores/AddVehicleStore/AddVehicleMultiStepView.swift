@@ -10,23 +10,6 @@ import ComposableArchitecture
 
 struct AddVehicleMultiStepView: View {
     @Bindable var store: StoreOf<AddVehicleStore>
-    @State private var showPrimaryAlert: Bool = false
-
-    private var existingPrimaryVehicle: Vehicle? {
-        let primaryVehicle = store.vehicles.first(where: { $0.isPrimary })
-        if let vehicle = primaryVehicle {
-            print("🔍 [AddVehicleMultiStepView] Véhicule principal trouvé : \(vehicle.brand) \(vehicle.model)")
-        } else {
-            print("🔍 [AddVehicleMultiStepView] Aucun véhicule principal trouvé")
-        }
-        return primaryVehicle
-    }
-
-    private var isVehicleInformationComplete: Bool {
-        !store.brand.isEmpty &&
-        !store.model.isEmpty &&
-        !store.plate.isEmpty
-    }
 
     var body: some View {
         ZStack {
@@ -45,9 +28,9 @@ struct AddVehicleMultiStepView: View {
                         .foregroundStyle(ColorTokens.textPrimary)
                     Spacer()
                     Button("Ajouter") {
-                        handleAddButton()
+                        store.send(.addButtonTapped)
                     }
-                    .disabled(store.isLoading || !isVehicleInformationComplete)
+                    .disabled(store.isLoading || !store.isFormValid)
                 }
                 .padding(.horizontal, Spacing.screenMargin)
                 .padding(.vertical, Spacing.sm)
@@ -113,14 +96,43 @@ struct AddVehicleMultiStepView: View {
         .sheet(item: $store.scope(state: \.scanStore, action: \.scanStore)) { scanStore in
             DocumentScanView(store: scanStore)
         }
-        .alert("Véhicule principal existant", isPresented: $showPrimaryAlert) {
+        .sheet(isPresented: $store.showImagePicker) {
+            ImagePickerView(selectedImage: Binding(
+                get: { store.pendingImage },
+                set: { store.send(.imageSelected($0)) }
+            ))
+        }
+        .confirmationDialog(
+            "Ajouter un document",
+            isPresented: $store.showDocumentSourcePicker
+        ) {
+            Button("Scanner un document") {
+                store.send(.selectDocumentSource(.camera))
+            }
+            Button("Choisir une photo") {
+                store.send(.selectDocumentSource(.photoLibrary))
+            }
             Button("Annuler", role: .cancel) { }
+        }
+        .alert("Véhicule principal existant", isPresented: $store.showPrimaryAlert) {
+            Button("Annuler", role: .cancel) {
+                store.send(.primaryWarningCancelled)
+            }
             Button("Continuer") {
-                store.send(.saveVehicle)
+                store.send(.primaryWarningConfirmed)
             }
         } message: {
-            if let existingVehicle = existingPrimaryVehicle {
+            if let existingVehicle = store.existingPrimaryVehicle {
                 Text("Vous avez déjà un véhicule principal (\(existingVehicle.brand) \(existingVehicle.model)). En créant ce nouveau véhicule comme principal, l'actuel deviendra secondaire.")
+            }
+        }
+        .alert("Erreur", isPresented: $store.showErrorAlert) {
+            Button("OK", role: .cancel) {
+                store.send(.dismissError)
+            }
+        } message: {
+            if let errorMessage = store.errorMessage {
+                Text(errorMessage)
             }
         }
     }
@@ -283,21 +295,6 @@ struct AddVehicleMultiStepView: View {
         .padding(Spacing.md)
         .background(ColorTokens.surfaceElevated)
         .cornerRadius(Radius.md)
-    }
-
-    // MARK: - Actions
-
-    private func handleAddButton() {
-        // Vérifier si un véhicule principal existe déjà
-        if store.isPrimary && existingPrimaryVehicle != nil {
-            print("⚠️ [AddVehicleMultiStepView] Véhicule principal détecté : \(existingPrimaryVehicle!.brand) \(existingPrimaryVehicle!.model)")
-            showPrimaryAlert = true
-            return
-        }
-
-        // Sauvegarder directement
-        print("💾 [AddVehicleMultiStepView] Sauvegarde directe du véhicule")
-        store.send(.saveVehicle)
     }
 }
 

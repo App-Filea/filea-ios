@@ -12,12 +12,12 @@ import Dependencies
 /// Client interface for vehicle repository operations
 /// Delegates to VehicleRepository actor for actual implementation
 struct VehicleRepositoryClient: Sendable {
-    let createVehicle: @Sendable (Vehicle) async throws -> Void
-    let updateVehicle: @Sendable (Vehicle) async throws -> Void
-    let setPrimaryVehicle: @Sendable (UUID) async throws -> Void
-    let getAllVehicles: @Sendable () async throws -> [Vehicle]
-    let getVehicle: @Sendable (UUID) async throws -> Vehicle?
-    let deleteVehicle: @Sendable (UUID) async throws -> Void
+    var createVehicle: @Sendable (Vehicle) async throws -> Void
+    var updateVehicle: @Sendable (Vehicle) async throws -> Void
+    var setPrimaryVehicle: @Sendable (UUID) async throws -> Void
+    var getAllVehicles: @Sendable () async throws -> [Vehicle]
+    var getVehicle: @Sendable (UUID) async throws -> Vehicle?
+    var deleteVehicle: @Sendable (UUID) async throws -> Void
 }
 
 // MARK: - Dependency Key
@@ -101,35 +101,6 @@ extension VehicleRepositoryClient: DependencyKey {
         },
         deleteVehicle: { _ in }
     )
-}
-
-// MARK: - Convenience Methods
-
-extension VehicleRepositoryClient {
-    /// Convenience method with `by:` label for backward compatibility
-    func find(by id: UUID) async throws -> Vehicle? {
-        try await self.getVehicle(id)
-    }
-
-    /// Convenience method for backward compatibility - alias for getAllVehicles
-    func loadAll() async throws -> [Vehicle] {
-        try await self.getAllVehicles()
-    }
-
-    /// Convenience method for backward compatibility - alias for updateVehicle
-    func update(_ vehicle: Vehicle) async throws {
-        try await self.updateVehicle(vehicle)
-    }
-
-    /// Convenience method for backward compatibility - alias for createVehicle
-    func save(_ vehicle: Vehicle) async throws {
-        try await self.createVehicle(vehicle)
-    }
-
-    /// Convenience method for backward compatibility - alias for deleteVehicle
-    func delete(_ id: UUID) async throws {
-        try await self.deleteVehicle(id)
-    }
 }
 
 // MARK: - Dependency Values Extension

@@ -57,7 +57,7 @@ struct Vehicle: Codable, Equatable, Identifiable {
     var isPrimary: Bool
     var documents: [Document] = []
 
-    init(id: UUID? = nil,
+    init(id: UUID,
          type: VehicleType = .car,
          brand: String = "",
          model: String = "",
@@ -66,7 +66,7 @@ struct Vehicle: Codable, Equatable, Identifiable {
          plate: String = "",
          isPrimary: Bool = false,
          documents: [Document] = []) {
-        self.id = id ?? UUID()
+        self.id = id
         self.type = type
         self.brand = brand
         self.model = model

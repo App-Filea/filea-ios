@@ -7,29 +7,28 @@
 
 import SwiftUI
 import ComposableArchitecture
-import PhotosUI
+import VisionKit
 
 struct DocumentScanView: View {
     @Bindable var store: StoreOf<DocumentScanStore>
-    @State private var selectedItem: PhotosPickerItem?
 
     var body: some View {
         ZStack {
             ColorTokens.background
                 .ignoresSafeArea()
 
-            VStack(spacing: Spacing.xl) {
-                // Header
-                headerView
-
-                // Content based on state
-                if store.showPreview {
+            // Content based on state
+            if store.showCamera {
+                cameraView
+            } else if store.isProcessing {
+                loadingView
+            } else if store.showPreview {
+                VStack(spacing: Spacing.xl) {
+                    headerView
                     previewView
-                } else {
-                    scannerView
                 }
+                .padding(Spacing.md)
             }
-            .padding(Spacing.md)
         }
         .onAppear {
             store.send(.onAppear)
@@ -52,99 +51,82 @@ struct DocumentScanView: View {
                 Text(error.localizedDescription)
             }
         }
-        .onChange(of: selectedItem) { oldValue, newValue in
-            Task {
-                if let data = try? await newValue?.loadTransferable(type: Data.self),
-                   let image = UIImage(data: data) {
-                    store.send(.captureImage(image))
-                }
-            }
-        }
-        .onChange(of: store.showPreview) { oldValue, newValue in
-            // Réinitialiser le PhotosPicker quand on cache la preview
-            if !newValue {
-                selectedItem = nil
-            }
-        }
     }
 
     // MARK: - Subviews
 
     private var headerView: some View {
-        VStack(spacing: Spacing.sm) {
-            HStack {
-                Button("Annuler") {
-                    store.send(.cancelScan)
+        HStack {
+            Button("Annuler") {
+                store.send(.cancelScan)
+            }
+            .foregroundStyle(ColorTokens.textSecondary)
+
+            Spacer()
+
+            Text("Résultats du scan")
+                .font(Typography.title2)
+                .foregroundStyle(ColorTokens.textPrimary)
+
+            Spacer()
+
+            // Phantom button for alignment
+            Button("Annuler") {
+                store.send(.cancelScan)
+            }
+            .opacity(0)
+        }
+    }
+
+    private var cameraView: some View {
+        // VisionKit Document Scanner - full screen, no overlay
+        DocumentScannerView(
+            onFinish: { scan in
+                // Extract first page from scan
+                guard scan.pageCount > 0 else {
+                    store.send(.scanFailed(.noTextDetected))
+                    return
                 }
-                .foregroundStyle(ColorTokens.textSecondary)
 
-                Spacer()
+                let firstPage = scan.imageOfPage(at: 0)
+                print("📄 [DocumentScanView] Extracted page from scan")
+                print("   ├─ Total pages: \(scan.pageCount)")
+                print("   └─ Image size: \(firstPage.size)")
 
-                Text("Scanner une carte grise")
-                    .font(Typography.title2)
+                store.send(.captureImage(firstPage))
+            },
+            onCancel: {
+                store.send(.cancelScan)
+            },
+            onError: { error in
+                store.send(.scanFailed(.unknown(error.localizedDescription)))
+            }
+        )
+        .ignoresSafeArea()
+    }
+
+    private var loadingView: some View {
+        VStack(spacing: Spacing.xl) {
+            Spacer()
+
+            VStack(spacing: Spacing.lg) {
+                ProgressView()
+                    .scaleEffect(1.5)
+                    .tint(ColorTokens.actionPrimary)
+
+                Text("Analyse en cours...")
+                    .font(Typography.title3)
                     .foregroundStyle(ColorTokens.textPrimary)
 
-                Spacer()
-
-                // Phantom button for alignment
-                Button("Annuler") {
-                    store.send(.cancelScan)
-                }
-                .opacity(0)
-            }
-
-            if !store.showPreview {
-                Text("Placez la carte grise dans le cadre. Assurez-vous que les champs A, B, D.1 et D.3 sont visibles et bien éclairés.")
+                Text("Extraction des informations de la carte grise")
                     .bodySmallRegular()
                     .foregroundStyle(ColorTokens.textSecondary)
                     .multilineTextAlignment(.center)
             }
-        }
-    }
-
-    private var scannerView: some View {
-        VStack {
-            // Placeholder pour le scanner avec PhotosPicker
-            ZStack {
-                RoundedRectangle(cornerRadius: Radius.lg)
-                    .fill(ColorTokens.surfaceSecondary)
-                    .frame(height: 400)
-
-                VStack(spacing: Spacing.md) {
-                    Image(systemName: "viewfinder")
-                        .font(.system(size: 60))
-                        .foregroundStyle(ColorTokens.actionPrimary)
-
-                    Text("Sélectionnez une image du document")
-                        .bodyDefaultSemibold()
-                        .foregroundStyle(ColorTokens.textPrimary)
-                        .multilineTextAlignment(.center)
-
-                    if store.isScanning {
-                        ProgressView()
-                            .tint(ColorTokens.actionPrimary)
-                    }
-                }
-            }
 
             Spacer()
-
-            // Action buttons
-            VStack(spacing: Spacing.md) {
-                PhotosPicker(selection: $selectedItem, matching: .images) {
-                    HStack {
-                        Image(systemName: "photo.on.rectangle")
-                        Text("Choisir une photo")
-                    }
-                }
-                .buttonStyle(.primaryTextOnly())
-
-                Button("Retour") {
-                    store.send(.retryScanning)
-                }
-                .buttonStyle(.primaryTextOnly())
-            }
         }
+        .padding(Spacing.md)
     }
 
     private var previewView: some View {
@@ -191,8 +173,8 @@ struct DocumentScanView: View {
                     }
                     .buttonStyle(.primaryTextOnly())
 
-                    Button("Réessayer le scan") {
-                        store.send(.retryScanning)
+                    Button(store.scanSource == .photoLibrary ? "Choisir une autre image" : "Réessayer le scan") {
+                        store.send(.requestRetry)
                     }
                     .buttonStyle(.primaryTextOnly())
                 }

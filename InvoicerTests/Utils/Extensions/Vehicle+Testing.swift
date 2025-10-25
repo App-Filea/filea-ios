@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Dependencies
 @testable import Invoicer
 
 /// Extension for creating test fixtures of Vehicle
@@ -28,8 +29,8 @@ extension Vehicle {
         brand: String = "Tesla",
         model: String = "Model 3",
         mileage: String? = "50000",
-        registrationDate: Date = Date(),
-        plate: String = "TEST-\(UUID().uuidString.prefix(3))",
+        registrationDate: Date = Date(timeIntervalSince1970: 0),
+        plate: String = "TEST-PLATE",
         isPrimary: Bool = false,
         documents: [Document] = []
     ) -> Vehicle {

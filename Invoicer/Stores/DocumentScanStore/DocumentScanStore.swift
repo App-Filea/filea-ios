@@ -17,11 +17,14 @@ struct DocumentScanStore {
         var scanMode: ScanMode = .registrationCard
         var cameraAvailability: CameraAvailability = .checking
         var isScanning: Bool = false
+        var isProcessing: Bool = false
         var scannedText: String = ""
         var extractedData: ScannedVehicleData? = nil
         var scanError: ScanError? = nil
         var showModeSelector: Bool = false
         var showPreview: Bool = false
+        var showCamera: Bool = true
+        var scanSource: DocumentSource? = nil
     }
 
     enum Action: Equatable {
@@ -37,6 +40,7 @@ struct DocumentScanStore {
         case scanFailed(ScanError)
         case confirmData
         case retryScanning
+        case requestRetry
         case cancelScan
     }
 
@@ -92,6 +96,8 @@ struct DocumentScanStore {
             case .captureImage(let image):
                 print("📷 [DocumentScanStore] Image capturée, lancement OCR...")
                 state.isScanning = false
+                state.isProcessing = true
+                state.showCamera = false
 
                 return .run { [mode = state.scanMode] send in
                     do {
@@ -121,6 +127,7 @@ struct DocumentScanStore {
                 print("   └─ Champs remplis: \(data.filledFieldsCount)/4")
 
                 state.extractedData = data
+                state.isProcessing = false
                 state.showPreview = true
 
                 if !data.hasData {
@@ -133,6 +140,8 @@ struct DocumentScanStore {
                 print("❌ [DocumentScanStore] Scan échoué: \(error.localizedDescription)")
                 state.scanError = error
                 state.isScanning = false
+                state.isProcessing = false
+                state.showCamera = true
                 return .none
 
             case .confirmData:
@@ -142,12 +151,29 @@ struct DocumentScanStore {
                     await dismiss()
                 }
 
+            case .requestRetry:
+                print("🔄 [DocumentScanStore] Utilisateur demande un retry")
+
+                // Si la source était photoLibrary, on ferme (le parent gérera la réouverture)
+                if state.scanSource == .photoLibrary {
+                    print("   └─ Source: photoLibrary - Fermeture du scanner")
+                    return .run { _ in
+                        await dismiss()
+                    }
+                }
+
+                // Si c'était la caméra, on reset pour recommencer
+                print("   └─ Source: camera - Reset du scanner")
+                return .send(.retryScanning)
+
             case .retryScanning:
-                print("🔄 [DocumentScanStore] Nouveau scan demandé")
+                print("🔄 [DocumentScanStore] Reset pour nouveau scan")
                 state.scanError = nil
                 state.scannedText = ""
                 state.extractedData = nil
                 state.showPreview = false
+                state.showCamera = true
+                state.isProcessing = false
                 return .none
 
             case .cancelScan:

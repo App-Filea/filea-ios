@@ -139,6 +139,7 @@ extension VehicleType {
     VStack(spacing: Spacing.md) {
         VehicleCard(
             vehicle: Vehicle(
+                id: UUID(),
                 type: .car,
                 brand: "Tesla",
                 model: "Model 3",
@@ -160,6 +161,7 @@ extension VehicleType {
 
         VehicleCard(
             vehicle: Vehicle(
+                id: UUID(),
                 type: .motorcycle,
                 brand: "Harley",
                 model: "Davidson",

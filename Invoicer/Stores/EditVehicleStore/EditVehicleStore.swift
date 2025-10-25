@@ -39,6 +39,7 @@ struct EditVehicleStore {
         // Computed property pour avoir le véhicule avec les changements actuels
         var vehicle: Vehicle {
             updatedVehicle ?? Vehicle(
+                id: originalVehicle.id,
                 type: type,
                 brand: brand,
                 model: model,
@@ -84,6 +85,7 @@ struct EditVehicleStore {
                 }
 
                 let updatedVehicle = Vehicle(
+                    id: state.originalVehicle.id,
                     type: state.type,
                     brand: state.brand,
                     model: state.model,
@@ -99,11 +101,11 @@ struct EditVehicleStore {
                         // Sauvegarder tous les véhicules mis à jour
                         for existingVehicle in vehicles {
                             if existingVehicle.id != originalVehicleId {
-                                try await vehicleRepository.update(existingVehicle)
+                                try await vehicleRepository.updateVehicle(existingVehicle)
                             }
                         }
                         // Mettre à jour le véhicule actuel
-                        try await vehicleRepository.update(updatedVehicle)
+                        try await vehicleRepository.updateVehicle(updatedVehicle)
                         await send(.vehicleUpdated)
                     } catch {
                         print("❌ [EditVehicleStore] Erreur lors de la mise à jour: \(error.localizedDescription)")
@@ -116,6 +118,7 @@ struct EditVehicleStore {
                 state.isLoading = false
                 // Créer le véhicule mis à jour et le stocker
                 let updatedVehicle = Vehicle(
+                    id: state.originalVehicle.id,
                     type: state.type,
                     brand: state.brand,
                     model: state.model,

@@ -1,0 +1,38 @@
+{
+  "configurations" : [
+    {
+      "id" : "29EC488C-913E-4A9D-A981-F7AD9466CF6F",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:Invoicer.xcodeproj",
+      "identifier" : "3F0741332E6C714B00F18229",
+      "name" : "Invoicer"
+    }
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : false,
+      "target" : {
+        "containerPath" : "container:Invoicer.xcodeproj",
+        "identifier" : "3F0741412E6C714D00F18229",
+        "name" : "InvoicerTests"
+      }
+    },
+    {
+      "enabled" : false,
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:Invoicer.xcodeproj",
+        "identifier" : "3F07414B2E6C714D00F18229",
+        "name" : "InvoicerUITests"
+      }
+    }
+  ],
+  "version" : 1
+}

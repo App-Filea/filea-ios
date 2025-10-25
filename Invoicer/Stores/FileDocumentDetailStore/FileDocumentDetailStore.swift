@@ -52,7 +52,7 @@ struct FileDocumentDetailStore {
                 print("📖 [FileDocumentDetailStore] Chargement du document fichier: \(state.documentId)")
                 return .run { [vehicleId = state.vehicleId, documentId = state.documentId] send in
                     do {
-                        if let vehicle = try await vehicleRepository.find(by: vehicleId),
+                        if let vehicle = try await vehicleRepository.getVehicle(vehicleId),
                            let document = vehicle.documents.first(where: { $0.id == documentId }) {
                             print("✅ [FileDocumentDetailStore] Document fichier trouvé: \(document.fileURL)")
                             await send(.documentLoaded(document))

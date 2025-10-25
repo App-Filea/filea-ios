@@ -255,10 +255,12 @@ struct VehicleDetailsView: View {
 
 // MARK: - Preview
 #Preview {
+    @Dependency(\.uuid) var uuid
     NavigationView {
         VehicleDetailsView(store:
                         Store(initialState:
                                 VehicleDetailsStore.State(selectedVehicle: Shared(value: Vehicle(
+                                    id: uuid(),
                                     type: .car,
                                     brand: "Lexus",
                                     model: "CT200h",

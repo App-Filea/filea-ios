@@ -22,6 +22,7 @@ struct VehiclesListStore {
     enum Action: Equatable {
         case vehiclesLoaded([Vehicle])
         case showAddVehicle
+        case dismissAddVehicle
         case selectVehicle(Vehicle)
         case addVehicle(PresentationAction<AddVehicleStore.Action>)
     }
@@ -38,6 +39,10 @@ struct VehiclesListStore {
 
             case .showAddVehicle:
                 state.addVehicle = AddVehicleStore.State()
+                return .none
+                
+            case .dismissAddVehicle:
+                state.addVehicle = nil
                 return .none
 
             case .selectVehicle(let vehicle):

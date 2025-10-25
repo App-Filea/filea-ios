@@ -51,7 +51,7 @@ struct DocumentDetailCoordinatorStore {
                 print("🔍 [DocumentDetailCoordinator] Détermination du type de document: \(state.documentId)")
                 return .run { [vehicleId = state.vehicleId, documentId = state.documentId] send in
                     do {
-                        if let vehicle = try await vehicleRepository.find(by: vehicleId),
+                        if let vehicle = try await vehicleRepository.getVehicle(vehicleId),
                            let document = vehicle.documents.first(where: { $0.id == documentId }) {
 
                             let documentType = await determineDocumentType(from: document.fileURL)
@@ -161,7 +161,7 @@ struct DocumentDetailCoordinatorStore {
                 // Recharger le véhicule pour mettre à jour la liste des documents
                 return .run { [vehicleId = state.vehicleId, vehicles = state.$vehicles] send in
                     do {
-                        if let updatedVehicle = try await vehicleRepository.find(by: vehicleId) {
+                        if let updatedVehicle = try await vehicleRepository.getVehicle(vehicleId) {
                             await vehicles.withLock { vehicles in
                                 if let index = vehicles.firstIndex(where: { $0.id == vehicleId }) {
                                     vehicles[index] = updatedVehicle
@@ -178,7 +178,7 @@ struct DocumentDetailCoordinatorStore {
                 state.isLoading = true
                 return .run { [vehicleId = state.vehicleId, documentId = state.documentId] send in
                     do {
-                        if let vehicle = try await vehicleRepository.find(by: vehicleId),
+                        if let vehicle = try await vehicleRepository.getVehicle(vehicleId),
                            let document = vehicle.documents.first(where: { $0.id == documentId }) {
                             await send(.editDocumentLoaded(document))
                         }

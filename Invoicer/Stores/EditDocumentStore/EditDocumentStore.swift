@@ -125,7 +125,7 @@ struct EditDocumentStore {
                 // Recharger le véhicule pour mettre à jour la liste des documents dans @Shared
                 return .run { [vehicleId = state.vehicleId, vehicles = state.$vehicles] send in
                     do {
-                        if let updatedVehicle = try await vehicleRepository.find(by: vehicleId) {
+                        if let updatedVehicle = try await vehicleRepository.getVehicle(vehicleId) {
                             await vehicles.withLock { vehicles in
                                 if let index = vehicles.firstIndex(where: { $0.id == vehicleId }) {
                                     vehicles[index] = updatedVehicle

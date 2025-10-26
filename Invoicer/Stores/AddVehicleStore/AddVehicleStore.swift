@@ -46,15 +46,6 @@ struct AddVehicleStore {
             case .saveVehicle:
                 state.isLoading = true
 
-                // Si le nouveau véhicule est principal, mettre tous les autres en secondaire
-                if state.isPrimary {
-                    state.$vehicles.withLock { vehicles in
-                        for index in vehicles.indices {
-                            vehicles[index].isPrimary = false
-                        }
-                    }
-                }
-
                 // Construire le Vehicle à partir des champs séparés
                 let vehicle = Vehicle(
                     type: state.vehicleType ?? .car,
@@ -66,14 +57,16 @@ struct AddVehicleStore {
                     isPrimary: state.isPrimary
                 )
 
-                return .run { [vehicles = state.vehicles] send in
+                return .run { send in
                     do {
-                        // Sauvegarder tous les véhicules mis à jour
-                        for existingVehicle in vehicles {
-                            try await vehicleRepository.update(existingVehicle)
+                        // Créer le véhicule (système dual : JSON + GRDB)
+                        try await vehicleRepository.createVehicle(vehicle)
+
+                        // Si véhicule principal, mettre à jour tous les autres
+                        if vehicle.isPrimary {
+                            try await vehicleRepository.setPrimaryVehicle(vehicle.id)
                         }
-                        // Sauvegarder le nouveau véhicule
-                        try await vehicleRepository.save(vehicle)
+
                         await send(.vehicleSaved(vehicle))
                     } catch {
                         print("❌ [AddVehicleStore] Erreur lors de la sauvegarde: \(error.localizedDescription)")

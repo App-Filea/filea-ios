@@ -77,9 +77,17 @@ actor VehicleMetadataSyncManager {
         // 5. Encoder en JSON
         let jsonData = try encoder.encode(metadataFile)
 
-        // 6. Écrire dans le dossier du véhicule
-        let jsonURL = URL(fileURLWithPath: vehicleRecord.folderPath)
-            .appendingPathComponent(jsonFileName)
+        // 6. Créer le dossier du véhicule s'il n'existe pas
+        let folderURL = URL(fileURLWithPath: vehicleRecord.folderPath)
+        let fileManager = FileManager.default
+
+        if !fileManager.fileExists(atPath: folderURL.path) {
+            print("   📁 Création du dossier : \(folderURL.lastPathComponent)")
+            try fileManager.createDirectory(at: folderURL, withIntermediateDirectories: true)
+        }
+
+        // 7. Écrire le fichier JSON dans le dossier du véhicule
+        let jsonURL = folderURL.appendingPathComponent(jsonFileName)
 
         try jsonData.write(to: jsonURL)
 
@@ -198,7 +206,7 @@ actor VehicleMetadataSyncManager {
     /// Vérifie si un dossier contient un fichier de métadonnées valide
     /// - Parameter folderPath: Chemin du dossier à vérifier
     /// - Returns: true si le fichier existe et est valide
-    func hasValidMetadata(folderPath: String) -> Bool {
+    nonisolated func hasValidMetadata(folderPath: String) -> Bool {
         let jsonURL = URL(fileURLWithPath: folderPath)
             .appendingPathComponent(jsonFileName)
 
@@ -249,18 +257,3 @@ extension Bundle {
     }
 }
 
-// MARK: - Dependency Key
-
-extension VehicleMetadataSyncManager: DependencyKey {
-    nonisolated static let liveValue: VehicleMetadataSyncManager = {
-        @Dependency(\.database) var database
-        return VehicleMetadataSyncManager(database: database)
-    }()
-}
-
-extension DependencyValues {
-    var syncManager: VehicleMetadataSyncManager {
-        get { self[VehicleMetadataSyncManager.self] }
-        set { self[VehicleMetadataSyncManager.self] = newValue }
-    }
-}

@@ -1,42 +1,17 @@
 //
-//  VehicleRepository.swift
+//  FileVehicleRepository.swift
 //  Invoicer
 //
 //  Created by Claude on 2025-01-16.
-//  Repository for vehicle CRUD operations
+//  Legacy file-based repository for vehicle CRUD operations (JSON)
 //
 
 import Foundation
 import Dependencies
 import os.log
 
-// MARK: - Protocol
-
-protocol VehicleRepositoryProtocol: Sendable {
-    func loadAll() async throws -> [Vehicle]
-    func save(_ vehicle: Vehicle) async throws
-    func update(_ vehicle: Vehicle) async throws
-    func delete(_ vehicleId: UUID) async throws
-    func find(by id: UUID) async throws -> Vehicle?
-}
-
-// MARK: - Dependency Registration
-
-extension DependencyValues {
-    var vehicleRepository: VehicleRepositoryProtocol {
-        get { self[VehicleRepositoryKey.self] }
-        set { self[VehicleRepositoryKey.self] = newValue }
-    }
-}
-
-private enum VehicleRepositoryKey: DependencyKey {
-    static let liveValue: VehicleRepositoryProtocol = VehicleRepository()
-}
-
-// MARK: - Implementation
-
-final class VehicleRepository: VehicleRepositoryProtocol, @unchecked Sendable {
-    private let logger = Logger(subsystem: AppConstants.bundleIdentifier, category: "VehicleRepository")
+actor FileVehicleRepository {
+    private let logger = Logger(subsystem: AppConstants.bundleIdentifier, category: "FileVehicleRepository")
     private let fileManager = FileManager.default
     @Dependency(\.storageManager) var storageManager
 

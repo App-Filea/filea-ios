@@ -440,6 +440,342 @@ try dbQueue.write { db in
 }
 ```
 
+## Conventions de Tests Unitaires
+
+### Règles Générales
+
+**⚠️ OBLIGATOIRE** : Tous les tests doivent suivre strictement ces conventions pour garantir la cohérence et la maintenabilité du projet.
+
+### 1. Convention de Nommage des Tests
+
+**Pattern obligatoire** : `test_Action_ce_que_je_vais_vérifier()`
+
+**Structure** :
+- `test_` : Préfixe obligatoire pour XCTest
+- `Action` : L'action ou la méthode testée (ex: `create`, `update`, `delete`, `fetch`)
+- `ce_que_je_vais_vérifier` : Description claire de ce qui est vérifié (en camelCase)
+
+**Exemples** :
+```swift
+✅ func test_create_vehicleExistsInDatabase() async throws
+✅ func test_create_allPropertiesAreCorrectlySaved() async throws
+✅ func test_update_vehicleIsModified() async throws
+✅ func test_delete_vehicleIsRemoved() async throws
+✅ func test_fetch_vehicleWithDocumentsIsRetrieved() async throws
+
+❌ func test_create_savesVehicle() // Trop vague
+❌ func testCreateVehicle() // Pas de description de vérification
+❌ func test_vehicleCreation() // Action pas claire
+```
+
+### 2. Pattern Given-When-Then
+
+**Tous les tests doivent suivre le pattern BDD (Behavior Driven Development)** :
+
+```swift
+func test_create_vehicleExistsInDatabase() async throws {
+    // Setup des données de test
+    let vehicle = Vehicle.make(brand: "Tesla", model: "Model 3")
+
+    // Exécution de l'action à tester
+    try await givenVehicleCreated(vehicle)
+    try await whenFetchingVehicle(id: vehicle.id)
+
+    // Vérifications des résultats
+    thenVehicleShouldExist(vehicle)
+}
+```
+
+### 3. Nommage des Helpers
+
+**Convention stricte pour les noms de helpers** :
+
+#### Helpers `given` (Setup/Configuration)
+- Préfixe : `given`
+- Format : `givenXXXCreated()`, `givenXXXConfigured()`
+- Responsabilité : Créer et configurer les données de test
+- **Ne retournent RIEN** (utilisent `async throws` si nécessaire)
+
+```swift
+private func givenVehicleCreated(
+    _ vehicle: Vehicle,
+    at folderPath: String? = nil
+) async throws {
+    let path = folderPath ?? "/test/vehicles/\(vehicle.id.uuidString)"
+    try await repository.create(vehicle: vehicle, folderPath: path)
+}
+```
+
+#### Helpers `when` (Actions)
+- Préfixe : `when`
+- Format : `whenFetchingXXX()`, `whenCreatingXXX()`, `whenUpdatingXXX()`
+- Responsabilité : Exécuter l'action et **stocker le résultat dans une variable globale**
+- **Ne retournent RIEN** - Peuplent les variables de la classe
+
+```swift
+private func whenFetchingVehicle(id: UUID) async throws {
+    fetchedVehicle = try await repository.fetch(id: id)
+}
+
+private func whenFetchingAllVehicles() async throws {
+    fetchedVehicles = try await repository.fetchAll()
+}
+```
+
+#### Helpers `then` (Assertions)
+- Préfixe : `then`
+- Format : `thenXXXShouldBe()`, `thenXXXShouldExist()`, `thenXXXShouldMatch()`
+- Responsabilité : Vérifier les résultats **en utilisant les variables globales**
+- **Ne retournent RIEN** - Exécutent des assertions XCTest
+- Prennent uniquement les valeurs attendues en paramètres
+
+```swift
+private func thenVehicleShouldExist(_ expected: Vehicle) {
+    XCTAssertNotNil(fetchedVehicle, "Vehicle should exist in database")
+    XCTAssertEqual(fetchedVehicle?.id, expected.id, "Vehicle ID should match")
+}
+
+private func thenVehicleTypeShouldBe(_ expected: VehicleType) {
+    XCTAssertEqual(fetchedVehicle?.type, expected, "Should save \(expected) type")
+}
+
+private func thenVehicleMileageShouldBeNil() {
+    XCTAssertNil(fetchedVehicle?.mileage, "Should save nil mileage when not provided")
+}
+```
+
+### 4. Variables Globales pour Résultats
+
+**Déclarer des variables d'instance privées** pour stocker les résultats des actions :
+
+```swift
+final class VehicleDatabaseRepository_Spec: XCTestCase {
+
+    // Variables placées EN BAS de la classe, après tous les helpers
+    private var testDatabase: DatabaseManager!
+    private var repository: VehicleDatabaseRepository!
+    private var fetchedVehicle: Vehicle?
+    private var fetchedVehicles: [Vehicle] = []
+}
+```
+
+**Reset obligatoire** dans `setUp()` et `tearDown()` :
+
+```swift
+override func setUp() async throws {
+    try await super.setUp()
+    testDatabase = try DatabaseManager(databasePath: ":memory:")
+    repository = VehicleDatabaseRepository(database: testDatabase)
+    fetchedVehicle = nil
+    fetchedVehicles = []
+}
+
+override func tearDown() async throws {
+    testDatabase = nil
+    repository = nil
+    fetchedVehicle = nil
+    fetchedVehicles = []
+    try await super.tearDown()
+}
+```
+
+### 5. Extensions pour Fixtures (Test Data Builders)
+
+**Créer des extensions dans `InvoicerTests/Extensions/`** pour faciliter la création de données de test :
+
+```swift
+// InvoicerTests/Extensions/Vehicle+Testing.swift
+import Foundation
+@testable import Invoicer
+
+extension Vehicle {
+    static func make(
+        id: UUID = UUID(),
+        type: VehicleType = .car,
+        brand: String = "Tesla",
+        model: String = "Model 3",
+        mileage: String? = "50000",
+        registrationDate: Date = Date(),
+        plate: String = "TEST-\(UUID().uuidString.prefix(3))",
+        isPrimary: Bool = false,
+        documents: [Document] = []
+    ) -> Vehicle {
+        Vehicle(
+            id: id,
+            type: type,
+            brand: brand,
+            model: model,
+            mileage: mileage,
+            registrationDate: registrationDate,
+            plate: plate,
+            isPrimary: isPrimary,
+            documents: documents
+        )
+    }
+}
+```
+
+**Avantages** :
+- Tous les paramètres optionnels avec valeurs par défaut
+- Plaques uniques générées automatiquement
+- Utilisation concise : `Vehicle.make(brand: "BMW")`
+
+### 6. Base de Données en Mémoire pour Tests
+
+**TOUJOURS utiliser `:memory:` pour les tests GRDB** :
+
+```swift
+testDatabase = try DatabaseManager(databasePath: ":memory:")
+```
+
+**Avantages** :
+- ✅ Ultra-rapide (pas d'I/O disque)
+- ✅ Isolation complète entre tests
+- ✅ Pas de nettoyage manuel nécessaire
+- ✅ Détruite automatiquement à la fin du test
+
+### 7. Structure d'un Fichier de Test
+
+**Organisation obligatoire** :
+
+```swift
+import XCTest
+@testable import Invoicer
+
+final class RepositoryName_Spec: XCTestCase {
+
+    // 1. Setup & Teardown
+    override func setUp() async throws { ... }
+    override func tearDown() async throws { ... }
+
+    // 2. Tests (groupés par action)
+    func test_create_vehicleExistsInDatabase() async throws { ... }
+    func test_create_allPropertiesAreCorrectlySaved() async throws { ... }
+
+    func test_update_vehicleIsModified() async throws { ... }
+
+    func test_delete_vehicleIsRemoved() async throws { ... }
+
+    // 3. Helpers Given
+    private func givenVehicleCreated(...) async throws { ... }
+
+    // 4. Helpers When
+    private func whenFetchingVehicle(...) async throws { ... }
+
+    // 5. Helpers Then
+    private func thenVehicleShouldExist(...) { ... }
+
+    // 6. Variables d'instance (EN BAS)
+    private var testDatabase: DatabaseManager!
+    private var repository: RepositoryName!
+    private var fetchedVehicle: Vehicle?
+    private var fetchedVehicles: [Vehicle] = []
+}
+```
+
+### 8. Règles de Style
+
+**❌ PAS de commentaires** dans les tests - le code doit être auto-documenté :
+```swift
+❌ // Given - Create a vehicle
+❌ // When - Fetch the vehicle
+❌ // Then - Check it exists
+
+✅ Le nom des fonctions et variables doit suffire
+```
+
+**✅ Code concis et lisible** :
+```swift
+✅ func test_create_vehicleExistsInDatabase() async throws {
+    let vehicle = Vehicle.make(brand: "Tesla")
+    try await givenVehicleCreated(vehicle)
+    try await whenFetchingVehicle(id: vehicle.id)
+    thenVehicleShouldExist(vehicle)
+}
+```
+
+### 9. Messages d'Assertion
+
+**Toujours fournir des messages descriptifs** dans les assertions :
+
+```swift
+✅ XCTAssertNotNil(fetchedVehicle, "Vehicle should exist in database")
+✅ XCTAssertEqual(fetchedVehicle?.brand, "Tesla", "Brand should match")
+✅ XCTAssertEqual(all.count, 3, "Should have 3 vehicles saved")
+
+❌ XCTAssertNotNil(fetchedVehicle)
+❌ XCTAssertEqual(fetchedVehicle?.brand, "Tesla")
+```
+
+### 10. Exemple Complet
+
+**Référence** : `InvoicerTests/Data/Repositories/VehicleDatabaseRepository_Spec.swift`
+
+```swift
+final class VehicleDatabaseRepository_Spec: XCTestCase {
+
+    override func setUp() async throws {
+        try await super.setUp()
+        testDatabase = try DatabaseManager(databasePath: ":memory:")
+        repository = VehicleDatabaseRepository(database: testDatabase)
+        fetchedVehicle = nil
+        fetchedVehicles = []
+    }
+
+    override func tearDown() async throws {
+        testDatabase = nil
+        repository = nil
+        fetchedVehicle = nil
+        fetchedVehicles = []
+        try await super.tearDown()
+    }
+
+    func test_create_vehicleExistsInDatabase() async throws {
+        let vehicle = Vehicle.make(brand: "Tesla", model: "Model 3")
+        try await givenVehicleCreated(vehicle)
+        try await whenFetchingVehicle(id: vehicle.id)
+        thenVehicleShouldExist(vehicle)
+    }
+
+    private func givenVehicleCreated(
+        _ vehicle: Vehicle,
+        at folderPath: String? = nil
+    ) async throws {
+        let path = folderPath ?? "/test/vehicles/\(vehicle.id.uuidString)"
+        try await repository.create(vehicle: vehicle, folderPath: path)
+    }
+
+    private func whenFetchingVehicle(id: UUID) async throws {
+        fetchedVehicle = try await repository.fetch(id: id)
+    }
+
+    private func thenVehicleShouldExist(_ expected: Vehicle) {
+        XCTAssertNotNil(fetchedVehicle, "Vehicle should exist in database")
+        XCTAssertEqual(fetchedVehicle?.id, expected.id, "Vehicle ID should match")
+    }
+
+    private var testDatabase: DatabaseManager!
+    private var repository: VehicleDatabaseRepository!
+    private var fetchedVehicle: Vehicle?
+    private var fetchedVehicles: [Vehicle] = []
+}
+```
+
+### 11. Checklist de Revue de Tests
+
+Avant de valider un fichier de test, vérifier :
+
+- [ ] Tous les tests suivent `test_Action_ce_que_je_vais_vérifier()`
+- [ ] Pattern Given-When-Then respecté
+- [ ] Helpers nommés `givenX`, `whenX`, `thenX`
+- [ ] Variables globales déclarées en bas de classe
+- [ ] Variables reset dans `setUp()` et `tearDown()`
+- [ ] Base de données en mémoire (`:memory:`)
+- [ ] Pas de commentaires dans le code
+- [ ] Messages descriptifs dans toutes les assertions
+- [ ] Extension `.make()` créée si nécessaire
+- [ ] Tous les tests passent ✅
+
 ## Ressources Utiles
 
 ### Documentation Projet
@@ -464,5 +800,5 @@ try dbQueue.write { db in
 
 ---
 
-**Dernière mise à jour** : 18 Octobre 2025
-**Version** : 2.0 - Mise à jour complète avec architecture hybride GRDB
+**Dernière mise à jour** : 25 Octobre 2025
+**Version** : 2.1 - Ajout des conventions de tests unitaires complètes

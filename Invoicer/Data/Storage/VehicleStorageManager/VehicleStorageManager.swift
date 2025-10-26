@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import Dependencies
 import os.log
 
 /// Actor responsible for managing the storage location of vehicle data
@@ -265,17 +264,4 @@ actor VehicleStorageManager {
             logger.debug("🧹 Cleanup: Stopped accessing security-scoped resource in deinit")
         }
     }
-}
-
-// MARK: - Dependency Registration
-
-extension DependencyValues {
-    var storageManager: VehicleStorageManager {
-        get { self[VehicleStorageManagerKey.self] }
-        set { self[VehicleStorageManagerKey.self] = newValue }
-    }
-}
-
-private enum VehicleStorageManagerKey: DependencyKey {
-    static let liveValue = VehicleStorageManager()
 }

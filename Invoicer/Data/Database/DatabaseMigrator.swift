@@ -17,7 +17,7 @@ enum DatabaseMigrator {
         // MARK: - Migration v1.0: Tables initiales
 
         migrator.registerMigration("v1.0_create_vehicles_table") { db in
-            try db.create(table: "vehicleRecord") { table in
+            try db.create(table: "vehicleRecords") { table in
                 table.primaryKey("id", .blob).notNull()
                 table.column("type", .text).notNull()
                 table.column("brand", .text).notNull()
@@ -32,15 +32,15 @@ enum DatabaseMigrator {
             }
 
             // Index pour recherche rapide
-            try db.create(index: "idx_vehicle_plate", on: "vehicleRecord", columns: ["plate"])
-            try db.create(index: "idx_vehicle_isPrimary", on: "vehicleRecord", columns: ["isPrimary"])
+            try db.create(index: "idx_vehicle_plate", on: "vehicleRecords", columns: ["plate"])
+            try db.create(index: "idx_vehicle_isPrimary", on: "vehicleRecords", columns: ["isPrimary"])
         }
 
         migrator.registerMigration("v1.0_create_file_metadata_table") { db in
-            try db.create(table: "fileMetadataRecord") { table in
+            try db.create(table: "fileMetadataRecords") { table in
                 table.primaryKey("id", .blob).notNull()
                 table.column("vehicleId", .blob).notNull()
-                    .references("vehicleRecord", column: "id", onDelete: .cascade)
+                    .references("vehicleRecords", column: "id", onDelete: .cascade)
                 table.column("fileName", .text).notNull()
                 table.column("relativePath", .text).notNull()
                 table.column("documentType", .text).notNull()
@@ -55,9 +55,9 @@ enum DatabaseMigrator {
             }
 
             // Index pour recherche et tri
-            try db.create(index: "idx_file_vehicleId", on: "fileMetadataRecord", columns: ["vehicleId"])
-            try db.create(index: "idx_file_date", on: "fileMetadataRecord", columns: ["date"])
-            try db.create(index: "idx_file_documentType", on: "fileMetadataRecord", columns: ["documentType"])
+            try db.create(index: "idx_file_vehicleId", on: "fileMetadataRecords", columns: ["vehicleId"])
+            try db.create(index: "idx_file_date", on: "fileMetadataRecords", columns: ["date"])
+            try db.create(index: "idx_file_documentType", on: "fileMetadataRecords", columns: ["documentType"])
         }
 
         // MARK: - Futures migrations

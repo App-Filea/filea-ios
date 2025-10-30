@@ -530,8 +530,9 @@ struct EditVehicleView: View {
 
 
 #Preview {
+    @Dependency(\.uuid) var uuid
     EditVehicleView(store: Store(initialState: EditVehicleStore.State(
-        vehicle: Vehicle(brand: "Test Car", model: "", mileage: "50000", registrationDate: Date(timeIntervalSince1970: 1322784000), plate: "ABC-123")
+        vehicle: Vehicle(id: uuid(), brand: "Test Car", model: "", mileage: "50000", registrationDate: Date(timeIntervalSince1970: 1322784000), plate: "ABC-123")
     )) {
         EditVehicleStore()
     })

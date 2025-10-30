@@ -43,7 +43,7 @@ struct VehiclesListModalView: View {
                     }
                 }
                 .safeAreaInset(edge: .bottom) {
-                    Button(action: {}) {
+                    Button(action: { store.send(.showAddVehicle) }) {
                         Text("Ajouter un nouveau véhicule")
                     }
                     .buttonStyle(.primaryTextOnly())
@@ -78,8 +78,7 @@ struct VehiclesListModalView: View {
                         }
                         Spacer()
                         // Vehicle type icon
-                        if let iconName = vehicle.type.iconName {
-                            Image(systemName: iconName)
+                            Image(systemName: vehicle.type.iconName)
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
                                 .fontWeight(.bold)
@@ -87,7 +86,6 @@ struct VehiclesListModalView: View {
                                 .frame(/*maxWidth: 128, */width: 120, height: 80)
                                 .scaleEffect(x: vehicle.type.shouldFlipIcon ? -1 : 1, y: 1)
                                 .offset(x: 60, y: -10)
-                        }
                     }
 
                     HStack(spacing: 0) {
@@ -118,10 +116,11 @@ struct VehiclesListModalView: View {
 }
 
 #Preview("With vehicles") {
+    @Dependency(\.uuid) var uuid
     VehiclesListModalView(store: Store(initialState: VehiclesListModalStore.State(vehicles: [
-        .init(brand: "Lexus", model: "CT200H", mileage: "120000", registrationDate: Date(timeIntervalSince1970: 1322784000), plate: "BZ-029-YV", documents: []),
-        .init(brand: "Tesla", model: "Model 3", mileage: "45000", registrationDate: Date(timeIntervalSince1970: 1577836800), plate: "AB-123-CD", documents: []),
-        .init(brand: "BMW", model: "X5", mileage: "98000", registrationDate: Date(timeIntervalSince1970: 1546300800), plate: "EF-456-GH", documents: [])
+        .init(id: uuid(), brand: "Lexus", model: "CT200H", mileage: "120000", registrationDate: Date(timeIntervalSince1970: 1322784000), plate: "BZ-029-YV", documents: []),
+        .init(id: uuid(), brand: "Tesla", model: "Model 3", mileage: "45000", registrationDate: Date(timeIntervalSince1970: 1577836800), plate: "AB-123-CD", documents: []),
+        .init(id: uuid(), brand: "BMW", model: "X5", mileage: "98000", registrationDate: Date(timeIntervalSince1970: 1546300800), plate: "EF-456-GH", documents: [])
     ])) {
         VehiclesListModalStore()
     })

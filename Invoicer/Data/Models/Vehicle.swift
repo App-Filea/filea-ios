@@ -26,20 +26,20 @@ enum VehicleType: String, Codable, CaseIterable, Identifiable {
         }
     }
 
-    var iconName: String? {
+    var iconName: String {
         switch self {
         case .car: return "car.side"
         case .motorcycle: return "motorcycle"
         case .truck: return "truck.box"
         case .bicycle: return "bicycle"
-        case .other: return nil
+        case .other: return "scooter"
         }
     }
 
     var shouldFlipIcon: Bool {
         switch self {
         case .car: return false
-        case .motorcycle, .truck, .bicycle: return true
+        case .motorcycle, .truck, .bicycle, .other: return true
         case .other: return false
         }
     }
@@ -57,7 +57,7 @@ struct Vehicle: Codable, Equatable, Identifiable {
     var isPrimary: Bool
     var documents: [Document] = []
 
-    init(id: UUID? = nil,
+    init(id: UUID,
          type: VehicleType = .car,
          brand: String = "",
          model: String = "",
@@ -66,7 +66,7 @@ struct Vehicle: Codable, Equatable, Identifiable {
          plate: String = "",
          isPrimary: Bool = false,
          documents: [Document] = []) {
-        self.id = id ?? UUID()
+        self.id = id
         self.type = type
         self.brand = brand
         self.model = model

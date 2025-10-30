@@ -19,19 +19,14 @@ struct AddDocumentStepView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: Spacing.lg) {
-                switch step {
-                case .selectSource:
-                    selectSourceView
-                case .metadata:
-                    metadataView
-                }
+        VStack(spacing: Spacing.lg) {
+            switch step {
+            case .selectSource:
+                selectSourceView
+            case .metadata:
+                metadataView
             }
-            .padding(.horizontal, Spacing.md)
-            .padding(.vertical, Spacing.lg)
         }
-        .scrollDismissesKeyboard(.interactively)
         .fullScreenCover(isPresented: $store.showCamera) {
             CameraView { image in
                 store.send(.imageCapture(image))

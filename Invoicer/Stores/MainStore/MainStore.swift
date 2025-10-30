@@ -120,7 +120,7 @@ struct MainStore {
                 }
                 return .run { send in
                     do {
-                        try await vehicleRepository.delete(vehicleId)
+                        try await vehicleRepository.deleteVehicle(vehicleId)
                         await send(.vehicleDeleted)
                     } catch {
                         // Handle error - for now just continue

@@ -88,7 +88,7 @@ struct AddVehicleStepView: View {
     // MARK: - Step Contents
 
     private var vehicleTypeContent: some View {
-        VStack(spacing: Spacing.md) {
+        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: Spacing.md) {
             // Sélection du type de véhicule
             ForEach(VehicleType.allCases) { type in
                 Button(action: {
@@ -98,59 +98,284 @@ struct AddVehicleStepView: View {
                         store.vehicleType = type
                     }
                 }) {
-                    HStack {
-                        Text(type.displayName)
-                            .font(Typography.button)
-                            .foregroundStyle(store.vehicleType == type ? ColorTokens.onActionPrimary : ColorTokens.textPrimary)
+                    VStack {
+                        Image(systemName: type.iconName)
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .scaleEffect(x: type.shouldFlipIcon ? -1 : 1, y: 1)
+                                .foregroundStyle(ColorTokens.textPrimary)
+
                         Spacer()
-                        Circle()
-                            .frame(width: 18, height: 18)
-                            .foregroundStyle(.clear) // cercle de base transparent
-                            .background(
-                                Circle()
-                                    .stroke(ColorTokens.border.opacity(0.5), lineWidth: 1) // bordure toujours visible
-                            )
-                            .overlay(
-                                Group {
-                                    if store.vehicleType == type {
-                                        Image(systemName: "checkmark.circle")
-                                            .resizable()
-                                            .scaledToFit()
-                                            .foregroundStyle(ColorTokens.onActionPrimary)
-                                    }
-                                }
-                            )
+                        Text(type.displayName)
+                            .font(Typography.cardSubtitle)
+                            .foregroundStyle(ColorTokens.textSecondary)
                     }
-                    .padding(Spacing.md)
-                    .background(
-                        ZStack {
-                            if store.vehicleType == type {
-                                // Gradient background pour l'état sélectionné
-                                RoundedRectangle(cornerRadius: Radius.md)
-                                    .fill(
-                                        LinearGradient(
-                                            gradient: Gradient(colors: [
-                                                ColorTokens.actionPrimary.opacity(0.8),
-                                                ColorTokens.actionPrimary
-                                            ]),
-                                            startPoint: .topLeading,
-                                            endPoint: .bottomTrailing
-                                        )
-                                    )
-                                    .shadow(color: ColorTokens.shadow, radius: Spacing.xs, x: 0, y: 4)
-                            } else {
-                                // Background non sélectionné avec effet glass
-                                RoundedRectangle(cornerRadius: Radius.md)
-                                    .fill(ColorTokens.surfaceSecondary)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: Radius.md)
-                                            .stroke(ColorTokens.border.opacity(0.5), lineWidth: 1)
-                                    )
-                            }
-                        }
+                    .frame(width: 100, height: 100)
+                    .padding()
+                    .background(ColorTokens.surface)
+                    .clipShape(.rect(cornerRadius: Radius.lg))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: Radius.lg)
+                            .stroke(store.vehicleType == type ? ColorTokens.actionPrimary : .clear, lineWidth: 3)
                     )
-                    .cornerRadius(8)
+                    .shadow(color: ColorTokens.shadow, radius: Spacing.xs, x: 0, y: 4)
                 }
+            }
+        }
+    }
+
+    private var brandAndModelContent: some View {
+        VStack(spacing: Spacing.formFieldSpacing) {
+            // Marque
+            VStack(alignment: .leading) {
+                Text("Marque")
+                    .font(Typography.subheadline)
+                    .foregroundStyle(ColorTokens.textPrimary)
+                TextField("TOYOTA, BMW, MERCEDES...", text: $store.brand)
+                    .textInputAutocapitalization(.characters)
+                    .submitLabel(.next)
+                    .padding(Spacing.screenMargin)
+                    .background(ColorTokens.background)
+                    .cornerRadius(Radius.textField, corners: .allCorners)
+                Label("Champ D.1 de la carte grise", systemImage: "info.circle")
+                    .font(Typography.footnote)
+                    .foregroundStyle(ColorTokens.textSecondary)
+            }
+            Divider()
+            // Modèle
+            VStack(alignment: .leading) {
+                Text("Modèle")
+                    .font(Typography.subheadline)
+                    .foregroundStyle(ColorTokens.textPrimary)
+                TextField("COROLLA, X3, CLASSE A...", text: $store.model)
+                    .textInputAutocapitalization(.characters)
+                    .submitLabel(.next)
+                    .padding(Spacing.screenMargin)
+                    .background(ColorTokens.background)
+                    .cornerRadius(Radius.textField, corners: .allCorners)
+                Label("Champ D.2 de la carte grise", systemImage: "info.circle")
+                    .font(Typography.footnote)
+                    .foregroundStyle(ColorTokens.textSecondary)
+            }
+            Divider()
+            // Plaque d'immatriculation
+            VStack(alignment: .leading) {
+                Text("Immatriculation")
+                    .font(Typography.subheadline)
+                    .foregroundStyle(ColorTokens.textPrimary)
+                TextField("AB-123-CD", text: $store.plate)
+                    .textInputAutocapitalization(.characters)
+                    .submitLabel(.next)
+                    .padding(Spacing.screenMargin)
+                    .background(ColorTokens.background)
+                    .cornerRadius(Radius.textField, corners: .allCorners)
+                Label("Champ A de la carte grise", systemImage: "info.circle")
+                    .font(Typography.footnote)
+                    .foregroundStyle(ColorTokens.textSecondary)
+            }
+            Divider()
+            // Date de mise en circulation
+            VStack(alignment: .leading) {
+                Text("Mise en circulation")
+                    .font(Typography.subheadline)
+                    .foregroundStyle(ColorTokens.textPrimary)
+                DatePicker("Date", selection: $store.registrationDate, displayedComponents: .date)
+                    .datePickerStyle(.compact)
+                    .padding(Spacing.sm)
+                    .background(ColorTokens.background)
+                    .cornerRadius(Radius.textField, corners: .allCorners)
+                Label("Champ B de la carte grise", systemImage: "info.circle")
+                    .font(Typography.footnote)
+                    .foregroundStyle(ColorTokens.textSecondary)
+            }
+
+        }
+        .padding(Spacing.cardPadding)
+        .background(ColorTokens.surfaceElevated)
+        .cornerRadius(Radius.xl, corners: .allCorners)
+        
+//        VStack(alignment: .leading, spacing: Spacing.md) {
+//            // Brand field
+//            VStack(alignment: .leading, spacing: Spacing.xxxs) {
+//                Text("Marque")
+//                    .font(Typography.footnote)
+//                    .foregroundStyle(ColorTokens.textSecondary)
+//
+//                HStack(alignment: .top, spacing: Spacing.xxs) {
+//                    Image(systemName: "info.circle")
+//                        .font(Typography.caption2)
+//                        .foregroundStyle(ColorTokens.textTertiary)
+//
+//                    Text("Champ D.1 de la carte grise")
+//                        .font(Typography.caption1)
+//                        .foregroundStyle(ColorTokens.textTertiary)
+//                }
+//                .padding(.bottom, Spacing.xxs)
+//
+//                TextField("TOYOTA, BMW, MERCEDES...", text: $store.brand)
+//                    .bodyDefaultRegular()
+//                    .foregroundColor(ColorTokens.textPrimary)
+//                    .accentColor(ColorTokens.actionPrimary)
+//                    .textFieldStyle(.plain)
+//                    .padding(.horizontal, Spacing.md)
+//                    .padding(.vertical, Spacing.md)
+//                    .background(
+//                        RoundedRectangle(cornerRadius: Radius.md)
+//                            .stroke(!validationResult.isValid && store.showValidationError && store.brand.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? ColorTokens.error : ColorTokens.border, lineWidth: 2)
+//                            .animation(.easeInOut(duration: 0.3), value: !validationResult.isValid && store.showValidationError)
+//                    )
+//                    .submitLabel(.next)
+//                    .autocapitalization(.allCharacters)
+//            }
+//
+//            // Model field
+//            VStack(alignment: .leading, spacing: Spacing.xxxs) {
+//                Text("Modèle")
+//                    .font(Typography.footnote)
+//                    .foregroundStyle(ColorTokens.textSecondary)
+//
+//                HStack(alignment: .top, spacing: Spacing.xxs) {
+//                    Image(systemName: "info.circle")
+//                        .font(Typography.caption2)
+//                        .foregroundStyle(ColorTokens.textTertiary)
+//
+//                    Text("Champ D.2 de la carte grise")
+//                        .font(Typography.caption1)
+//                        .foregroundStyle(ColorTokens.textTertiary)
+//                }
+//                .padding(.bottom, Spacing.xxs)
+//
+//                TextField("COROLLA, X3, CLASSE A...", text: $store.model)
+//                    .bodyDefaultRegular()
+//                    .foregroundColor(ColorTokens.textPrimary)
+//                    .accentColor(ColorTokens.actionPrimary)
+//                    .textFieldStyle(.plain)
+//                    .padding(.horizontal, Spacing.md)
+//                    .padding(.vertical, Spacing.md)
+//                    .background(
+//                        RoundedRectangle(cornerRadius: Radius.md)
+//                            .stroke(!validationResult.isValid && store.showValidationError && store.model.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? ColorTokens.error : ColorTokens.border, lineWidth: 2)
+//                            .animation(.easeInOut(duration: 0.3), value: !validationResult.isValid && store.showValidationError)
+//                    )
+//                    .submitLabel(.next)
+//                    .autocapitalization(.allCharacters)
+//            }
+//
+//            // Plate field
+//            VStack(alignment: .leading, spacing: Spacing.xxxs) {
+//                Text("Immatriculation")
+//                    .font(Typography.footnote)
+//                    .foregroundStyle(ColorTokens.textSecondary)
+//
+//                HStack(alignment: .top, spacing: Spacing.xxs) {
+//                    Image(systemName: "info.circle")
+//                        .font(Typography.caption2)
+//                        .foregroundStyle(ColorTokens.textTertiary)
+//
+//                    Text("Champ A de la carte grise")
+//                        .font(Typography.caption1)
+//                        .foregroundStyle(ColorTokens.textTertiary)
+//                }
+//                .padding(.bottom, Spacing.xxs)
+//
+//                TextField("AB-123-CD", text: $store.plate)
+//                    .bodyDefaultRegular()
+//                    .foregroundColor(ColorTokens.textPrimary)
+//                    .accentColor(ColorTokens.actionPrimary)
+//                    .textFieldStyle(.plain)
+//                    .padding(.horizontal, Spacing.md)
+//                    .padding(.vertical, Spacing.md)
+//                    .background(
+//                        RoundedRectangle(cornerRadius: Radius.md)
+//                            .stroke(!validationResult.isValid && store.showValidationError && store.plate.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? ColorTokens.error : ColorTokens.border, lineWidth: 2)
+//                            .animation(.easeInOut(duration: 0.3), value: !validationResult.isValid && store.showValidationError)
+//                    )
+//                    .submitLabel(.next)
+//                    .autocapitalization(.allCharacters)
+//            }
+//
+//            // Date field
+//            VStack(alignment: .leading, spacing: Spacing.xxxs) {
+//                Text("Mise en circulation")
+//                    .font(Typography.footnote)
+//                    .foregroundStyle(ColorTokens.textSecondary)
+//
+//                HStack(alignment: .top, spacing: Spacing.xxs) {
+//                    Image(systemName: "info.circle")
+//                        .font(Typography.caption2)
+//                        .foregroundStyle(ColorTokens.textTertiary)
+//
+//                    Text("Champ B de la carte grise")
+//                        .font(Typography.caption1)
+//                        .foregroundStyle(ColorTokens.textTertiary)
+//                }
+//                .padding(.bottom, Spacing.xxs)
+//
+//                Button(action: {
+//                    showDatePicker = true
+//                }) {
+//                    HStack {
+//                        Text(formatDate(store.registrationDate))
+//                            .bodyDefaultRegular()
+//                            .foregroundStyle(ColorTokens.textPrimary)
+//
+//                        Spacer()
+//
+//                        Image(systemName: "calendar")
+//                            .foregroundStyle(ColorTokens.textSecondary)
+//                    }
+//                    .padding(.horizontal, Spacing.lg)
+//                    .padding(.vertical, Spacing.lg)
+//                    .background(
+//                        RoundedRectangle(cornerRadius: Radius.md)
+//                            .fill(ColorTokens.surfaceSecondary)
+//                            .stroke(ColorTokens.border, lineWidth: 2)
+//                    )
+//                }
+//                .buttonStyle(.plain)
+//            }
+//        }
+//        .padding(Spacing.md)
+//        .background(ColorTokens.surfacePrimary)
+//        .cornerRadius(Radius.md)
+    }
+
+    private var detailsContent: some View {
+        VStack(alignment: .leading, spacing: Spacing.md) {
+            // Mileage field
+            VStack(alignment: .leading, spacing: Spacing.xxxs) {
+                Text("Kilométrage")
+                    .font(Typography.footnote)
+                    .foregroundStyle(ColorTokens.textSecondary)
+
+                HStack(alignment: .top, spacing: Spacing.xxs) {
+                    Image(systemName: "info.circle")
+                        .font(Typography.caption2)
+                        .foregroundStyle(ColorTokens.textTertiary)
+
+                    Text("Consultez votre compteur")
+                        .font(Typography.caption1)
+                        .foregroundStyle(ColorTokens.textTertiary)
+                }
+                .padding(.bottom, Spacing.xxs)
+
+                HStack {
+                    TextField("120000", text: $store.mileage)
+                        .bodyDefaultRegular()
+                        .foregroundColor(ColorTokens.textPrimary)
+                        .accentColor(ColorTokens.actionPrimary)
+                        .textFieldStyle(.plain)
+
+                    Text("KM")
+                        .bodyDefaultRegular()
+                        .foregroundColor(ColorTokens.textSecondary)
+                }
+                .padding(.horizontal, Spacing.md)
+                .padding(.vertical, Spacing.md)
+                .background(
+                    RoundedRectangle(cornerRadius: Radius.md)
+                        .stroke(ColorTokens.border, lineWidth: 2)
+                )
             }
 
             // Séparateur
@@ -250,193 +475,6 @@ struct AddVehicleStepView: View {
                 .animation(.spring(response: 0.3, dampingFraction: 0.7), value: store.isPrimary)
             }
         }
-    }
-
-    private var brandAndModelContent: some View {
-        VStack(alignment: .leading, spacing: Spacing.md) {
-            // Brand field
-            VStack(alignment: .leading, spacing: Spacing.xxxs) {
-                Text("Marque")
-                    .font(Typography.footnote)
-                    .foregroundStyle(ColorTokens.textSecondary)
-
-                HStack(alignment: .top, spacing: Spacing.xxs) {
-                    Image(systemName: "info.circle")
-                        .font(Typography.caption2)
-                        .foregroundStyle(ColorTokens.textTertiary)
-
-                    Text("Champ D.1 de la carte grise")
-                        .font(Typography.caption1)
-                        .foregroundStyle(ColorTokens.textTertiary)
-                }
-                .padding(.bottom, Spacing.xxs)
-
-                TextField("TOYOTA, BMW, MERCEDES...", text: $store.brand)
-                    .bodyDefaultRegular()
-                    .foregroundColor(ColorTokens.textPrimary)
-                    .accentColor(ColorTokens.actionPrimary)
-                    .textFieldStyle(.plain)
-                    .padding(.horizontal, Spacing.md)
-                    .padding(.vertical, Spacing.md)
-                    .background(
-                        RoundedRectangle(cornerRadius: Radius.md)
-                            .stroke(!validationResult.isValid && store.showValidationError && store.brand.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? ColorTokens.error : ColorTokens.border, lineWidth: 2)
-                            .animation(.easeInOut(duration: 0.3), value: !validationResult.isValid && store.showValidationError)
-                    )
-                    .submitLabel(.next)
-                    .autocapitalization(.allCharacters)
-            }
-
-            // Model field
-            VStack(alignment: .leading, spacing: Spacing.xxxs) {
-                Text("Modèle")
-                    .font(Typography.footnote)
-                    .foregroundStyle(ColorTokens.textSecondary)
-
-                HStack(alignment: .top, spacing: Spacing.xxs) {
-                    Image(systemName: "info.circle")
-                        .font(Typography.caption2)
-                        .foregroundStyle(ColorTokens.textTertiary)
-
-                    Text("Champ D.2 de la carte grise")
-                        .font(Typography.caption1)
-                        .foregroundStyle(ColorTokens.textTertiary)
-                }
-                .padding(.bottom, Spacing.xxs)
-
-                TextField("COROLLA, X3, CLASSE A...", text: $store.model)
-                    .bodyDefaultRegular()
-                    .foregroundColor(ColorTokens.textPrimary)
-                    .accentColor(ColorTokens.actionPrimary)
-                    .textFieldStyle(.plain)
-                    .padding(.horizontal, Spacing.md)
-                    .padding(.vertical, Spacing.md)
-                    .background(
-                        RoundedRectangle(cornerRadius: Radius.md)
-                            .stroke(!validationResult.isValid && store.showValidationError && store.model.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? ColorTokens.error : ColorTokens.border, lineWidth: 2)
-                            .animation(.easeInOut(duration: 0.3), value: !validationResult.isValid && store.showValidationError)
-                    )
-                    .submitLabel(.next)
-                    .autocapitalization(.allCharacters)
-            }
-        }
-        .padding(Spacing.md)
-        .background(ColorTokens.surfacePrimary)
-        .cornerRadius(Radius.md)
-    }
-
-    private var detailsContent: some View {
-        VStack(alignment: .leading, spacing: Spacing.md) {
-            // Plate field
-            VStack(alignment: .leading, spacing: Spacing.xxxs) {
-                Text("Immatriculation")
-                    .font(Typography.footnote)
-                    .foregroundStyle(ColorTokens.textSecondary)
-
-                HStack(alignment: .top, spacing: Spacing.xxs) {
-                    Image(systemName: "info.circle")
-                        .font(Typography.caption2)
-                        .foregroundStyle(ColorTokens.textTertiary)
-
-                    Text("Champ A de la carte grise")
-                        .font(Typography.caption1)
-                        .foregroundStyle(ColorTokens.textTertiary)
-                }
-                .padding(.bottom, Spacing.xxs)
-
-                TextField("AB-123-CD", text: $store.plate)
-                    .bodyDefaultRegular()
-                    .foregroundColor(ColorTokens.textPrimary)
-                    .accentColor(ColorTokens.actionPrimary)
-                    .textFieldStyle(.plain)
-                    .padding(.horizontal, Spacing.md)
-                    .padding(.vertical, Spacing.md)
-                    .background(
-                        RoundedRectangle(cornerRadius: Radius.md)
-                            .stroke(!validationResult.isValid && store.showValidationError && store.plate.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? ColorTokens.error : ColorTokens.border, lineWidth: 2)
-                            .animation(.easeInOut(duration: 0.3), value: !validationResult.isValid && store.showValidationError)
-                    )
-                    .submitLabel(.next)
-                    .autocapitalization(.allCharacters)
-            }
-
-            // Mileage field
-            VStack(alignment: .leading, spacing: Spacing.xxxs) {
-                Text("Kilométrage")
-                    .font(Typography.footnote)
-                    .foregroundStyle(ColorTokens.textSecondary)
-
-                HStack(alignment: .top, spacing: Spacing.xxs) {
-                    Image(systemName: "info.circle")
-                        .font(Typography.caption2)
-                        .foregroundStyle(ColorTokens.textTertiary)
-
-                    Text("Consultez votre compteur")
-                        .font(Typography.caption1)
-                        .foregroundStyle(ColorTokens.textTertiary)
-                }
-                .padding(.bottom, Spacing.xxs)
-
-                HStack {
-                    TextField("120000", text: $store.mileage)
-                        .bodyDefaultRegular()
-                        .foregroundColor(ColorTokens.textPrimary)
-                        .accentColor(ColorTokens.actionPrimary)
-                        .textFieldStyle(.plain)
-
-                    Text("KM")
-                        .bodyDefaultRegular()
-                        .foregroundColor(ColorTokens.textSecondary)
-                }
-                .padding(.horizontal, Spacing.md)
-                .padding(.vertical, Spacing.md)
-                .background(
-                    RoundedRectangle(cornerRadius: Radius.md)
-                        .stroke(ColorTokens.border, lineWidth: 2)
-                )
-            }
-
-            // Date field
-            VStack(alignment: .leading, spacing: Spacing.xxxs) {
-                Text("Mise en circulation")
-                    .font(Typography.footnote)
-                    .foregroundStyle(ColorTokens.textSecondary)
-
-                HStack(alignment: .top, spacing: Spacing.xxs) {
-                    Image(systemName: "info.circle")
-                        .font(Typography.caption2)
-                        .foregroundStyle(ColorTokens.textTertiary)
-
-                    Text("Champ B de la carte grise")
-                        .font(Typography.caption1)
-                        .foregroundStyle(ColorTokens.textTertiary)
-                }
-                .padding(.bottom, Spacing.xxs)
-
-                Button(action: {
-                    showDatePicker = true
-                }) {
-                    HStack {
-                        Text(formatDate(store.registrationDate))
-                            .bodyDefaultRegular()
-                            .foregroundStyle(ColorTokens.textPrimary)
-
-                        Spacer()
-
-                        Image(systemName: "calendar")
-                            .foregroundStyle(ColorTokens.textSecondary)
-                    }
-                    .padding(.horizontal, Spacing.lg)
-                    .padding(.vertical, Spacing.lg)
-                    .background(
-                        RoundedRectangle(cornerRadius: Radius.md)
-                            .fill(ColorTokens.surfaceSecondary)
-                            .stroke(ColorTokens.border, lineWidth: 2)
-                    )
-                }
-                .buttonStyle(.plain)
-            }
-        }
         .padding(Spacing.md)
         .background(ColorTokens.surfacePrimary)
         .cornerRadius(Radius.md)
@@ -516,6 +554,8 @@ struct AddVehicleStepView: View {
             AddVehicleStore()
         }
     )
+    .padding(.vertical)
+    .background(ColorTokens.background)
 }
 
 #Preview("Details Step") {
@@ -525,6 +565,8 @@ struct AddVehicleStepView: View {
             AddVehicleStore()
         }
     )
+    .padding(.vertical)
+    .background(ColorTokens.background)
 }
 
 #Preview("Summary Step") {

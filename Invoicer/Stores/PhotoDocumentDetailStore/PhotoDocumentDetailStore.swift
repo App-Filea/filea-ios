@@ -47,7 +47,7 @@ struct PhotoDocumentDetailStore {
                 print("📖 [PhotoDocumentDetailStore] Chargement du document photo: \(state.documentId)")
                 return .run { [vehicleId = state.vehicleId, documentId = state.documentId] send in
                     do {
-                        if let vehicle = try await vehicleRepository.find(by: vehicleId),
+                        if let vehicle = try await vehicleRepository.getVehicle(vehicleId),
                            let document = vehicle.documents.first(where: { $0.id == documentId }) {
                             print("✅ [PhotoDocumentDetailStore] Document photo trouvé: \(document.fileURL)")
                             await send(.documentLoaded(document))

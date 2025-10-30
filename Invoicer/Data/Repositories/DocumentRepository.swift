@@ -66,7 +66,7 @@ final class DocumentRepository: DocumentRepositoryProtocol, @unchecked Sendable 
     func save(image: UIImage, for vehicleId: UUID, metadata: DocumentMetadata) async throws -> Document {
         logger.info("💾 Sauvegarde d'un document image pour le véhicule: \(vehicleId)")
 
-        guard let vehicle = try await vehicleRepository.find(by: vehicleId) else {
+        guard let vehicle = try await vehicleRepository.getVehicle(vehicleId) else {
             throw RepositoryError.notFound("Véhicule \(vehicleId) introuvable")
         }
 
@@ -96,7 +96,7 @@ final class DocumentRepository: DocumentRepositoryProtocol, @unchecked Sendable 
         // Add document to vehicle
         var updatedVehicle = vehicle
         updatedVehicle.documents.append(document)
-        try await vehicleRepository.update(updatedVehicle)
+        try await vehicleRepository.updateVehicle(updatedVehicle)
 
         logger.info("✅ Document image sauvegardé avec succès")
         return document
@@ -106,7 +106,7 @@ final class DocumentRepository: DocumentRepositoryProtocol, @unchecked Sendable 
         logger.info("💾 Sauvegarde d'un fichier document pour le véhicule: \(vehicleId)")
         logger.info("📄 Fichier source: \(fileURL.lastPathComponent)")
 
-        guard let vehicle = try await vehicleRepository.find(by: vehicleId) else {
+        guard let vehicle = try await vehicleRepository.getVehicle(vehicleId) else {
             throw RepositoryError.notFound("Véhicule \(vehicleId) introuvable")
         }
 
@@ -140,7 +140,7 @@ final class DocumentRepository: DocumentRepositoryProtocol, @unchecked Sendable 
         // Add document to vehicle
         var updatedVehicle = vehicle
         updatedVehicle.documents.append(document)
-        try await vehicleRepository.update(updatedVehicle)
+        try await vehicleRepository.updateVehicle(updatedVehicle)
 
         logger.info("✅ Document fichier sauvegardé avec succès")
         return document
@@ -149,7 +149,7 @@ final class DocumentRepository: DocumentRepositoryProtocol, @unchecked Sendable 
     func update(_ document: Document, for vehicleId: UUID) async throws {
         logger.info("📝 Mise à jour du document \(document.id)")
 
-        guard var vehicle = try await vehicleRepository.find(by: vehicleId) else {
+        guard var vehicle = try await vehicleRepository.getVehicle(vehicleId) else {
             throw RepositoryError.notFound("Véhicule \(vehicleId) introuvable")
         }
 
@@ -158,7 +158,7 @@ final class DocumentRepository: DocumentRepositoryProtocol, @unchecked Sendable 
         }
 
         vehicle.documents[documentIndex] = document
-        try await vehicleRepository.update(vehicle)
+        try await vehicleRepository.updateVehicle(vehicle)
 
         logger.info("✅ Document mis à jour avec succès")
     }
@@ -166,7 +166,7 @@ final class DocumentRepository: DocumentRepositoryProtocol, @unchecked Sendable 
     func delete(_ documentId: UUID, for vehicleId: UUID) async throws {
         logger.info("🗑️ Suppression du document: \(documentId)")
 
-        guard var vehicle = try await vehicleRepository.find(by: vehicleId) else {
+        guard var vehicle = try await vehicleRepository.getVehicle(vehicleId) else {
             throw RepositoryError.notFound("Véhicule \(vehicleId) introuvable")
         }
 
@@ -183,7 +183,7 @@ final class DocumentRepository: DocumentRepositoryProtocol, @unchecked Sendable 
 
         // Remove document from vehicle
         vehicle.documents.remove(at: documentIndex)
-        try await vehicleRepository.update(vehicle)
+        try await vehicleRepository.updateVehicle(vehicle)
 
         logger.info("✅ Document supprimé avec succès")
     }
@@ -191,7 +191,7 @@ final class DocumentRepository: DocumentRepositoryProtocol, @unchecked Sendable 
     func replacePhoto(_ documentId: UUID, for vehicleId: UUID, with newImage: UIImage) async throws {
         logger.info("📸 Remplacement de la photo du document: \(documentId)")
 
-        guard var vehicle = try await vehicleRepository.find(by: vehicleId) else {
+        guard var vehicle = try await vehicleRepository.getVehicle(vehicleId) else {
             throw RepositoryError.notFound("Véhicule \(vehicleId) introuvable")
         }
 
@@ -226,7 +226,7 @@ final class DocumentRepository: DocumentRepositoryProtocol, @unchecked Sendable 
 
         // Update document with new file path
         vehicle.documents[documentIndex].fileURL = newFileURL.path
-        try await vehicleRepository.update(vehicle)
+        try await vehicleRepository.updateVehicle(vehicle)
 
         logger.info("✅ Photo remplacée avec succès")
     }

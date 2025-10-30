@@ -236,11 +236,13 @@ struct MainView: View {
 }
 
 #Preview() {
+    @Dependency(\.uuid) var uuid
     NavigationView {
         MainView(
             store: Store(
                 initialState: MainStore.State(
                     selectedVehicle: Shared(value: .init(
+                        id: uuid(),
                         brand: "Lexus",
                         model: "CT200H",
                         mileage: "120000",

@@ -103,10 +103,10 @@ struct VehicleDetailsView: View {
                 .ignoresSafeArea()
 
             // Background Icon (Blurred)
-            if let selectedVehicle = store.selectedVehicle, let iconName = selectedVehicle.type.iconName {
+            if let selectedVehicle = store.selectedVehicle {
                 GeometryReader { proxy in
                     VStack {
-                        Image(systemName: iconName)
+                        Image(systemName: selectedVehicle.type.iconName)
                             .resizable()
                             .aspectRatio(contentMode: .fit)
                             .frame(width: 400)
@@ -255,10 +255,12 @@ struct VehicleDetailsView: View {
 
 // MARK: - Preview
 #Preview {
+    @Dependency(\.uuid) var uuid
     NavigationView {
         VehicleDetailsView(store:
                         Store(initialState:
                                 VehicleDetailsStore.State(selectedVehicle: Shared(value: Vehicle(
+                                    id: uuid(),
                                     type: .car,
                                     brand: "Lexus",
                                     model: "CT200h",

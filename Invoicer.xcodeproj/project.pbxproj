@@ -45,11 +45,6 @@
 			path = InvoicerTests;
 			sourceTree = "<group>";
 		};
-		3F07414F2E6C714D00F18229 /* InvoicerUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = InvoicerUITests;
-			sourceTree = "<group>";
-		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -84,7 +79,6 @@
 			children = (
 				3F0741362E6C714B00F18229 /* Invoicer */,
 				3F0741452E6C714D00F18229 /* InvoicerTests */,
-				3F07414F2E6C714D00F18229 /* InvoicerUITests */,
 				3F07416C2E6C7C5A00F18229 /* Frameworks */,
 				3F0741352E6C714B00F18229 /* Products */,
 			);
@@ -169,9 +163,6 @@
 			);
 			dependencies = (
 				3F07414E2E6C714D00F18229 /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				3F07414F2E6C714D00F18229 /* InvoicerUITests */,
 			);
 			name = InvoicerUITests;
 			packageProductDependencies = (

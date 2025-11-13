@@ -28,7 +28,7 @@ extension Vehicle {
         type: VehicleType = .car,
         brand: String = "Tesla",
         model: String = "Model 3",
-        mileage: String? = "50000",
+        mileage: String? = nil,
         registrationDate: Date = Date(timeIntervalSince1970: 0),
         plate: String = "TEST-PLATE",
         isPrimary: Bool = false,

@@ -7,15 +7,15 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "C931A76F-7EF6-4E07-B610-F70FDAF4EFB2"
-            shouldBeEnabled = "No"
+            uuid = "B3172439-CABF-48BD-B06F-D5847090C15F"
+            shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Invoicer/Stores/AppStore/AppStore.swift"
+            filePath = "Invoicer/Stores/AddVehicleStore/AddVehicleStore.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "45"
-            endingLineNumber = "45"
+            startingLineNumber = "218"
+            endingLineNumber = "218"
             landmarkName = "body"
             landmarkType = "24">
          </BreakpointContent>
@@ -23,125 +23,17 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "4F013981-6E89-4B10-A5E1-6581A6FFB684"
+            uuid = "30BDE5E7-AF2B-49BC-8D78-D961635E922D"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Invoicer/Stores/AddVehicleStore/AddVehicleView.swift"
+            filePath = "Invoicer/Stores/AddVehicleStore/AddVehicleStore.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "248"
-            endingLineNumber = "248"
+            startingLineNumber = "213"
+            endingLineNumber = "213"
             landmarkName = "body"
             landmarkType = "24">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "3D6D4C02-55E3-4B3D-9943-2D524C84A542"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Invoicer/Data/Repositories/VehicleDatabase/VehicleDatabaseRepositoryClient.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "31"
-            endingLineNumber = "31"
-            landmarkName = "liveValue"
-            landmarkType = "24">
-            <Locations>
-               <Location
-                  uuid = "3D6D4C02-55E3-4B3D-9943-2D524C84A542 - 52ec46199d4fed90"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "(1) suspend resume partial function for closure #1 @Sendable (Invoicer.Vehicle, Swift.String) async throws -&gt; () in closure #1 () -&gt; Invoicer.VehicleDatabaseRepositoryClient in variable initialization expression of static Invoicer.VehicleDatabaseRepositoryClient.liveValue : Invoicer.VehicleDatabaseRepositoryClient"
-                  moduleName = "Invoicer.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/nicolasbarbosa/Documents/Developpeur/Invoicer/Invoicer/Data/Repositories/VehicleDatabase/VehicleDatabaseRepositoryClient.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "31"
-                  endingLineNumber = "31">
-               </Location>
-               <Location
-                  uuid = "3D6D4C02-55E3-4B3D-9943-2D524C84A542 - 91c1901d2b68b192"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "(3) suspend resume partial function for closure #1 @Sendable (Invoicer.Vehicle, Swift.String) async throws -&gt; () in closure #1 () -&gt; Invoicer.VehicleDatabaseRepositoryClient in variable initialization expression of static Invoicer.VehicleDatabaseRepositoryClient.liveValue : Invoicer.VehicleDatabaseRepositoryClient"
-                  moduleName = "Invoicer.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/nicolasbarbosa/Documents/Developpeur/Invoicer/Invoicer/Data/Repositories/VehicleDatabase/VehicleDatabaseRepositoryClient.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "31"
-                  endingLineNumber = "31">
-               </Location>
-            </Locations>
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "41FD009E-B44C-4806-9C4D-F7AA21EBC139"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Invoicer/Data/Repositories/VehicleDatabase/VehicleDatabaseRepository.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "20"
-            endingLineNumber = "20"
-            landmarkName = "create(vehicle:folderPath:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "24C70876-A0DE-4436-A3CE-7D1A20337473"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Invoicer/Data/Repositories/VehicleDatabase/VehicleDatabaseRepositoryClient.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "61"
-            endingLineNumber = "61"
-            landmarkName = "testValue"
-            landmarkType = "24">
-            <Locations>
-               <Location
-                  uuid = "24C70876-A0DE-4436-A3CE-7D1A20337473 - 51efa628eef82482"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "closure #1 @Sendable (Invoicer.Vehicle, Swift.String) async -&gt; () in closure #1 () -&gt; Invoicer.VehicleDatabaseRepositoryClient in variable initialization expression of static Invoicer.VehicleDatabaseRepositoryClient.testValue : Invoicer.VehicleDatabaseRepositoryClient"
-                  moduleName = "Invoicer.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/nicolasbarbosa/Documents/Developpeur/Invoicer/Invoicer/Data/Repositories/VehicleDatabase/VehicleDatabaseRepositoryClient.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "61"
-                  endingLineNumber = "61">
-               </Location>
-               <Location
-                  uuid = "24C70876-A0DE-4436-A3CE-7D1A20337473 - 762d797a2cd36573"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "(1) suspend resume partial function for closure #1 @Sendable (Invoicer.Vehicle, Swift.String) async -&gt; () in closure #1 () -&gt; Invoicer.VehicleDatabaseRepositoryClient in variable initialization expression of static Invoicer.VehicleDatabaseRepositoryClient.testValue : Invoicer.VehicleDatabaseRepositoryClient"
-                  moduleName = "Invoicer.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/nicolasbarbosa/Documents/Developpeur/Invoicer/Invoicer/Data/Repositories/VehicleDatabase/VehicleDatabaseRepositoryClient.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "61"
-                  endingLineNumber = "61">
-               </Location>
-            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

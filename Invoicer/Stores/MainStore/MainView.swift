@@ -17,19 +17,33 @@ struct MainView: View {
         ZStack(alignment: .bottom) {
             Color(.secondarySystemBackground)
                 .ignoresSafeArea()
+
+            if store.vehicles.isEmpty {
+                // EmptyState si aucun véhicule
+                EmptyVehiclesListView {
+                    store.send(.view(.openCreateVehicleButtonTapped))
+                }
+            } else {
+                // Dashboard normal si au moins 1 véhicule
                 mainContentView
+            }
         }
         .onAppear {
-            // Calculate statistics when the view appears
-            store.send(.setupVehicleStatistics)
+            store.send(.onAppear)
         }
         .navigationBarBackButtonHidden()
         .alert($store.scope(state: \.deleteAlert, action: \.deleteAlert))
-        .fullScreenCover(item: $store.scope(state: \.vehiclesList, action: \.vehiclesList)) { store in
-            VehiclesListModalView(store: store)
+        .sheet(item: $store.scope(state: \.vehiclesList, action: \.vehiclesList)) { store in
+            VehiclesListView(store: store)
+                .presentationDetents([.large])
+        }  
+        .sheet(item: $store.scope(state: \.addVehicle, action: \.addVehicle)) { store in
+            AddVehicleMultiStepView(store: store)
+                .presentationDetents([.large])
         }
         .fullScreenCover(item: $store.scope(state: \.addDocument, action: \.addDocument)) { store in
             AddDocumentMultiStepView(store: store)
+                .presentationDetents([.large])
         }
     }
 
@@ -45,10 +59,16 @@ struct MainView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: Spacing.md) {
                         // Stats cards
-                        statsCardsView
+                        HStack(spacing: Spacing.sm) {
+                            // Total cost card
+                            TotalCostVehicleView(store: store.scope(state: \.totalCostVehicle, action: \.totalCostVehicle))
+
+                            // Alerts card
+                            WarningVehicleView(store: store.scope(state: \.warningVehicle, action: \.warningVehicle))
+                        }
 
                         // Monthly expenses chart
-                        monthlyExpensesChartView
+                        VehicleMonthlyExpensesView(store: store.scope(state: \.vehicleMonthlyExpenses, action: \.vehicleMonthlyExpenses))
 
                         // Divider
                         Divider()
@@ -134,7 +154,7 @@ struct MainView: View {
             HStack(alignment: .lastTextBaseline) {
                 Menu {
                     Button(action: {
-                        store.send(.showVehiclesList)
+                        store.send(.presentVehiclesListView) //TODO: refactor this with a test and a view button
                     }) {
                         Label("Changer de véhicule",
                               systemImage: "arrow.triangle.2.circlepath")
@@ -184,47 +204,6 @@ struct MainView: View {
         }
         .padding(.top, Spacing.xs)
     }
-
-    // MARK: - Stats Cards
-    private var statsCardsView: some View {
-        HStack(spacing: Spacing.sm) {
-            // Total cost card
-            StatCard(
-                title: "Coût total",
-                value: store.currentVehicleTotalCost.asCurrencyStringAdaptive,
-                subtitle: "Sur l'année en cours",
-                icon: nil,
-                accentColor: ColorTokens.actionPrimary,
-                action: nil
-            )
-
-            // Alerts card
-            StatCard(
-                title: "Alertes",
-                value: "\(store.currentVehicleIncompleteDocumentsCount)",
-                subtitle: store.currentVehicleIncompleteDocumentsCount == 0
-                    ? "Tout est en ordre"
-                    : "Nécessite votre attention",
-                icon: store.currentVehicleIncompleteDocumentsCount == 0
-                    ? "checkmark.circle.fill"
-                    : "exclamationmark.triangle.fill",
-                accentColor: store.currentVehicleIncompleteDocumentsCount == 0
-                    ? ColorTokens.success
-                    : ColorTokens.warning,
-                action: nil
-            )
-        }
-    }
-
-    // MARK: - Monthly Expenses Chart
-    private var monthlyExpensesChartView: some View {
-        MonthlyExpenseChart(
-            expenses: store.currentVehicleMonthlyExpenses,
-            year: Calendar.current.component(.year, from: Date()),
-            accentColor: ColorTokens.actionPrimary
-        )
-    }
-
 
     // MARK: - Document Display Methods
     private func eventElement(of document: Document) -> some View {

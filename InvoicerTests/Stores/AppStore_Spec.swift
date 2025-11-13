@@ -54,7 +54,7 @@ class AppStore_Spec: XCTestCase {
         await store.receive(.vehiclesLoaded([expectedVehicle]))
     }
     
-    func test_When_get_all_vehicles_gets_no_vehicle_then_it_opens_vehicle_list_view() async {
+    func test_When_get_all_vehicles_gets_no_vehicle_then_it_opens_main_view() async {
         givenStore(getAllVehiclesResponse: [])
         await store.send(.storageStateChecked(.configured(.documentsDirectory))) {
             $0.isStorageConfigured = true
@@ -62,7 +62,7 @@ class AppStore_Spec: XCTestCase {
         await store.receive(.getAllVehicles)
         await store.receive(.vehiclesLoaded([]))
         await store.receive(.initiateCompleted) {
-            $0.path[id: 0] = .vehiclesList(VehiclesListStore.State())
+            $0.path[id: 0] = .main(MainStore.State())
         }
     }
     
@@ -133,14 +133,7 @@ class AppStore_Spec: XCTestCase {
             $0.path[id: 0] = .main(MainStore.State())
         }
     }
-    
-    func test_When_navigate_to_vehicle_list_then_it_push_vehicle_list_view_to_the_path() async {
-        givenStore()
-        await store.send(.navigateToVehiclesList) {
-            $0.path[id: 0] = .vehiclesList(VehiclesListStore.State())
-        }
-    }
-    
+
     private func givenStore(initialSharedVehicles: [Vehicle] = [],
                             initialSelectedVehicle: Vehicle? = nil,
                             initialLastOpenedVehicleId: UUID? = nil,

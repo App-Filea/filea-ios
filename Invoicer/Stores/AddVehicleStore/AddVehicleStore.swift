@@ -25,12 +25,13 @@ struct AddVehicleStore {
         var showValidationError = false
         var showDocumentSourcePicker: Bool = false
         var showImagePicker: Bool = false
-        var showPrimaryAlert: Bool = false
         var showErrorAlert: Bool = false
         var errorMessage: String? = nil
         var pendingImage: UIImage? = nil
         @Shared(.vehicles) var vehicles: [Vehicle] = []
+        @Shared(.selectedVehicle) var selectedVehicle: Vehicle?
         @Presents var scanStore: DocumentScanStore.State?
+        @Presents var alert: AlertState<Action.Alert>?
 
         init(
             vehicleType: VehicleType? = nil,
@@ -71,24 +72,39 @@ struct AddVehicleStore {
     }
 
     enum Action: Equatable, BindableAction {
+        case view(ActionView)
         case binding(BindingAction<State>)
-        case addButtonTapped
+        
+        case verifyPrimaryVehicleExistance
+        case showIsPrimaryAlert
+        
         case primaryWarningConfirmed
         case primaryWarningCancelled
-        case imageSelected(UIImage?)
-        case processImageForOCR(UIImage)
         case saveVehicle
-        case updateVehiclesList([Vehicle])
-        case vehicleSaved(Vehicle)
         case saveVehicleFailed(String)
+        case updateVehiclesListAndSetVehicleAsSelected(Vehicle)
         case dismissError
         case cancelCreation
         case setShowValidationError(Bool)
+        case imageSelected(UIImage?)
+        case processImageForOCR(UIImage)
         case scanButtonTapped
         case selectDocumentSource(DocumentSource)
         case handleScanRetry(DocumentSource)
         case scanStore(PresentationAction<DocumentScanStore.Action>)
         case applyScanData(ScannedVehicleData)
+        case alert(PresentationAction<Alert>)
+        case dismiss
+        
+        case vehicleIsCreatedAndSelected
+        
+        enum ActionView: Equatable {
+            case saveVehicleButtonTapped
+        }
+        
+        enum Alert: Equatable {
+            case confirm
+        }
     }
 
     @Dependency(\.vehicleRepository) var vehicleRepository
@@ -97,26 +113,27 @@ struct AddVehicleStore {
 
     var body: some ReducerOf<Self> {
         BindingReducer()
-
         Reduce { state, action in
             switch action {
-            case .binding:
-                return .none
-
-            case .addButtonTapped:
-                if state.shouldShowPrimaryWarning {
-                    state.showPrimaryAlert = true
-                    return .none
+            case .view(let actionView):
+                switch actionView {
+                case .saveVehicleButtonTapped:
+                    return .send(.verifyPrimaryVehicleExistance)
                 }
-                return .send(.saveVehicle)
+//            case .addButtonTapped:
+//                if state.shouldShowPrimaryWarning {
+//                    state.showPrimaryAlert = true
+//                    return .none
+//                }
+//                return .send(.saveVehicle)
 
-            case .primaryWarningConfirmed:
-                state.showPrimaryAlert = false
-                return .send(.saveVehicle)
-
-            case .primaryWarningCancelled:
-                state.showPrimaryAlert = false
-                return .none
+//            case .primaryWarningConfirmed:
+//                state.showPrimaryAlert = false
+//                return .send(.saveVehicle)
+//
+//            case .primaryWarningCancelled:
+//                state.showPrimaryAlert = false
+//                return .none
 
             case .imageSelected(let image):
                 state.showImagePicker = false
@@ -173,9 +190,6 @@ struct AddVehicleStore {
                 }
                 return .none
 
-            case .scanStore(.dismiss):
-                return .none
-
             case .applyScanData(let data):
                 if let brand = data.brand {
                     state.brand = brand
@@ -191,13 +205,25 @@ struct AddVehicleStore {
                 }
     
                 return .none
-
-            case .scanStore:
+            case .verifyPrimaryVehicleExistance:
+                return .run { send in
+                    if await vehicleRepository.hasPrimaryVehicle() {
+                        await send(.showIsPrimaryAlert)
+                    } else {
+                        await send(.saveVehicle)
+                    }
+                }
+                
+            case .showIsPrimaryAlert:
+                state.alert = AlertState.saveNewPrimaryVehicleAlert()
                 return .none
-
+                
+            case .alert(.presented(.confirm)):
+                state.alert = nil
+                return .send(.saveVehicle)
+                
             case .saveVehicle:
                 state.isLoading = true
-
                 let vehicle = Vehicle(
                     id: self.uuid(),
                     type: state.vehicleType ?? .car,
@@ -211,33 +237,29 @@ struct AddVehicleStore {
 
                 return .run { send in
                     do {
-                        // Créer le véhicule (système dual : JSON + GRDB)
                         try await vehicleRepository.createVehicle(vehicle)
 
                         // Si véhicule principal, mettre à jour tous les autres
                         if vehicle.isPrimary {
                             try await vehicleRepository.setPrimaryVehicle(vehicle.id)
                         }
-
-                        await send(.vehicleSaved(vehicle))
+                        await send(.updateVehiclesListAndSetVehicleAsSelected(vehicle))
                     } catch {
                         await send(.saveVehicleFailed(error.localizedDescription))
                     }
                 }
 
-            case .updateVehiclesList(let vehicles):
-                state.isLoading = false
-                state.$vehicles.withLock { sharedVehicles in
-                    sharedVehicles = vehicles
-                }
+            case .dismiss:
                 return .run { _ in
                     await dismiss()
                 }
-
-            case \.vehicleSaved:
-                state.isLoading = false
-                // AppStore va gérer le rechargement, la fermeture et la navigation
-                return .none
+                
+            case .updateVehiclesListAndSetVehicleAsSelected(let newSavedVehicle):
+                var newVehiclesArray: [Vehicle] = state.vehicles
+                newVehiclesArray.append(newSavedVehicle)
+                state.$vehicles.withLock { $0 = newVehiclesArray }
+                state.$selectedVehicle.withLock { $0 = newSavedVehicle }
+                return .send(.dismiss)
 
             case .saveVehicleFailed(let errorMessage):
                 state.isLoading = false
@@ -259,8 +281,7 @@ struct AddVehicleStore {
                 state.showValidationError = show
                 return .none
                 
-            case .vehicleSaved:
-                return .none
+            default: return .none
             }
         }
         .ifLet(\.$scanStore, action: \.scanStore) {

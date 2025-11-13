@@ -1,0 +1,35 @@
+//
+//  WarningVehicleView.swift
+//  Invoicer
+//
+//  Created by Nicolas Barbosa on 31/10/2025.
+//
+
+import SwiftUI
+import ComposableArchitecture
+
+struct WarningVehicleView: View {
+    @Bindable var store: StoreOf<WarningVehicleStore>
+    
+    var body: some View {
+        Text("hello World")
+//        StatCard(
+//            title: "Alertes",
+//            value: "\(store.currentVehicleIncompleteDocumentsCount)",
+//            subtitle: store.currentVehicleIncompleteDocumentsCount == 0
+//                ? "Tout est en ordre"
+//                : "Nécessite votre attention",
+//            icon: store.currentVehicleIncompleteDocumentsCount == 0
+//                ? "checkmark.circle.fill"
+//                : "exclamationmark.triangle.fill",
+//            accentColor: store.currentVehicleIncompleteDocumentsCount == 0
+//                ? ColorTokens.success
+//                : ColorTokens.warning,
+//            action: nil
+//        )
+    }
+}
+
+#Preview {
+    WarningVehicleView(store: .init(initialState: WarningVehicleStore.State(), reducer: { WarningVehicleStore() }))
+}

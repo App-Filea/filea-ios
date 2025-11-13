@@ -2,7 +2,7 @@
 //  VehiclesListStore.swift
 //  Invoicer
 //
-//  Created by Nicolas Barbosa on 06/09/2025.
+//  Created by Nicolas Barbosa on 11/10/2025.
 //
 
 import ComposableArchitecture
@@ -20,39 +20,53 @@ struct VehiclesListStore {
     }
 
     enum Action: Equatable {
-        case vehiclesLoaded([Vehicle])
-        case showAddVehicle
-        case dismissAddVehicle
+        case view(ActionView)
+        case presentAddVehicleView
         case selectVehicle(Vehicle)
+        case dismiss
         case addVehicle(PresentationAction<AddVehicleStore.Action>)
+        case vehicleIsCreatedAndSelected
+        
+        enum ActionView: Equatable {
+            case dimissSheetButtonTapped
+            case openCreateVehicleButtonTapped
+            case selectedVehicleButtonTapped(Vehicle)
+        }
     }
 
     @Dependency(\.vehicleRepository) var vehicleRepository
+    @Dependency(\.dismiss) var dismiss
 
     var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
-            case .vehiclesLoaded(let vehicles):
-                state.isLoading = false
-                state.$vehicles.withLock { $0 = vehicles }
-                return .none
+            case .view(let actionView):
+                switch actionView {
+                case .dimissSheetButtonTapped:
+                    return .send(.dismiss)
+                case .openCreateVehicleButtonTapped:
+                    return .send(.presentAddVehicleView)
+                case .selectedVehicleButtonTapped(let selectedVehicle):
+                    return .send(.selectVehicle(selectedVehicle))
+                }
 
-            case .showAddVehicle:
+            case .presentAddVehicleView:
                 state.addVehicle = AddVehicleStore.State()
                 return .none
+
+            case .selectVehicle(let selectedVehicle):
+                state.$selectedVehicle.withLock { $0 = selectedVehicle }
+                state.$lastOpenedVehicleId.withLock { $0 = selectedVehicle.id }
+                return .send(.dismiss)
+
+            case .dismiss:
+                return .run { _ in
+                    await self.dismiss()
+                }
+            case .addVehicle(.presented(.vehicleIsCreatedAndSelected)):
+                return .send(.vehicleIsCreatedAndSelected)
                 
-            case .dismissAddVehicle:
-                state.addVehicle = nil
-                return .none
-
-            case .selectVehicle(let vehicle):
-                // Update selected vehicle and save last opened ID (navigation handled by AppStore+Path)
-                state.$selectedVehicle.withLock { $0 = vehicle }
-                state.$lastOpenedVehicleId.withLock { $0 = vehicle.id }
-                return .none
-
-            case .addVehicle:
-                return .none
+            default: return .none
             }
         }
         .ifLet(\.$addVehicle, action: \.addVehicle) {

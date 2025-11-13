@@ -28,7 +28,7 @@ struct AddVehicleMultiStepView: View {
                         .foregroundStyle(ColorTokens.textPrimary)
                     Spacer()
                     Button("Ajouter") {
-                        store.send(.addButtonTapped)
+                        store.send(.view(.saveVehicleButtonTapped))
                     }
                     .disabled(store.isLoading || !store.isFormValid)
                 }
@@ -114,27 +114,16 @@ struct AddVehicleMultiStepView: View {
             }
             Button("Annuler", role: .cancel) { }
         }
-        .alert("Véhicule principal existant", isPresented: $store.showPrimaryAlert) {
-            Button("Annuler", role: .cancel) {
-                store.send(.primaryWarningCancelled)
-            }
-            Button("Continuer") {
-                store.send(.primaryWarningConfirmed)
-            }
-        } message: {
-            if let existingVehicle = store.existingPrimaryVehicle {
-                Text("Vous avez déjà un véhicule principal (\(existingVehicle.brand) \(existingVehicle.model)). En créant ce nouveau véhicule comme principal, l'actuel deviendra secondaire.")
-            }
-        }
-        .alert("Erreur", isPresented: $store.showErrorAlert) {
-            Button("OK", role: .cancel) {
-                store.send(.dismissError)
-            }
-        } message: {
-            if let errorMessage = store.errorMessage {
-                Text(errorMessage)
-            }
-        }
+        .alert($store.scope(state: \.alert, action: \.alert))
+//        .alert("Erreur", isPresented: $store.showErrorAlert) {
+//            Button("OK", role: .cancel) {
+//                store.send(.dismissError)
+//            }
+//        } message: {
+//            if let errorMessage = store.errorMessage {
+//                Text(errorMessage)
+//            }
+//        }
     }
     
     // MARK: - Content Components

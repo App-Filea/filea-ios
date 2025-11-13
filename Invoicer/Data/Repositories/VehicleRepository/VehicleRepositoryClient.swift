@@ -15,6 +15,7 @@ struct VehicleRepositoryClient: Sendable {
     var createVehicle: @Sendable (Vehicle) async throws -> Void
     var updateVehicle: @Sendable (Vehicle) async throws -> Void
     var setPrimaryVehicle: @Sendable (UUID) async throws -> Void
+    var hasPrimaryVehicle: @Sendable () async -> Bool
     var getAllVehicles: @Sendable () async throws -> [Vehicle]
     var getVehicle: @Sendable (UUID) async throws -> Vehicle?
     var deleteVehicle: @Sendable (UUID) async throws -> Void
@@ -35,6 +36,9 @@ extension VehicleRepositoryClient: DependencyKey {
             setPrimaryVehicle: { id in
                 try await repository.setPrimaryVehicle(id)
             },
+            hasPrimaryVehicle: {
+                await repository.hasPrimaryVehicle()
+            },
             getAllVehicles: {
                 try await repository.getAllVehicles()
             },
@@ -51,6 +55,7 @@ extension VehicleRepositoryClient: DependencyKey {
         createVehicle: { _ in },
         updateVehicle: { _ in },
         setPrimaryVehicle: { _ in },
+        hasPrimaryVehicle: { false },
         getAllVehicles: { [] },
         getVehicle: { _ in nil },
         deleteVehicle: { _ in }
@@ -60,6 +65,7 @@ extension VehicleRepositoryClient: DependencyKey {
         createVehicle: { _ in },
         updateVehicle: { _ in },
         setPrimaryVehicle: { _ in },
+        hasPrimaryVehicle: { false },
         getAllVehicles: {
             [
                 Vehicle(

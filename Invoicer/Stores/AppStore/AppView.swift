@@ -23,10 +23,6 @@ struct AppView: View {
                 if let store = store.scope(state: \.storageOnboarding, action: \.storageOnboarding) {
                     StorageOnboardingView(store: store)
                 }
-            case .vehiclesList:
-                if let store = store.scope(state: \.vehiclesList, action: \.vehiclesList) {
-                    VehiclesListView(store: store)
-                }
             case .main:
                 if let store = store.scope(state: \.main, action: \.main) {
                     MainView(store: store)
@@ -35,10 +31,10 @@ struct AppView: View {
                 if let store = store.scope(state: \.vehicleDetails, action: \.vehicleDetails) {
                     VehicleDetailsView(store: store)
                 }
-            case .addVehicle:
-                if let store = store.scope(state: \.addVehicle, action: \.addVehicle) {
-                    AddVehicleMultiStepView(store: store)
-                }
+//            case .addVehicle:
+//                if let store = store.scope(state: \.addVehicle, action: \.addVehicle) {
+//                    AddVehicleMultiStepView(store: store)
+//                }
             case .editVehicle:
                 if let store = store.scope(state: \.editVehicle, action: \.editVehicle) {
                     EditVehicleView(store: store)

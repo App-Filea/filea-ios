@@ -48,13 +48,13 @@ struct AddVehicleStepView: View {
                 .padding(.horizontal, Spacing.md)
 
             // Validation error
-            if let errorMessage = validationResult.errorMessage, store.showValidationError {
-                Text(errorMessage)
-                    .bodyXSmallRegular()
-                    .foregroundStyle(ColorTokens.error)
-                    .padding(.horizontal, Spacing.md)
-                    .padding(.bottom, Spacing.sm)
-            }
+//            if let errorMessage = validationResult.errorMessage, store.showValidationError {
+//                Text(errorMessage)
+//                    .bodyXSmallRegular()
+//                    .foregroundStyle(ColorTokens.error)
+//                    .padding(.horizontal, Spacing.md)
+//                    .padding(.bottom, Spacing.sm)
+//            }
         }
         .sheet(isPresented: $showDatePicker) {
             DatePickerSheet(
@@ -586,14 +586,14 @@ struct AddVehicleStepView: View {
     )
 }
 
-#Preview("With Validation Error") {
-    var state = AddVehicleStore.State()
-    state.showValidationError = true
-
-    return AddVehicleStepView(
-        step: .brandAndModel,
-        store: Store(initialState: state) {
-            AddVehicleStore()
-        }
-    )
-}
+//#Preview("With Validation Error") {
+//    var state = AddVehicleStore.State()
+//    state.showValidationError = true
+//
+//    return AddVehicleStepView(
+//        step: .brandAndModel,
+//        store: Store(initialState: state) {
+//            AddVehicleStore()
+//        }
+//    )
+//}

@@ -14,7 +14,8 @@ extension AlertState where Action == AddVehicleStore.Action.Alert {
                 TextState("")
             },
             actions: {
-                ButtonState(role: .cancel, action: .confirm) { TextState("") }
+                ButtonState(action: .yes) { TextState("Oui, je le remplace") }
+                ButtonState(role: .cancel, action: .no) { TextState("Non") }
             },
             message: {
                 TextState("")

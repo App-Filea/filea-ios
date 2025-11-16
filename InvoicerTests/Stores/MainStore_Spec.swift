@@ -30,18 +30,18 @@ class MainStore_Spec: XCTestCase {
         }
     }
     
-    func test_When_add_vehicle_is_completed_then_gets_statistics_on_creation_succeed() async {
-        givenStore(initialSharedVehicles: [])
-        await store.send(.onAppear) {
-            $0.showEmptyState = true
-        }
-        await store.send(.view(.openCreateVehicleButtonTapped))
-        await store.receive(.presentAddVehicleView) {
-            $0.addVehicle = AddVehicleStore.State(registrationDate: Date(timeIntervalSince1970: 1))
-        }
-        await store.send(.addVehicle(.presented(.vehicleIsCreatedAndSelected)))
-        await store.receive(.setupVehicleStatistics)
-    }
+//    func test_When_add_vehicle_is_completed_then_gets_statistics_on_creation_succeed() async {
+//        givenStore(initialSharedVehicles: [])
+//        await store.send(.onAppear) {
+//            $0.showEmptyState = true
+//        }
+//        await store.send(.view(.openCreateVehicleButtonTapped))
+//        await store.receive(.presentAddVehicleView) {
+//            $0.addVehicle = AddVehicleStore.State(registrationDate: Date(timeIntervalSince1970: 1))
+//        }
+//        await store.send(.addVehicle(.presented(.vehicleIsCreatedAndSelected)))
+//        await store.receive(.setupVehicleStatistics)
+//    }
     
     func test_When_vehicles_exists_at_on_appear_but_no_one_is_selected_then_show_vehicles_list() async {
         givenStore(initialSharedVehicles: [.make()], initialSelectedVehicle: nil)
@@ -51,15 +51,7 @@ class MainStore_Spec: XCTestCase {
         }
     }
     
-    func test_When_add_vehicle_by_vehicle_list_is_completed_then_gets_statistics_on_creation_succeed() async {
-        givenStore(initialSharedVehicles: [.make()], initialSelectedVehicle: nil)
-        await store.send(.onAppear)
-        await store.receive(.presentVehiclesListView) {
-            $0.vehiclesList = VehiclesListStore.State()
-        }
-        await store.send(.vehiclesList(.presented(.vehicleIsCreatedAndSelected)))
-        await store.receive(.setupVehicleStatistics)
-    }
+//a
     
     func test_When_vehicles_exists_at_on_appear_with_selected_one_then_gets_statistics_about_it() async {
         givenStore(initialSharedVehicles: [.make()], initialSelectedVehicle: .make())

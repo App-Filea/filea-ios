@@ -1,5 +1,5 @@
 //
-//  DocumentScanView.swift
+//  VehicleCardDocumentScanView.swift
 //  Invoicer
 //
 //  Created by Claude Code on 20/10/2025.
@@ -8,48 +8,79 @@
 import SwiftUI
 import ComposableArchitecture
 import VisionKit
+import PhotosUI
 
-struct DocumentScanView: View {
-    @Bindable var store: StoreOf<DocumentScanStore>
+struct VehicleCardDocumentScanView: View {
+    @Bindable var store: StoreOf<VehicleCardDocumentScanStore>
 
     var body: some View {
         ZStack {
             ColorTokens.background
                 .ignoresSafeArea()
-
-            // Content based on state
-            if store.showCamera {
-                cameraView
-            } else if store.isProcessing {
-                loadingView
-            } else if store.showPreview {
-                VStack(spacing: Spacing.xl) {
+            
+            VStack {
+                
+                switch store.viewState {
+                case .modeChoice:
+                    VStack {
+                        Button(action: { store.send(.view(.scanDocumentButtonTapped)) }) {
+                            Text("Scanner un document")
+                        }
+                        Button(action: { store.send(.view(.pickPhotoButtonTapped)) }) {
+                            Text("Choisir une photo")
+                        }
+                        Button(action: { store.send(.view(.importFileButtonTapped)) }) {
+                            Text("Importer un fichier")
+                        }
+                    }
+                case .loading: loadingView
+                case .preview:
+                    VStack(spacing: Spacing.xl) {
                     headerView
                     previewView
                 }
                 .padding(Spacing.md)
+                case .error:
+                    VStack {
+                        Text("Une erreur est survenue")
+                    }
+                }
             }
         }
-        .onAppear {
-            store.send(.onAppear)
-        }
-        .alert(
-            "Erreur de scan",
-            isPresented: Binding(
-                get: { store.scanError != nil },
-                set: { if !$0 { store.send(.retryScanning) } }
+        .sheet(isPresented: $store.showPhotoPickerView) {
+            PhotosPicker(
+                "Test",
+                selection: $store.photoPickerItem,
+                matching: .images,
+                photoLibrary: .shared()
             )
-        ) {
-            Button("Réessayer") {
-                store.send(.retryScanning)
-            }
-            Button("Annuler", role: .cancel) {
-                store.send(.cancelScan)
-            }
-        } message: {
-            if let error = store.scanError {
-                Text(error.localizedDescription)
-            }
+            .photosPickerStyle(.inline)
+            .ignoresSafeArea(edges: .bottom)
+        }
+        .fullScreenCover(isPresented: $store.showDocumentScanView) {
+            DocumentScannerView(
+                onFinish: { scan in
+                    store.send(.documentScanned(scan))
+                },
+                onCancel: {
+                    store.send(.closeScannerSheet)
+                },
+                onError: { error in
+                    store.send(.closeScannerSheet)
+                    store.send(.scanFailed(.unknown(error.localizedDescription)))
+                }
+            )
+            .ignoresSafeArea()
+        }
+        .sheet(isPresented: $store.showFileManagerView) {
+            DocumentFilePickerView(
+                onFileSelected: { url in
+                    store.send(.fileSelected(url))
+                },
+                onCancel: {
+                    store.showFileManagerView = false
+                }
+            )
         }
     }
 
@@ -89,7 +120,7 @@ struct DocumentScanView: View {
                 }
 
                 let firstPage = scan.imageOfPage(at: 0)
-                print("📄 [DocumentScanView] Extracted page from scan")
+                print("📄 [VehicleCardDocumentScanView] Extracted page from scan")
                 print("   ├─ Total pages: \(scan.pageCount)")
                 print("   └─ Image size: \(firstPage.size)")
 
@@ -172,11 +203,6 @@ struct DocumentScanView: View {
                         store.send(.confirmData)
                     }
                     .buttonStyle(.primaryTextOnly())
-
-                    Button(store.scanSource == .photoLibrary ? "Choisir une autre image" : "Réessayer le scan") {
-                        store.send(.requestRetry)
-                    }
-                    .buttonStyle(.primaryTextOnly())
                 }
             }
         }
@@ -208,7 +234,7 @@ struct DocumentScanView: View {
 }
 
 #Preview {
-    DocumentScanView(store: Store(initialState: DocumentScanStore.State()) {
-        DocumentScanStore()
+    VehicleCardDocumentScanView(store: Store(initialState: VehicleCardDocumentScanStore.State()) {
+        VehicleCardDocumentScanStore()
     })
 }

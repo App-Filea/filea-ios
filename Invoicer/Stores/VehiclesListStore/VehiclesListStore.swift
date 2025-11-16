@@ -25,7 +25,6 @@ struct VehiclesListStore {
         case selectVehicle(Vehicle)
         case dismiss
         case addVehicle(PresentationAction<AddVehicleStore.Action>)
-        case vehicleIsCreatedAndSelected
         
         enum ActionView: Equatable {
             case dimissSheetButtonTapped
@@ -63,8 +62,6 @@ struct VehiclesListStore {
                 return .run { _ in
                     await self.dismiss()
                 }
-            case .addVehicle(.presented(.vehicleIsCreatedAndSelected)):
-                return .send(.vehicleIsCreatedAndSelected)
                 
             default: return .none
             }

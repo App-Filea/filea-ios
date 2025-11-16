@@ -38,15 +38,15 @@ class VehiclesListStore_Spec: XCTestCase {
         await store.receive(.dismiss)
     }
     
-    func test_When_presented_add_vehicle_create_a_new_one_then_send_same_action_to_parent() async {
-        givenStore()
-        await store.send(.view(.openCreateVehicleButtonTapped))
-        await store.receive(.presentAddVehicleView) {
-            $0.addVehicle = AddVehicleStore.State(registrationDate: Date(timeIntervalSince1970: 1))
-        }
-        await store.send(.addVehicle(.presented(.vehicleIsCreatedAndSelected)))
-        await store.receive(.vehicleIsCreatedAndSelected)
-    }
+//    func test_When_presented_add_vehicle_create_a_new_one_then_send_same_action_to_parent() async {
+//        givenStore()
+//        await store.send(.view(.openCreateVehicleButtonTapped))
+//        await store.receive(.presentAddVehicleView) {
+//            $0.addVehicle = AddVehicleStore.State(registrationDate: Date(timeIntervalSince1970: 1))
+//        }
+//        await store.send(.addVehicle(.presented(.vehicleIsCreatedAndSelected)))
+//        await store.receive(.vehicleIsCreatedAndSelected)
+//    }
     
     private func givenStore() {
         store = TestStore(initialState: VehiclesListStore.State(),

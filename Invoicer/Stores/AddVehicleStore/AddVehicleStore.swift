@@ -22,15 +22,11 @@ struct AddVehicleStore {
         var mileage: String = ""
         var isPrimary: Bool = false
         var isLoading = false
-        var showValidationError = false
-        var showDocumentSourcePicker: Bool = false
-        var showImagePicker: Bool = false
         var showErrorAlert: Bool = false
         var errorMessage: String? = nil
-        var pendingImage: UIImage? = nil
         @Shared(.vehicles) var vehicles: [Vehicle] = []
         @Shared(.selectedVehicle) var selectedVehicle: Vehicle?
-        @Presents var scanStore: DocumentScanStore.State?
+        @Presents var scanStore: VehicleCardDocumentScanStore.State?
         @Presents var alert: AlertState<Action.Alert>?
 
         init(
@@ -74,36 +70,27 @@ struct AddVehicleStore {
     enum Action: Equatable, BindableAction {
         case view(ActionView)
         case binding(BindingAction<State>)
-        
+
         case verifyPrimaryVehicleExistance
         case showIsPrimaryAlert
-        
-        case primaryWarningConfirmed
-        case primaryWarningCancelled
         case saveVehicle
         case saveVehicleFailed(String)
-        case updateVehiclesListAndSetVehicleAsSelected(Vehicle)
-        case dismissError
+        case updateVehiclesListAndSetNewVehicleAsSelected(vehicles: [Vehicle], newVehicle: Vehicle)
         case cancelCreation
-        case setShowValidationError(Bool)
-        case imageSelected(UIImage?)
-        case processImageForOCR(UIImage)
-        case scanButtonTapped
-        case selectDocumentSource(DocumentSource)
-        case handleScanRetry(DocumentSource)
-        case scanStore(PresentationAction<DocumentScanStore.Action>)
+        case scanStore(PresentationAction<VehicleCardDocumentScanStore.Action>)
         case applyScanData(ScannedVehicleData)
         case alert(PresentationAction<Alert>)
         case dismiss
-        
-        case vehicleIsCreatedAndSelected
-        
+        case openScanStore
+
         enum ActionView: Equatable {
             case saveVehicleButtonTapped
+            case scanButtonTapped
         }
-        
+
         enum Alert: Equatable {
-            case confirm
+            case yes
+            case no
         }
     }
 
@@ -119,53 +106,13 @@ struct AddVehicleStore {
                 switch actionView {
                 case .saveVehicleButtonTapped:
                     return .send(.verifyPrimaryVehicleExistance)
-                }
-//            case .addButtonTapped:
-//                if state.shouldShowPrimaryWarning {
-//                    state.showPrimaryAlert = true
-//                    return .none
-//                }
-//                return .send(.saveVehicle)
-
-//            case .primaryWarningConfirmed:
-//                state.showPrimaryAlert = false
-//                return .send(.saveVehicle)
-//
-//            case .primaryWarningCancelled:
-//                state.showPrimaryAlert = false
-//                return .none
-
-            case .imageSelected(let image):
-                state.showImagePicker = false
-                state.pendingImage = nil
-
-                guard let image else {
-                    return .none
+                    
+                case .scanButtonTapped:
+                    return .send(.openScanStore)
                 }
 
-                return .send(.processImageForOCR(image))
-
-            case .processImageForOCR(let image):
-                state.scanStore = DocumentScanStore.State(scanSource: .photoLibrary)
-                return .run { send in
-                    await send(.scanStore(.presented(.captureImage(image))))
-                }
-
-            case .scanButtonTapped:
-                state.showDocumentSourcePicker = true
-                return .none
-
-            case .selectDocumentSource(let source):
-                state.showDocumentSourcePicker = false
-
-                switch source {
-                case .camera:
-                    state.scanStore = DocumentScanStore.State(scanSource: .camera)
-
-                case .photoLibrary:
-                    state.showImagePicker = true
-                }
-
+            case .openScanStore:
+                state.scanStore = VehicleCardDocumentScanStore.State()
                 return .none
 
             case .scanStore(.presented(.confirmData)):
@@ -174,23 +121,9 @@ struct AddVehicleStore {
                 }
                 return .none
 
-            case .scanStore(.presented(.requestRetry)):
-                if let source = state.scanStore?.scanSource {
-                    return .send(.handleScanRetry(source))
-                }
-                return .none
-
-            case .handleScanRetry(let source):
-                state.scanStore = nil
-                switch source {
-                case .photoLibrary:
-                    state.showImagePicker = true
-                case .camera:
-                    state.scanStore = DocumentScanStore.State(scanSource: .camera)
-                }
-                return .none
-
             case .applyScanData(let data):
+                state.scanStore = nil
+
                 if let brand = data.brand {
                     state.brand = brand
                 }
@@ -203,11 +136,10 @@ struct AddVehicleStore {
                 if let date = data.registrationDate {
                     state.registrationDate = date
                 }
-    
                 return .none
             case .verifyPrimaryVehicleExistance:
-                return .run { send in
-                    if await vehicleRepository.hasPrimaryVehicle() {
+                return .run { [isPrimary = state.isPrimary] send in
+                    if await vehicleRepository.hasPrimaryVehicle() && isPrimary {
                         await send(.showIsPrimaryAlert)
                     } else {
                         await send(.saveVehicle)
@@ -218,9 +150,13 @@ struct AddVehicleStore {
                 state.alert = AlertState.saveNewPrimaryVehicleAlert()
                 return .none
                 
-            case .alert(.presented(.confirm)):
+            case .alert(.presented(.yes)):
                 state.alert = nil
                 return .send(.saveVehicle)
+                
+            case .alert(.presented(.no)):
+                state.alert = nil
+                return .none
                 
             case .saveVehicle:
                 state.isLoading = true
@@ -238,12 +174,11 @@ struct AddVehicleStore {
                 return .run { send in
                     do {
                         try await vehicleRepository.createVehicle(vehicle)
-
-                        // Si véhicule principal, mettre à jour tous les autres
                         if vehicle.isPrimary {
                             try await vehicleRepository.setPrimaryVehicle(vehicle.id)
                         }
-                        await send(.updateVehiclesListAndSetVehicleAsSelected(vehicle))
+                        let updatedVehicles = try await vehicleRepository.getAllVehicles()
+                        await send(.updateVehiclesListAndSetNewVehicleAsSelected(vehicles: updatedVehicles, newVehicle: vehicle))
                     } catch {
                         await send(.saveVehicleFailed(error.localizedDescription))
                     }
@@ -254,11 +189,9 @@ struct AddVehicleStore {
                     await dismiss()
                 }
                 
-            case .updateVehiclesListAndSetVehicleAsSelected(let newSavedVehicle):
-                var newVehiclesArray: [Vehicle] = state.vehicles
-                newVehiclesArray.append(newSavedVehicle)
-                state.$vehicles.withLock { $0 = newVehiclesArray }
-                state.$selectedVehicle.withLock { $0 = newSavedVehicle }
+            case .updateVehiclesListAndSetNewVehicleAsSelected(let vehicles, let newVehicle):
+                state.$vehicles.withLock { $0 = vehicles }
+                state.$selectedVehicle.withLock { $0 = newVehicle }
                 return .send(.dismiss)
 
             case .saveVehicleFailed(let errorMessage):
@@ -267,25 +200,16 @@ struct AddVehicleStore {
                 state.showErrorAlert = true
                 return .none
 
-            case .dismissError:
-                state.showErrorAlert = false
-                state.errorMessage = nil
-                return .none
-
             case .cancelCreation:
                 return .run { _ in
                     await dismiss()
                 }
 
-            case .setShowValidationError(let show):
-                state.showValidationError = show
-                return .none
-                
             default: return .none
             }
         }
         .ifLet(\.$scanStore, action: \.scanStore) {
-            DocumentScanStore()
+            VehicleCardDocumentScanStore()
         }
     }
 }

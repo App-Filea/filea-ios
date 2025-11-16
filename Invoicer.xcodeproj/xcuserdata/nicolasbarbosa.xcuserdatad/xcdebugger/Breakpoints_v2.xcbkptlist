@@ -14,24 +14,22 @@
             filePath = "Invoicer/Stores/AddVehicleStore/AddVehicleStore.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "218"
-            endingLineNumber = "218"
-            landmarkName = "body"
-            landmarkType = "24">
+            startingLineNumber = "222"
+            endingLineNumber = "222">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "30BDE5E7-AF2B-49BC-8D78-D961635E922D"
-            shouldBeEnabled = "Yes"
+            uuid = "38EC9BF8-388B-4679-ADE6-5EE9427D6C70"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Invoicer/Stores/AddVehicleStore/AddVehicleStore.swift"
+            filePath = "Invoicer/Stores/VehicleCardDocumentScanStore/PhotoPickerStore.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "213"
-            endingLineNumber = "213"
+            startingLineNumber = "64"
+            endingLineNumber = "64"
             landmarkName = "body"
             landmarkType = "24">
          </BreakpointContent>

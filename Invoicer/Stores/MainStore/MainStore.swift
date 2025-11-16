@@ -113,10 +113,6 @@ struct MainStore {
             case .presentAddVehicleView:
                 state.addVehicle = AddVehicleStore.State()
                 return .none
-                
-            case .addVehicle(.presented(.vehicleIsCreatedAndSelected)),
-                    .vehiclesList(.presented(.vehicleIsCreatedAndSelected)):
-                return .send(.setupVehicleStatistics) // maybe this could be done via publisher inside every store at selectedVehicle shared is updated
 
 //            case .showSettings:
 //                // Navigation handled by AppStore+Path (to be implemented)

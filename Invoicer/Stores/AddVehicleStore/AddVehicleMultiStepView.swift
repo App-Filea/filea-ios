@@ -59,7 +59,7 @@ struct AddVehicleMultiStepView: View {
                                 Spacer()
 
                                 Button {
-                                    store.send(.scanButtonTapped)
+                                    store.send(.view(.scanButtonTapped))
                                 } label: {
                                     HStack(spacing: Spacing.xxs) {
                                         Image(systemName: "doc.text.viewfinder")
@@ -94,36 +94,9 @@ struct AddVehicleMultiStepView: View {
             }
         }
         .sheet(item: $store.scope(state: \.scanStore, action: \.scanStore)) { scanStore in
-            DocumentScanView(store: scanStore)
-        }
-        .sheet(isPresented: $store.showImagePicker) {
-            ImagePickerView(selectedImage: Binding(
-                get: { store.pendingImage },
-                set: { store.send(.imageSelected($0)) }
-            ))
-        }
-        .confirmationDialog(
-            "Ajouter un document",
-            isPresented: $store.showDocumentSourcePicker
-        ) {
-            Button("Scanner un document") {
-                store.send(.selectDocumentSource(.camera))
-            }
-            Button("Choisir une photo") {
-                store.send(.selectDocumentSource(.photoLibrary))
-            }
-            Button("Annuler", role: .cancel) { }
+            VehicleCardDocumentScanView(store: scanStore)
         }
         .alert($store.scope(state: \.alert, action: \.alert))
-//        .alert("Erreur", isPresented: $store.showErrorAlert) {
-//            Button("OK", role: .cancel) {
-//                store.send(.dismissError)
-//            }
-//        } message: {
-//            if let errorMessage = store.errorMessage {
-//                Text(errorMessage)
-//            }
-//        }
     }
     
     // MARK: - Content Components

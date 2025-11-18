@@ -168,7 +168,7 @@ struct MainView: View {
                               systemImage: "eye")
                     }
                     Button(role: .destructive) {
-                        store.send(.deleteVehicleTapped)
+                        store.send(.view(.deleteVehicleButtonTapped))
                     } label: {
                         Label("Supprimer", systemImage: "trash")
                     }

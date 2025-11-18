@@ -77,11 +77,12 @@ struct AddVehicleStore {
         case saveVehicleFailed(String)
         case updateVehiclesListAndSetNewVehicleAsSelected(vehicles: [Vehicle], newVehicle: Vehicle)
         case cancelCreation
+        case openScanStore
         case scanStore(PresentationAction<VehicleCardDocumentScanStore.Action>)
         case applyScanData(ScannedVehicleData)
         case alert(PresentationAction<Alert>)
+        case newVehicleAdded
         case dismiss
-        case openScanStore
 
         enum ActionView: Equatable {
             case saveVehicleButtonTapped
@@ -192,7 +193,8 @@ struct AddVehicleStore {
             case .updateVehiclesListAndSetNewVehicleAsSelected(let vehicles, let newVehicle):
                 state.$vehicles.withLock { $0 = vehicles }
                 state.$selectedVehicle.withLock { $0 = newVehicle }
-                return .send(.dismiss)
+                return .merge([.send(.newVehicleAdded), // TODO: test newVehicleAdded
+                               .send(.dismiss)])
 
             case .saveVehicleFailed(let errorMessage):
                 state.isLoading = false

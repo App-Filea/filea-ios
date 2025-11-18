@@ -194,8 +194,8 @@ struct AppStore {
 //                    }
 
                 // Handle vehicle deletion - reload and navigate to appropriate view
-                case .element(id: _, action: .main(.vehicleDeleted)):
-                    return .send(.vehicleListChanged)
+//                case .element(id: _, action: .main(.vehicleDeleted)):
+//                    return .send(.vehicleListChanged)
 
                 case .element(id: _, action: .vehicleDetails(.vehicleDeleted)):
                     return .send(.vehicleListChanged)

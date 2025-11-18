@@ -57,14 +57,15 @@ struct MainStore {
         case showAddDocument
         case showDocumentDetail(Document)
         case showEditVehicle
-        case deleteVehicleTapped
+        case deleteCurrentVehicle
         case deleteAlert(PresentationAction<Alert>)
-        case vehicleDeleted
+        case updateAllVehicles([Vehicle])
         case setupVehicleStatistics
         case vehicleMonthlyExpensesCalculated([MonthlyExpense])
 
         enum ActionView: Equatable {
             case openCreateVehicleButtonTapped
+            case deleteVehicleButtonTapped
         }
         
         enum Alert: Equatable {
@@ -86,6 +87,8 @@ struct MainStore {
                 switch actionView {
                 case .openCreateVehicleButtonTapped:
                     return .send(.presentAddVehicleView)
+                case .deleteVehicleButtonTapped:
+                    return .send(.deleteCurrentVehicle)
                 }
                 
             case .onAppear:
@@ -113,6 +116,9 @@ struct MainStore {
             case .presentAddVehicleView:
                 state.addVehicle = AddVehicleStore.State()
                 return .none
+                
+            case .addVehicle(.presented(.newVehicleAdded)):
+                return .send(.setupVehicleStatistics)
 
 //            case .showSettings:
 //                // Navigation handled by AppStore+Path (to be implemented)
@@ -133,55 +139,33 @@ struct MainStore {
 //                // Navigation handled by AppStore+Path
 //                return .none
 //
-//            case .deleteVehicleTapped:
-//                state.deleteAlert = AlertState {
-//                    TextState("Supprimer le véhicule")
-//                } actions: {
-//                    ButtonState(role: .destructive, action: .confirmDelete) {
-//                        TextState("Supprimer")
-//                    }
-//                    ButtonState(role: .cancel) {
-//                        TextState("Annuler")
-//                    }
-//                } message: {
-//                    TextState("Êtes-vous sûr de vouloir supprimer ce véhicule ? Cette action est irréversible.")
-//                }
-//                return .none
-//
-//            case .deleteAlert(.presented(.confirmDelete)):
-//                guard let vehicleId = state.currentVehicle?.id else {
-//                    return .none
-//                }
-//                return .run { send in
-//                    do {
-//                        try await vehicleRepository.deleteVehicle(vehicleId)
-//                        await send(.vehicleDeleted)
-//                    } catch {
-//                        // Handle error - for now just continue
-//                        await send(.vehicleDeleted)
-//                    }
-//                }
-//
-//            case .deleteAlert:
-//                return .none
-//
-//            case .vehicleDeleted:
-//                // Supprimer le véhicule de la liste partagée pour mise à jour réactive
-//                if let vehicleId = state.currentVehicle?.id {
-//                    state.$vehicles.withLock { vehicles in
-//                        vehicles.removeAll { $0.id == vehicleId }
-//                    }
-//                    // La resélection sera gérée dans AppStore
-//                    state.$selectedVehicle.withLock { $0 = nil }
-//                }
-//                return .none
-//
-//            case .addDocument(.dismiss):
-//                // Recalculer le coût total après la fermeture du modal d'ajout de document
-//                return .send(.setupVehicleStatistics)
-//
-//            case .addDocument:
-//                return .none
+            case .deleteCurrentVehicle:
+                state.deleteAlert = AlertState.deleteCurrentVehicleAlert()
+                return .none
+
+            case .deleteAlert(.presented(.confirmDelete)):
+                guard let vehicleId = state.currentVehicle?.id else {
+                    return .none
+                }
+                return .run { send in
+                    do {
+                        try await vehicleRepository.deleteVehicle(vehicleId)
+                        let newVehiclesList = try await vehicleRepository.getAllVehicles()
+                        await send(.updateAllVehicles(newVehiclesList))
+                    } catch {}
+                }
+
+            case .updateAllVehicles(let newVehiclesList):
+                    state.$vehicles.withLock { $0 = newVehiclesList }
+                    state.$selectedVehicle.withLock { $0 = nil }
+                return .none
+
+            case .addDocument(.dismiss):
+                // Recalculer le coût total après la fermeture du modal d'ajout de document
+                return .send(.setupVehicleStatistics)
+
+            case .addDocument:
+                return .none
                 
             default: return .none
             }

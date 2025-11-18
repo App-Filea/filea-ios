@@ -145,6 +145,7 @@ final class AddVehicleStore_Spec: XCTestCase {
                                                                             plate: "AA-111-BB",
                                                                             isPrimary: true
                                                                           )))
+        await store.receive(.newVehicleAdded)
         await store.receive(.dismiss)
         thenViewIsDismissed()
     }

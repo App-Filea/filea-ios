@@ -93,7 +93,8 @@ actor VehicleRepository {
     }
 
     func getVehicle(_ id: UUID) async throws -> Vehicle? {
-        let vehicle = try await grdbRepo.fetch(id)
+        // ✅ Utiliser fetchWithDocuments() pour récupérer les documents depuis GRDB
+        let vehicle = try await grdbRepo.fetchWithDocuments(id)
         return vehicle
     }
 

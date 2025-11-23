@@ -120,16 +120,16 @@ struct MainStore {
 //                // Navigation handled by AppStore+Path (to be implemented)
 //                return .none
 //
-//            case .showAddDocument:
-//                guard let currentVehicle = state.currentVehicle else {
-//                    return .none
-//                }
-//                state.addDocument = AddDocumentStore.State(vehicleId: currentVehicle.id)
-//                return .none
-//
-//            case .showDocumentDetail:
-//                // Navigation handled by AppStore+Path
-//                return .none
+            case .showAddDocument:
+                guard let currentVehicle = state.currentVehicle else {
+                    return .none
+                }
+                state.addDocument = AddDocumentStore.State(vehicleId: currentVehicle.id)
+                return .none
+
+            case .showDocumentDetail:
+                // Navigation handled by AppStore+Path
+                return .none
 //
 //            case .showEditVehicle:
 //                // Navigation handled by AppStore+Path

@@ -100,6 +100,12 @@ final class VehicleRepository_Spec: XCTestCase {
                 return vehicles.first(where: { $0.id == id })
             }
 
+            $0.vehicleDatabaseRepository.fetchWithDocuments = { id in
+                self.databaseRepoFetchCalled = true
+                self.databaseRepoFetchId = id
+                return vehicles.first(where: { $0.id == id })
+            }
+
             $0.vehicleDatabaseRepository.delete = { id in
                 self.databaseRepoDeleteCalled = true
                 self.databaseRepoDeleteId = id

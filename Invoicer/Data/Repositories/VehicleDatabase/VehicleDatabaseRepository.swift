@@ -25,9 +25,23 @@ actor VehicleDatabaseRepository {
     }
 
     func fetchAll() async throws -> [Vehicle] {
-        try await database.read { db in
-            let records = try VehicleRecord.all.fetchAll(db)
-            return records.map { $0.toDomain() }
+        try await database.read { db -> [Vehicle] in
+            let vehicleRecords = try VehicleRecord.all.fetchAll(db)
+
+            return try vehicleRecords.map { vehicleRecord in
+                // Fetch documents for each vehicle
+                let fileRecords = try FileMetadataRecord
+                    .where { $0.vehicleId.in([vehicleRecord.id]) }
+                    .order { $0.date.desc() }
+                    .fetchAll(db)
+
+                var vehicle = vehicleRecord.toDomain()
+                vehicle.documents = fileRecords.map {
+                    $0.toDomain(vehicleFolderPath: vehicleRecord.folderPath)
+                }
+
+                return vehicle
+            }
         }
     }
 
@@ -89,6 +103,13 @@ actor VehicleDatabaseRepository {
 
     func delete(id: UUID) async throws {
         try await database.write { db in
+            // 1. Delete all associated documents (cascade delete)
+            try FileMetadataRecord
+                .where { $0.vehicleId.in([id]) }
+                .delete()
+                .execute(db)
+
+            // 2. Delete vehicle
             try VehicleRecord.where { $0.id.in([id]) }.delete().execute(db)
         }
     }

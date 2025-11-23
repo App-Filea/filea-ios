@@ -138,24 +138,16 @@ struct AppStore {
                 case .element(id: _, action: .storageOnboarding(.folderSaved)):
                     return .send(.getAllVehicles)
                     
-//                case .element(id: _, action: .main(.showAddVehicle)):
-//                    state.path.append(.addVehicle(AddVehicleStore.State()))
-//                    return .none
-//
-//                case .element(id: _, action: .main(.showVehicleDetail(let vehicle))):
-//                    state.path.append(.vehicleDetails(VehicleDetailsStore.State()))
-//                    return .none
+                case .element(id: _, action: .main(.showVehicleDetail(let vehicle))):
+                    state.path.append(.vehicleDetails(VehicleDetailsStore.State()))
+                    return .none
 
-//                // AddDocument now handled by sheet in MainView
-//                case .element(id: _, action: .main(.showAddDocument)):
-//                    return .none
-
-//                case .element(id: _, action: .main(.showDocumentDetail(let document))):
-//                    if case .main(let mainState) = state.path.last,
-//                       let currentVehicle = mainState.currentVehicle {
-//                        state.path.append(.documentDetail(DocumentDetailCoordinatorStore.State(vehicleId: currentVehicle.id, documentId: document.id)))
-//                    }
-//                    return .none
+                case .element(id: _, action: .main(.showDocumentDetail(let document))):
+                    if case .main(let mainState) = state.path.last,
+                       let currentVehicle = mainState.currentVehicle {
+                        state.path.append(.documentDetail(DocumentDetailCoordinatorStore.State(vehicleId: currentVehicle.id, documentId: document.id)))
+                    }
+                    return .none
 
 //                // Navigation from MainStore to EditVehicle
 //                case .element(id: _, action: .main(.showEditVehicle)):

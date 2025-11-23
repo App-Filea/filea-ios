@@ -51,6 +51,7 @@ final class DocumentRepository: DocumentRepositoryProtocol, @unchecked Sendable 
     private let fileManager = FileManager.default
 
     @Dependency(\.vehicleRepository) var vehicleRepository
+    @Dependency(\.documentDatabaseRepository) var documentDbRepo
     @Dependency(\.storageManager) var storageManager
 
     // MARK: - Paths
@@ -75,15 +76,7 @@ final class DocumentRepository: DocumentRepositoryProtocol, @unchecked Sendable 
         let vehicleDirectoryURL = try await vehicleDirectory(for: vehicle)
         let imageFileURL = vehicleDirectoryURL.appendingPathComponent(filename)
 
-        // Save image to disk
-        guard let imageData = image.jpegData(compressionQuality: 0.8) else {
-            throw RepositoryError.invalidData("Impossible de convertir l'image en JPEG")
-        }
-
-        try imageData.write(to: imageFileURL)
-        logger.info("📄 Image sauvegardée: \(imageFileURL.lastPathComponent)")
-
-        // Create document object
+        // Create document object AVANT la transaction
         let document = Document(
             fileURL: imageFileURL.path,
             name: metadata.name,
@@ -93,10 +86,25 @@ final class DocumentRepository: DocumentRepositoryProtocol, @unchecked Sendable 
             amount: metadata.amount
         )
 
-        // Add document to vehicle
-        var updatedVehicle = vehicle
-        updatedVehicle.documents.append(document)
-        try await vehicleRepository.updateVehicle(updatedVehicle)
+        // ✅ TRANSACTION ATOMIQUE : File + Database
+        do {
+            // 1. Save physical file
+            guard let imageData = image.jpegData(compressionQuality: 0.8) else {
+                throw RepositoryError.invalidData("Impossible de convertir l'image en JPEG")
+            }
+            try imageData.write(to: imageFileURL)
+            logger.info("📄 Image sauvegardée: \(imageFileURL.lastPathComponent)")
+
+            // 2. Save to database
+            try await documentDbRepo.create(document, vehicleId)
+            logger.info("💾 Metadata sauvegardée en BDD")
+
+        } catch {
+            // Rollback : delete physical file if DB insert failed
+            try? fileManager.safelyDelete(at: imageFileURL)
+            logger.error("❌ Erreur lors de la sauvegarde : \(error.localizedDescription)")
+            throw error
+        }
 
         logger.info("✅ Document image sauvegardé avec succès")
         return document
@@ -116,17 +124,6 @@ final class DocumentRepository: DocumentRepositoryProtocol, @unchecked Sendable 
         let vehicleDirectoryURL = try await vehicleDirectory(for: vehicle)
         let destinationFileURL = vehicleDirectoryURL.appendingPathComponent(filename)
 
-        // Copy file with security-scoped access
-        let hasAccess = fileURL.startAccessingSecurityScopedResource()
-        defer {
-            if hasAccess {
-                fileURL.stopAccessingSecurityScopedResource()
-            }
-        }
-
-        try fileManager.copyItem(at: fileURL, to: destinationFileURL)
-        logger.info("📄 Fichier copié: \(destinationFileURL.lastPathComponent)")
-
         // Create document object
         let document = Document(
             fileURL: destinationFileURL.path,
@@ -137,10 +134,29 @@ final class DocumentRepository: DocumentRepositoryProtocol, @unchecked Sendable 
             amount: metadata.amount
         )
 
-        // Add document to vehicle
-        var updatedVehicle = vehicle
-        updatedVehicle.documents.append(document)
-        try await vehicleRepository.updateVehicle(updatedVehicle)
+        // ✅ TRANSACTION ATOMIQUE : File + Database
+        do {
+            // 1. Copy file with security-scoped access
+            let hasAccess = fileURL.startAccessingSecurityScopedResource()
+            defer {
+                if hasAccess {
+                    fileURL.stopAccessingSecurityScopedResource()
+                }
+            }
+
+            try fileManager.copyItem(at: fileURL, to: destinationFileURL)
+            logger.info("📄 Fichier copié: \(destinationFileURL.lastPathComponent)")
+
+            // 2. Save to database
+            try await documentDbRepo.create(document, vehicleId)
+            logger.info("💾 Metadata sauvegardée en BDD")
+
+        } catch {
+            // Rollback : delete physical file if DB insert failed
+            try? fileManager.safelyDelete(at: destinationFileURL)
+            logger.error("❌ Erreur lors de la sauvegarde : \(error.localizedDescription)")
+            throw error
+        }
 
         logger.info("✅ Document fichier sauvegardé avec succès")
         return document
@@ -149,16 +165,8 @@ final class DocumentRepository: DocumentRepositoryProtocol, @unchecked Sendable 
     func update(_ document: Document, for vehicleId: UUID) async throws {
         logger.info("📝 Mise à jour du document \(document.id)")
 
-        guard var vehicle = try await vehicleRepository.getVehicle(vehicleId) else {
-            throw RepositoryError.notFound("Véhicule \(vehicleId) introuvable")
-        }
-
-        guard let documentIndex = vehicle.documents.firstIndex(where: { $0.id == document.id }) else {
-            throw RepositoryError.notFound("Document \(document.id) introuvable")
-        }
-
-        vehicle.documents[documentIndex] = document
-        try await vehicleRepository.updateVehicle(vehicle)
+        // ✅ Mise à jour DIRECTE en BDD (pas besoin de passer par Vehicle)
+        try await documentDbRepo.update(document, vehicleId)
 
         logger.info("✅ Document mis à jour avec succès")
     }
@@ -166,24 +174,32 @@ final class DocumentRepository: DocumentRepositoryProtocol, @unchecked Sendable 
     func delete(_ documentId: UUID, for vehicleId: UUID) async throws {
         logger.info("🗑️ Suppression du document: \(documentId)")
 
-        guard var vehicle = try await vehicleRepository.getVehicle(vehicleId) else {
+        guard let vehicle = try await vehicleRepository.getVehicle(vehicleId) else {
             throw RepositoryError.notFound("Véhicule \(vehicleId) introuvable")
         }
 
-        guard let documentIndex = vehicle.documents.firstIndex(where: { $0.id == documentId }) else {
+        // Fetch document to get file path
+        let folderPath = "\(vehicle.brand)\(vehicle.model)"
+        guard let document = try await documentDbRepo.fetch(documentId, folderPath) else {
             throw RepositoryError.notFound("Document \(documentId) introuvable")
         }
 
-        let document = vehicle.documents[documentIndex]
-
-        // Delete physical file
+        // ✅ TRANSACTION ATOMIQUE : Database + File
         let fileURL = URL(fileURLWithPath: document.fileURL)
-        try fileManager.safelyDelete(at: fileURL)
-        logger.info("📄 Fichier supprimé: \(document.fileURL)")
 
-        // Remove document from vehicle
-        vehicle.documents.remove(at: documentIndex)
-        try await vehicleRepository.updateVehicle(vehicle)
+        do {
+            // 1. Delete from database first (safer rollback)
+            try await documentDbRepo.delete(documentId)
+            logger.info("💾 Metadata supprimée de la BDD")
+
+            // 2. Delete physical file
+            try fileManager.safelyDelete(at: fileURL)
+            logger.info("📄 Fichier supprimé: \(document.fileURL)")
+
+        } catch {
+            logger.error("❌ Erreur lors de la suppression : \(error.localizedDescription)")
+            throw error
+        }
 
         logger.info("✅ Document supprimé avec succès")
     }
@@ -191,15 +207,15 @@ final class DocumentRepository: DocumentRepositoryProtocol, @unchecked Sendable 
     func replacePhoto(_ documentId: UUID, for vehicleId: UUID, with newImage: UIImage) async throws {
         logger.info("📸 Remplacement de la photo du document: \(documentId)")
 
-        guard var vehicle = try await vehicleRepository.getVehicle(vehicleId) else {
+        guard let vehicle = try await vehicleRepository.getVehicle(vehicleId) else {
             throw RepositoryError.notFound("Véhicule \(vehicleId) introuvable")
         }
 
-        guard let documentIndex = vehicle.documents.firstIndex(where: { $0.id == documentId }) else {
+        let folderPath = "\(vehicle.brand)\(vehicle.model)"
+        guard var document = try await documentDbRepo.fetch(documentId, folderPath) else {
             throw RepositoryError.notFound("Document \(documentId) introuvable")
         }
 
-        let document = vehicle.documents[documentIndex]
         let oldFileURL = URL(fileURLWithPath: document.fileURL)
 
         // Generate new unique filename
@@ -207,26 +223,34 @@ final class DocumentRepository: DocumentRepositoryProtocol, @unchecked Sendable 
         let vehicleDirectoryURL = try await vehicleDirectory(for: vehicle)
         let newFileURL = vehicleDirectoryURL.appendingPathComponent(filename)
 
-        // Ensure filenames are different
         guard oldFileURL.path != newFileURL.path else {
             throw RepositoryError.invalidData("Nouveau nom de fichier identique à l'ancien")
         }
 
-        // Save new image
-        guard let imageData = newImage.jpegData(compressionQuality: 0.8) else {
-            throw RepositoryError.invalidData("Impossible de convertir l'image en JPEG")
+        // ✅ TRANSACTION ATOMIQUE : File + Database
+        do {
+            // 1. Save new image
+            guard let imageData = newImage.jpegData(compressionQuality: 0.8) else {
+                throw RepositoryError.invalidData("Impossible de convertir l'image en JPEG")
+            }
+            try imageData.write(to: newFileURL)
+            logger.info("💾 Nouvelle image sauvegardée: \(newFileURL.lastPathComponent)")
+
+            // 2. Update document in database
+            document.fileURL = newFileURL.path
+            try await documentDbRepo.update(document, vehicleId)
+            logger.info("💾 Metadata mise à jour en BDD")
+
+            // 3. Delete old file (after success)
+            try fileManager.safelyDelete(at: oldFileURL)
+            logger.info("🗑️ Ancienne image supprimée: \(oldFileURL.lastPathComponent)")
+
+        } catch {
+            // Rollback : delete new file if created
+            try? fileManager.safelyDelete(at: newFileURL)
+            logger.error("❌ Erreur lors du remplacement : \(error.localizedDescription)")
+            throw error
         }
-
-        try imageData.write(to: newFileURL)
-        logger.info("💾 Nouvelle image sauvegardée: \(newFileURL.lastPathComponent)")
-
-        // Delete old file
-        try fileManager.safelyDelete(at: oldFileURL)
-        logger.info("🗑️ Ancienne image supprimée: \(oldFileURL.lastPathComponent)")
-
-        // Update document with new file path
-        vehicle.documents[documentIndex].fileURL = newFileURL.path
-        try await vehicleRepository.updateVehicle(vehicle)
 
         logger.info("✅ Photo remplacée avec succès")
     }

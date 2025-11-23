@@ -12,18 +12,18 @@ struct TotalCostVehicleView: View {
     @Bindable var store: StoreOf<TotalCostVehicleStore>
     
     var body: some View {
-        Text("hello World")
-//        StatCard(
-//            title: "Coût total",
-//            value: store.currentVehicleTotalCost.asCurrencyStringAdaptive,
-//            subtitle: "Sur l'année en cours",
-//            icon: nil,
-//            accentColor: ColorTokens.actionPrimary,
-//            action: nil
-//        )
+        StatCard(
+            title: "Coût total",
+            value: store.currentVehicleTotalCost.asCurrencyStringAdaptive,
+            subtitle: "Sur l'année en cours",
+            icon: nil,
+            accentColor: ColorTokens.actionPrimary,
+            action: nil
+        )
     }
 }
 
 #Preview {
-    TotalCostVehicleView(store: .init(initialState: TotalCostVehicleStore.State(), reducer: { TotalCostVehicleStore() }))
+    TotalCostVehicleView(store: .init(initialState: TotalCostVehicleStore.State(currentVehicleTotalCost: 1234),
+                                      reducer: { TotalCostVehicleStore() }))
 }

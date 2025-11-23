@@ -12,21 +12,20 @@ struct WarningVehicleView: View {
     @Bindable var store: StoreOf<WarningVehicleStore>
     
     var body: some View {
-        Text("hello World")
-//        StatCard(
-//            title: "Alertes",
-//            value: "\(store.currentVehicleIncompleteDocumentsCount)",
-//            subtitle: store.currentVehicleIncompleteDocumentsCount == 0
-//                ? "Tout est en ordre"
-//                : "Nécessite votre attention",
-//            icon: store.currentVehicleIncompleteDocumentsCount == 0
-//                ? "checkmark.circle.fill"
-//                : "exclamationmark.triangle.fill",
-//            accentColor: store.currentVehicleIncompleteDocumentsCount == 0
-//                ? ColorTokens.success
-//                : ColorTokens.warning,
-//            action: nil
-//        )
+        StatCard(
+            title: "Alertes",
+            value: "\(store.currentVehicleIncompleteDocumentsCount)",
+            subtitle: store.currentVehicleIncompleteDocumentsCount == 0
+                ? "Tout est en ordre"
+                : "Nécessite votre attention",
+            icon: store.currentVehicleIncompleteDocumentsCount == 0
+                ? "checkmark.circle.fill"
+                : "exclamationmark.triangle.fill",
+            accentColor: store.currentVehicleIncompleteDocumentsCount == 0
+                ? ColorTokens.success
+                : ColorTokens.warning,
+            action: nil
+        )
     }
 }
 

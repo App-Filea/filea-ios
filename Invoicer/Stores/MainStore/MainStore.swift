@@ -25,9 +25,6 @@ struct MainStore {
         var vehicleMonthlyExpenses: VehicleMonthlyExpensesStore.State = VehicleMonthlyExpensesStore.State()
         
         var showEmptyState: Bool = false
-        var currentVehicleTotalCost: Double = 0
-        var currentVehicleMonthlyExpenses: [MonthlyExpense] = []
-        var currentVehicleIncompleteDocumentsCount: Int = 0
 
         var currentVehicle: Vehicle? {
             selectedVehicle
@@ -61,7 +58,6 @@ struct MainStore {
         case deleteAlert(PresentationAction<Alert>)
         case updateAllVehicles([Vehicle])
         case setupVehicleStatistics
-        case vehicleMonthlyExpensesCalculated([MonthlyExpense])
 
         enum ActionView: Equatable {
             case openCreateVehicleButtonTapped

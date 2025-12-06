@@ -36,6 +36,7 @@ struct AppStore {
         case vehicleListChanged
         case navigateToVehiclesList
         case navigateToCreatedVehicle(Vehicle, [Vehicle])
+        case initiateMainStore
     }
 
     @Dependency(\.vehicleRepository) var vehicleRepository
@@ -45,16 +46,13 @@ struct AppStore {
         Reduce { state, action in
             switch action {
             case .initiate:
-                // Toujours naviguer vers MainView en premier
                 state.path.append(.main(MainStore.State()))
 
-                // Vérifier si onboarding complété
                 if !state.hasCompletedOnboarding {
                     state.onboarding = OnboardingStore.State()
                     return .none
                 }
 
-                // Sinon vérifier le storage
                 return .send(.checkStorage)
 
             case .checkStorage:
@@ -66,7 +64,6 @@ struct AppStore {
             case .storageStateChecked(let storageState):
                 switch storageState {
                 case .notConfigured, .invalidAccess:
-                    state.$isStorageConfigured.withLock { $0 = false }
                     state.storageOnboarding = StorageOnboardingStore.State()
                     return .none
 
@@ -92,18 +89,13 @@ struct AppStore {
 
             case .initiateCompleted:
                 switch state.vehicles.count {
-                case 0:
-                    state.path.append(.main(MainStore.State()))
-                    return .none
+                case 0: return .send(.initiateMainStore)
                 case 1:
-                    // Un seul véhicule → Le sélectionner et naviguer
                     let vehicle = state.vehicles[0]
                     state.$selectedVehicle.withLock { $0 = vehicle }
                     state.$lastOpenedVehicleId.withLock { $0 = vehicle.id }
-                    state.path.append(.main(MainStore.State()))
-                    return .none
+                    return .send(.initiateMainStore)
                 default:
-                    // Plusieurs véhicules → Logique de sélection intelligente
                     guard let selectedVehicle =
                             state.vehicles.first(where: { $0.id == state.lastOpenedVehicleId }) ??
                             state.vehicles.first(where: { $0.isPrimary }) ??
@@ -113,17 +105,14 @@ struct AppStore {
                     }
                     state.$selectedVehicle.withLock { $0 = selectedVehicle }
                     state.$lastOpenedVehicleId.withLock { $0 = selectedVehicle.id }
-                    state.path.append(.main(MainStore.State()))
-                    return .none
+                    return .send(.initiateMainStore)
                 }
 
             case .vehicleListChanged:
-                // Recharger les véhicules depuis le storage
                 return .run { send in
                     do {
                         let loadedVehicles = try await vehicleRepository.getAllVehicles()
                         await send(.vehiclesLoaded(loadedVehicles))
-//                        await send(.reselectVehicleIfNeeded)
                     } catch {
                         print("❌ [AppStore] Erreur lors du rechargement: \(error.localizedDescription)")
                         await send(.vehiclesLoaded([]))
@@ -131,23 +120,18 @@ struct AppStore {
                 }
 
             case .navigateToVehiclesList:
-                // Plus utilisé avec la nouvelle navigation
                 return .none
 
             case .navigateToCreatedVehicle(let vehicle, let vehicles):
-                // Mettre à jour la liste des véhicules
                 state.$vehicles.withLock { $0 = vehicles }
 
-                // Sélectionner le véhicule créé
                 state.$selectedVehicle.withLock { $0 = vehicle }
                 state.$lastOpenedVehicleId.withLock { $0 = vehicle.id }
 
-                // Retirer AddVehicleView et naviguer vers MainView
                 state.path.removeAll()
                 state.path.append(.main(MainStore.State()))
                 return .none
                 
-            // Gérer fermeture sheet onboarding
             case .onboarding(.dismiss):
                 state.$hasCompletedOnboarding.withLock { $0 = true }
                 state.onboarding = nil
@@ -160,10 +144,7 @@ struct AppStore {
                 state.storageOnboarding = StorageOnboardingStore.State()
                 return .none
 
-            // Gérer fermeture sheet storage
             case .storageOnboarding(.dismiss):
-                // L'utilisateur a fermé sans choisir de dossier
-                // On ré-affiche la sheet (obligatoire)
                 state.storageOnboarding = StorageOnboardingStore.State()
                 return .none
 
@@ -180,7 +161,6 @@ struct AppStore {
 
             case .path(let action):
                 switch action {
-                // Handle storage configuration completion (pas utilisé maintenant)
                 case .element(id: _, action: .storageOnboarding(.folderSaved)):
                     return .send(.getAllVehicles)
                     
@@ -195,51 +175,24 @@ struct AppStore {
                     }
                     return .none
 
-//                // Navigation from MainStore to EditVehicle
-//                case .element(id: _, action: .main(.showEditVehicle)):
-//                    if case .main(let mainState) = state.path.last,
-//                       let currentVehicle = mainState.currentVehicle {
-//                        state.path.append(.editVehicle(EditVehicleStore.State(vehicle: currentVehicle)))
-//                    }
-//                    return .none
-//
-//                case .element(id: _, action: .documentDetail(.editDocumentLoaded(let document))):
-//                    if case .documentDetail(let documentDetailState) = state.path.last {
-//                        state.path.append(.editDocument(EditDocumentStore.State(vehicleId: documentDetailState.vehicleId, document: document)))
-//                    }
-//                    return .none
-                    
-//                case let .element(id: id, action: .main(.vehiclesList(.presented(.addVehicle(.presented(.vehicleSaved(newSavedVehicle))))))):
-//                    return .run { send in
-//                        do {
-//                            let vehicles = try await vehicleRepository.getAllVehicles()
-//                            await send(.path(.element(id: id, action: .main(.vehiclesList(.presented(.dismiss))))))
-//                            await send(.navigateToCreatedVehicle(newSavedVehicle, vehicles))
-//                        } catch {
-//                            print("❌ [AppStore] Erreur lors du rechargement: \(error.localizedDescription)")
-//                        }
-//                    }
-//                    
-//                case let .element(id: id, action: .vehiclesList(.addVehicle(.presented(.vehicleSaved(newSavedVehicle))))):
-//                    return .run { send in
-//                        do {
-//                            let vehicles = try await vehicleRepository.getAllVehicles()
-//                            await send(.path(.element(id: id, action: .vehiclesList(.dismissAddVehicle))))
-//                            await send(.navigateToCreatedVehicle(newSavedVehicle, vehicles))
-//                        } catch {
-//                            print("❌ [AppStore] Erreur lors du rechargement: \(error.localizedDescription)")
-//                        }
-//                    }
-
-                // Handle vehicle deletion - reload and navigate to appropriate view
-//                case .element(id: _, action: .main(.vehicleDeleted)):
-//                    return .send(.vehicleListChanged)
-
                 case .element(id: _, action: .vehicleDetails(.vehicleDeleted)):
                     return .send(.vehicleListChanged)
 
                 default: return .none
                 }
+                
+            case .initiateMainStore:
+                guard let mainId = state.path.ids.first(where: { id in
+                    if case .main = state.path[id: id] {
+                        return true
+                    }
+                    return false
+                }) else {
+                    return .none
+                }
+
+                return .send(.path(.element(id: mainId, action: .main(.onAppear))))
+                
             default: return .none
             }
         }
@@ -261,7 +214,6 @@ struct AppStore {
             case storageOnboarding(StorageOnboardingStore.State)
             case main(MainStore.State)
             case vehicleDetails(VehicleDetailsStore.State)
-//            case addVehicle(AddVehicleStore.State)
             case editVehicle(EditVehicleStore.State)
             case documentDetail(DocumentDetailCoordinatorStore.State)
             case editDocument(EditDocumentStore.State)
@@ -272,7 +224,6 @@ struct AppStore {
             case storageOnboarding(StorageOnboardingStore.Action)
             case main(MainStore.Action)
             case vehicleDetails(VehicleDetailsStore.Action)
-//            case addVehicle(AddVehicleStore.Action)
             case editVehicle(EditVehicleStore.Action)
             case documentDetail(DocumentDetailCoordinatorStore.Action)
             case editDocument(EditDocumentStore.Action)
@@ -282,7 +233,6 @@ struct AppStore {
             Scope(state: \.storageOnboarding, action: \.storageOnboarding) { StorageOnboardingStore() }
             Scope(state: \.main, action: \.main) { MainStore() }
             Scope(state: \.vehicleDetails, action: \.vehicleDetails) { VehicleDetailsStore() }
-//            Scope(state: \.addVehicle, action: \.addVehicle) { AddVehicleStore() }
             Scope(state: \.editVehicle, action: \.editVehicle) { EditVehicleStore() }
             Scope(state: \.documentDetail, action: \.documentDetail) { DocumentDetailCoordinatorStore() }
             Scope(state: \.editDocument, action: \.editDocument) { EditDocumentStore() }

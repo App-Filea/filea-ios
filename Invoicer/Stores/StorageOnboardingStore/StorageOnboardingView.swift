@@ -11,171 +11,79 @@ import ComposableArchitecture
 
 struct StorageOnboardingView: View {
 
-    // MARK: - Properties
-
     @Bindable var store: StoreOf<StorageOnboardingStore>
 
-    // MARK: - Body
-
     var body: some View {
-        ScrollView {
-            VStack(spacing: 28) {
-                Spacer()
-                    .frame(height: 20)
+        VStack(spacing: 0) {
 
-                // Icon
-                Image(systemName: "folder.badge.plus")
-                    .font(.system(size: 70))
-                    .foregroundStyle(.blue.gradient)
-                    .symbolEffect(.bounce, value: store.isSelectingFolder)
+            ScrollView {
+                StorageIconView()
+                    .padding(.top, 60)
+                    .padding(.bottom, 28)
 
-                // Title
-                VStack(spacing: 12) {
-                    Text("Choisissez votre dossier de stockage")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .multilineTextAlignment(.center)
+                Text("Choisissez votre emplacement")
+                    .font(.system(size: 34, weight: .bold))
+                    .foregroundStyle(Color.primary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
+                    .padding(.bottom, 16)
 
-                    Text("Vos factures et documents seront stockés dans le dossier que vous choisissez.")
-                        .font(.body)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 24)
+                Text("Vos documents seront stockés dans le dossier que vous sélectionnez.")
+                    .font(.body)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
+                    .padding(.bottom, 40)
+
+                VStack(alignment: .leading, spacing: 24) {
+                    StorageFeatureRow(
+                        icon: "externaldrive.badge.icloud",
+                        iconColor: .blue,
+                        title: "Stockage flexible",
+                        description: "Choisissez entre votre téléphone ou iCloud Drive."
+                    )
+
+                    StorageFeatureRow(
+                        icon: "checkmark.shield.fill",
+                        iconColor: .orange,
+                        title: "Vos données vous appartiennent",
+                        description: "Même après désinstallation, vos fichiers restent accessibles."
+                    )
                 }
+                .padding(.horizontal, 16)
+                .padding(.bottom, 32)
 
-                // Recommended Locations
-                VStack(alignment: .leading, spacing: 12) {
-                    HStack {
-                        Image(systemName: "star.fill")
-                            .foregroundStyle(.yellow)
-                            .font(.subheadline)
-                        Text("Emplacements recommandés")
-                            .font(.headline)
-                            .foregroundStyle(.primary)
-                    }
-                    .padding(.horizontal, 24)
-
-                    VStack(spacing: 12) {
-                        RecommendedLocationRow(
-                            icon: "icloud",
-                            title: "iCloud Drive",
-                            badge: "Recommandé",
-                            badgeColor: .green,
-                            benefits: [
-                                "Synchronisé sur tous vos appareils",
-                                "Sauvegarde automatique",
-                                "Données conservées même si vous désinstallez l'app"
-                            ]
-                        )
-
-                        RecommendedLocationRow(
-                            icon: "globe",
-                            title: "Google Drive / Dropbox",
-                            badge: "Compatible",
-                            badgeColor: .blue,
-                            benefits: [
-                                "Accessible depuis n'importe quel appareil",
-                                "Partage facile avec d'autres personnes"
-                            ]
-                        )
-                    }
-                    .padding(.horizontal, 24)
+                if let errorMessage = store.errorMessage {
+                    ErrorMessageView(message: errorMessage)
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 16)
+                        .transition(.opacity.combined(with: .move(edge: .top)))
                 }
-
-                // Warning about "Sur mon iPhone"
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack {
-                        Image(systemName: "exclamationmark.triangle.fill")
-                            .foregroundStyle(.orange)
-                            .font(.subheadline)
-                        Text("Important")
-                            .font(.headline)
-                            .foregroundStyle(.primary)
-                    }
-
-                    Text("Vous ne pouvez pas créer de dossier directement à la racine de \"Sur mon iPhone\".\n\nSi vous souhaitez un stockage local, créez d'abord un dossier dans iCloud Drive ou dans un autre emplacement.")
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                .padding()
-                .background(.orange.opacity(0.1))
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-                .padding(.horizontal, 24)
-
-                // Features List
-                VStack(alignment: .leading, spacing: 14) {
-                    Text("Avantages de notre système")
-                        .font(.headline)
-                        .foregroundStyle(.primary)
-                        .padding(.horizontal, 24)
-
-                    VStack(spacing: 14) {
-                        FeatureRow(
-                            icon: "checkmark.shield.fill",
-                            title: "Vos données vous appartiennent",
-                            description: "Même en désinstallant l'app, vos factures restent dans le dossier choisi"
-                        )
-
-                        FeatureRow(
-                            icon: "arrow.triangle.2.circlepath",
-                            title: "Changement d'emplacement",
-                            description: "Vous pouvez changer de dossier à tout moment dans les réglages"
-                        )
-
-                        FeatureRow(
-                            icon: "externaldrive.fill",
-                            title: "Sauvegarde externe facilitée",
-                            description: "Sauvegardez facilement vos données avec votre solution cloud préférée"
-                        )
-                    }
-                    .padding(.horizontal, 24)
-                }
-
-                Spacer()
-                    .frame(height: 20)
-
-            // Error Message
-            if let errorMessage = store.errorMessage {
-                HStack {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .foregroundStyle(.orange)
-                    Text(errorMessage)
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-                }
-                .padding()
-                .background(.orange.opacity(0.1))
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-                .padding(.horizontal, 24)
-                .transition(.opacity.combined(with: .move(edge: .top)))
             }
+            .scrollBounceBehavior(.basedOnSize)
 
-            // Primary Button
-            Button {
-                store.send(.selectFolderTapped)
-            } label: {
+            Button(action: { store.send(.selectFolderTapped) }) {
                 HStack {
                     if store.isLoading {
                         ProgressView()
                             .tint(.white)
                     } else {
                         Image(systemName: "folder.badge.plus")
-                        Text("Choisir un dossier")
+                        Text("Sélectionner un dossier")
                     }
                 }
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(.blue.gradient)
+                .font(.system(size: 17, weight: .semibold))
                 .foregroundStyle(.white)
-                .clipShape(RoundedRectangle(cornerRadius: 16))
-                .shadow(color: .blue.opacity(0.3), radius: 8, y: 4)
+                .frame(maxWidth: .infinity)
+                .frame(height: 50)
+                .background(Color.blue)
+                .clipShape(RoundedRectangle(cornerRadius: 14))
             }
             .disabled(store.isLoading)
-            .padding(.horizontal, 24)
-            .padding(.bottom, 32)
-            }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 34)
         }
+        .background(Color(uiColor: .systemBackground))
         .animation(.spring(), value: store.errorMessage)
         .animation(.spring(), value: store.isLoading)
         .sheet(isPresented: Binding(
@@ -198,128 +106,96 @@ struct StorageOnboardingView: View {
     }
 }
 
-// MARK: - Recommended Location Row
-
-private struct RecommendedLocationRow: View {
-    let icon: String
-    let title: String
-    let badge: String
-    let badgeColor: Color
-    let benefits: [String]
-
+struct StorageIconView: View {
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Image(systemName: icon)
-                    .font(.title3)
-                    .foregroundStyle(.blue)
-                    .frame(width: 28)
+        ZStack {
+            Circle()
+                .fill(Color.blue.opacity(0.15))
+                .frame(width: 100, height: 100)
 
-                Text(title)
-                    .font(.headline)
-                    .foregroundStyle(.primary)
-
-                Spacer()
-
-                Text(badge)
-                    .font(.caption)
-                    .fontWeight(.semibold)
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(badgeColor)
-                    .clipShape(Capsule())
-            }
-
-            VStack(alignment: .leading, spacing: 6) {
-                ForEach(benefits, id: \.self) { benefit in
-                    HStack(alignment: .top, spacing: 8) {
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.caption)
-                            .foregroundStyle(.green)
-                            .frame(width: 16)
-
-                        Text(benefit)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                }
-            }
-            .padding(.leading, 28)
+            Image(systemName: "folder.badge.plus")
+                .font(.system(size: 44, weight: .medium))
+                .foregroundStyle(.blue)
         }
-        .padding()
-        .background(.ultraThinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }
 
-// MARK: - Feature Row
-
-private struct FeatureRow: View {
+struct StorageFeatureRow: View {
     let icon: String
+    let iconColor: Color
     let title: String
     let description: String
 
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            Image(systemName: icon)
-                .font(.title3)
-                .foregroundStyle(.blue)
-                .frame(width: 32)
+        HStack(alignment: .top, spacing: 16) {
+            ZStack {
+                Circle()
+                    .fill(iconColor.opacity(0.15))
+                    .frame(width: 44, height: 44)
+
+                Image(systemName: icon)
+                    .font(.system(size: 20, weight: .medium))
+                    .foregroundStyle(iconColor)
+            }
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
-                    .font(.headline)
-                    .foregroundStyle(.primary)
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundStyle(Color.primary)
 
                 Text(description)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .font(.system(size: 15))
+                    .foregroundStyle(Color.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
-
-            Spacer()
         }
+    }
+}
+
+struct ErrorMessageView: View {
+    let message: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 8) {
+                Image(systemName: "exclamationmark.circle.fill")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundStyle(.red)
+
+                Text("Dossier inaccessible")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(.primary)
+            }
+
+            Text("Choisissez un dossier dans iCloud Drive ou un autre emplacement accessible.")
+                .font(.system(size: 14))
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.red.opacity(0.08))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.red.opacity(0.2), lineWidth: 1)
+        )
     }
 }
 
 // MARK: - Preview
 
-#if DEBUG
-struct StorageOnboardingView_Previews: PreviewProvider {
-    static var previews: some View {
-        Group {
-            // Normal state
-            StorageOnboardingView(
-                store: Store(initialState: StorageOnboardingStore.State()) {
-                    StorageOnboardingStore()
-                }
-            )
-            .previewDisplayName("Normal")
-
-            // Error state
-            StorageOnboardingView(
-                store: Store(
-                    initialState: StorageOnboardingStore.State(
-                        errorMessage: "Impossible de créer le bookmark de sécurité."
-                    )
-                ) {
-                    StorageOnboardingStore()
-                }
-            )
-            .previewDisplayName("Error")
-
-            // Loading state
-            StorageOnboardingView(
-                store: Store(
-                    initialState: StorageOnboardingStore.State(isLoading: true)
-                ) {
-                    StorageOnboardingStore()
-                }
-            )
-            .previewDisplayName("Loading")
-        }
-    }
+#Preview("Normal") {
+    StorageOnboardingView(
+        store: Store(initialState: StorageOnboardingStore.State()) { StorageOnboardingStore() } )
 }
-#endif
+
+#Preview("Avec erreur") {
+    StorageOnboardingView(
+        store: Store(initialState: StorageOnboardingStore.State(errorMessage: "Le dossier sélectionné n'est pas accessible.")) { StorageOnboardingStore() } )
+}
+
+#Preview("Chargement") {
+    StorageOnboardingView(
+        store: Store(initialState: StorageOnboardingStore.State(isLoading: true)) { StorageOnboardingStore() } )
+}

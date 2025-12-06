@@ -28,9 +28,9 @@ struct MainView: View {
                 mainContentView
             }
         }
-        .onAppear {
-            store.send(.onAppear)
-        }
+//        .onAppear {
+//            store.send(.onAppear)
+//        }
         .navigationBarBackButtonHidden()
         .alert($store.scope(state: \.deleteAlert, action: \.deleteAlert))
         .sheet(item: $store.scope(state: \.vehiclesList, action: \.vehiclesList)) { store in

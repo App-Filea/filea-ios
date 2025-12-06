@@ -12,21 +12,13 @@ import Foundation
 @Reducer
 struct OnboardingStore {
 
-    // MARK: - State
-
     @ObservableState
-    struct State: Equatable {
-        // Pas de state pour l'instant
-    }
-
-    // MARK: - Action
+    struct State: Equatable {}
 
     enum Action: Equatable {
         case continueTapped
         case completeOnboarding
     }
-
-    // MARK: - Reducer
 
     var body: some ReducerOf<Self> {
         Reduce { state, action in
@@ -35,7 +27,6 @@ struct OnboardingStore {
                 return .send(.completeOnboarding)
 
             case .completeOnboarding:
-                // L'AppStore gérera la fermeture et l'affichage du storage
                 return .none
             }
         }

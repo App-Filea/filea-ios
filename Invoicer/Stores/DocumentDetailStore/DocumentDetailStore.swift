@@ -19,6 +19,8 @@ struct DocumentDetailStore {
         var image: UIImage?
         var isLoading = false
         var showCamera = false
+        @Shared(.vehicles) var vehicles: [Vehicle] = []
+        @Shared(.selectedVehicle) var selectedVehicle: Vehicle?
     }
     
     enum Action: Equatable {
@@ -156,7 +158,27 @@ struct DocumentDetailStore {
             case .documentDeleted:
                 print("✅ [DocumentDetailStore] Document supprimé avec succès")
                 state.isLoading = false
-                return .run { send in
+                // Recharger le véhicule pour mettre à jour la liste des documents
+                return .run { [vehicleId = state.vehicleId, vehicles = state.$vehicles, selectedVehicle = state.$selectedVehicle] send in
+                    do {
+                        if let updatedVehicle = try await vehicleRepository.getVehicle(vehicleId) {
+                            print("🔄 [DocumentDetailStore] Mise à jour du véhicule dans @Shared")
+                            await vehicles.withLock { vehicles in
+                                if let index = vehicles.firstIndex(where: { $0.id == vehicleId }) {
+                                    vehicles[index] = updatedVehicle
+                                }
+                            }
+
+                            // Also update selectedVehicle if it's the same vehicle
+                            await selectedVehicle.withLock { selected in
+                                if selected?.id == vehicleId {
+                                    selected = updatedVehicle
+                                }
+                            }
+                        }
+                    } catch {
+                        print("❌ [DocumentDetailStore] Erreur lors du rechargement du véhicule: \(error.localizedDescription)")
+                    }
                     await send(.goBack)
                 }
                 

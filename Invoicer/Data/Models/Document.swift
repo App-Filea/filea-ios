@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum DocumentType: String, Codable, CaseIterable {
+enum DocumentType: String, Codable, CaseIterable, Identifiable, Hashable, CustomStringConvertible {
     // Administratif
     case carteGrise = "Carte grise"
     case assurance = "Assurance"
@@ -28,6 +28,10 @@ enum DocumentType: String, Codable, CaseIterable {
     case achatPiece = "Achat de pièce"
     case peage = "Péage/Parking"
     case autre = "Autre"
+
+    var id: Self { self }
+
+    var description: String { displayName }
 
     var displayName: String {
         return self.rawValue

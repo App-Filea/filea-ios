@@ -8,19 +8,22 @@
 import ComposableArchitecture
 import Foundation
 import SwiftUI
+import PhotosUI
+import PDFKit
 
 @Reducer
 struct AddDocumentStore {
     @ObservableState
     struct State: Equatable {
         let vehicleId: UUID
-        var capturedImage: UIImage?
+        var viewState: ViewState = .modeChoice
         var isLoading = false
-        var showCamera = false
-        var showFilePicker = false
+        var showDocumentScanView = false
+        var showPhotoPickerView = false
+        var photoPickerItems: [PhotosPickerItem] = []
+        var showFileManagerView = false
         var selectedFileURL: URL?
         var selectedFileName: String?
-        var documentSource: DocumentSource = .none
         var showValidationError = false
         @Shared(.vehicles) var vehicles: [Vehicle] = []
         @Shared(.selectedVehicle) var selectedVehicle: Vehicle?
@@ -32,31 +35,39 @@ struct AddDocumentStore {
         var documentType: DocumentType = .entretien
         var documentAmount: String = ""
 
-        enum DocumentSource: Equatable {
-            case none
-            case camera
-            case file
+        enum ViewState: Equatable {
+            case modeChoice
+            case metadataForm
         }
 
         // Validation computed properties
         var hasSourceSelected: Bool {
-            capturedImage != nil || selectedFileURL != nil
+            selectedFileURL != nil
         }
     }
 
     enum Action: Equatable, BindableAction {
         case binding(BindingAction<State>)
-        case showCamera
-        case hideCamera
-        case showFilePicker
-        case hideFilePicker
-        case imageCapture(UIImage?)
+        case view(ActionView)
+        case openCameraScan
+        case openPhotoPicker
+        case openFileManager
+        case filePickedFromManager(URL)
         case fileSelected(URL?)
         case removeSource
         case saveDocument
         case documentSaved
         case cancelCreation
         case setShowValidationError(Bool)
+        case transformToPdf([UIImage])
+
+        enum ActionView: Equatable {
+            case openCameraViewButtonTapped
+            case openPhotoPickerButtonTapped
+            case openFileManagerButtonTapped
+            case documentScanned([UIImage])
+            case backFromMetadataFormButtonTapped
+        }
     }
 
     @Dependency(\.documentRepository) var documentRepository
@@ -65,6 +76,26 @@ struct AddDocumentStore {
 
     var body: some ReducerOf<Self> {
         BindingReducer()
+            .onChange(of: \.photoPickerItems) { oldValue, newValue in
+                Reduce { state, action in
+                    guard !newValue.isEmpty else { return .none }
+
+                    let items = newValue
+                    return .run { send in
+                        var images: [UIImage] = []
+
+                        for item in items {
+                            if let data = try? await item.loadTransferable(type: Data.self),
+                               let image = UIImage(data: data) {
+                                images.append(image)
+                            }
+                        }
+
+                        guard !images.isEmpty else { return }
+                        await send(.transformToPdf(images))
+                    }
+                }
+            }
 
         Reduce { state, action in
             switch action {
@@ -75,49 +106,65 @@ struct AddDocumentStore {
                 }
                 return .none
 
-            case .showCamera:
-                state.showCamera = true
-                return .none
-
-            case .hideCamera:
-                state.showCamera = false
-                return .none
-
-            case .showFilePicker:
-                state.showFilePicker = true
-                return .none
-
-            case .hideFilePicker:
-                state.showFilePicker = false
-                return .none
-
-            case .imageCapture(let image):
-                state.showCamera = false
-                if let image = image {
-                    // Clear file selection if present
-                    state.selectedFileURL = nil
-                    state.selectedFileName = nil
-                    state.capturedImage = image
-                    state.documentSource = .camera
+            case .view(let actionView):
+                switch actionView {
+                case .openCameraViewButtonTapped:
+                    return .send(.openCameraScan)
+                case .openPhotoPickerButtonTapped:
+                    return .send(.openPhotoPicker)
+                case .openFileManagerButtonTapped:
+                    return .send(.openFileManager)
+                case .documentScanned(let images):
+                    return .send(.transformToPdf(images))
+                case .backFromMetadataFormButtonTapped:
+                    state.viewState = .modeChoice
+                    return .none
                 }
+
+            case .openCameraScan:
+                state.showDocumentScanView = true
                 return .none
+
+            case .openPhotoPicker:
+                state.showPhotoPickerView = true
+                return .none
+
+            case .openFileManager:
+                state.showFileManagerView = true
+                return .none
+
+            case .filePickedFromManager(let url):
+                // Check if it's an image file that needs to be converted to PDF
+                let imageExtensions = ["png", "jpg", "jpeg", "heic", "heif", "gif", "bmp", "tiff"]
+                let fileExtension = url.pathExtension.lowercased()
+
+                if imageExtensions.contains(fileExtension) {
+                    // Convert image to PDF
+                    return .run { send in
+                        if let imageData = try? Data(contentsOf: url),
+                           let image = UIImage(data: imageData) {
+                            await send(.transformToPdf([image]))
+                        }
+                    }
+                } else {
+                    // It's already a PDF - use directly
+                    return .send(.fileSelected(url))
+                }
 
             case .fileSelected(let url):
-                state.showFilePicker = false
+                state.showFileManagerView = false
+                state.showDocumentScanView = false
+                state.showPhotoPickerView = false
                 if let url = url {
-                    // Clear image if present
-                    state.capturedImage = nil
                     state.selectedFileURL = url
                     state.selectedFileName = url.lastPathComponent
-                    state.documentSource = .file
+                    state.viewState = .metadataForm
                 }
                 return .none
 
             case .removeSource:
-                state.capturedImage = nil
                 state.selectedFileURL = nil
                 state.selectedFileName = nil
-                state.documentSource = .none
                 return .none
 
             case .saveDocument:
@@ -125,56 +172,26 @@ struct AddDocumentStore {
 
                 let amount = Double(state.documentAmount.replacingOccurrences(of: ",", with: "."))
 
-                switch state.documentSource {
-                case .camera:
-                    guard let image = state.capturedImage else {
-                        state.isLoading = false
-                        return .none
-                    }
-
-                    return .run { [vehicleId = state.vehicleId, name = state.documentName, date = state.documentDate, mileage = state.documentMileage, type = state.documentType] send in
-                        do {
-                            let metadata = DocumentMetadata(
-                                name: name,
-                                date: date,
-                                mileage: mileage,
-                                type: type,
-                                amount: amount
-                            )
-                            _ = try await documentRepository.save(image: image, for: vehicleId, metadata: metadata)
-                            await send(.documentSaved)
-                        } catch {
-                            print("❌ [AddDocumentStore] Erreur lors de la sauvegarde de l'image: \(error.localizedDescription)")
-                            await send(.documentSaved)
-                        }
-                    }
-
-                case .file:
-                    guard let fileURL = state.selectedFileURL else {
-                        state.isLoading = false
-                        return .none
-                    }
-
-                    return .run { [vehicleId = state.vehicleId, name = state.documentName, date = state.documentDate, mileage = state.documentMileage, type = state.documentType] send in
-                        do {
-                            let metadata = DocumentMetadata(
-                                name: name,
-                                date: date,
-                                mileage: mileage,
-                                type: type,
-                                amount: amount
-                            )
-                            _ = try await documentRepository.save(fileURL: fileURL, for: vehicleId, metadata: metadata)
-                            await send(.documentSaved)
-                        } catch {
-                            print("❌ [AddDocumentStore] Erreur lors de la sauvegarde du fichier: \(error.localizedDescription)")
-                            await send(.documentSaved)
-                        }
-                    }
-
-                case .none:
+                guard let fileURL = state.selectedFileURL else {
                     state.isLoading = false
                     return .none
+                }
+
+                return .run { [vehicleId = state.vehicleId, name = state.documentName, date = state.documentDate, mileage = state.documentMileage, type = state.documentType] send in
+                    do {
+                        let metadata = DocumentMetadata(
+                            name: name,
+                            date: date,
+                            mileage: mileage,
+                            type: type,
+                            amount: amount
+                        )
+                        _ = try await documentRepository.save(fileURL: fileURL, for: vehicleId, metadata: metadata)
+                        await send(.documentSaved)
+                    } catch {
+                        print("❌ [AddDocumentStore] Erreur lors de la sauvegarde du fichier: \(error.localizedDescription)")
+                        await send(.documentSaved)
+                    }
                 }
 
             case .documentSaved:
@@ -210,6 +227,28 @@ struct AddDocumentStore {
             case .setShowValidationError(let show):
                 state.showValidationError = show
                 return .none
+
+            case .transformToPdf(let images):
+                guard !images.isEmpty else { return .none }
+
+                return .run { send in
+                    let pdfURL = FileManager.default.temporaryDirectory
+                        .appendingPathComponent(UUID().uuidString)
+                        .appendingPathExtension("pdf")
+
+                    // Create PDF from images
+                    let pdfDocument = PDFDocument()
+                    for (index, image) in images.enumerated() {
+                        if let pdfPage = PDFPage(image: image) {
+                            pdfDocument.insert(pdfPage, at: index)
+                        }
+                    }
+
+                    // Write PDF to temp file
+                    pdfDocument.write(to: pdfURL)
+
+                    await send(.fileSelected(pdfURL))
+                }
             }
         }
     }

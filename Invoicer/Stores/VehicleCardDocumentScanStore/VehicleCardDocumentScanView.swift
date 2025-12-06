@@ -21,18 +21,7 @@ struct VehicleCardDocumentScanView: View {
             VStack {
                 
                 switch store.viewState {
-                case .modeChoice:
-                    VStack {
-                        Button(action: { store.send(.view(.scanDocumentButtonTapped)) }) {
-                            Text("Scanner un document")
-                        }
-                        Button(action: { store.send(.view(.pickPhotoButtonTapped)) }) {
-                            Text("Choisir une photo")
-                        }
-                        Button(action: { store.send(.view(.importFileButtonTapped)) }) {
-                            Text("Importer un fichier")
-                        }
-                    }
+                case .modeChoice: modeChoiceView
                 case .loading: loadingView
                 case .preview:
                     VStack(spacing: Spacing.xl) {
@@ -159,6 +148,67 @@ struct VehicleCardDocumentScanView: View {
         }
         .padding(Spacing.md)
     }
+    
+    private var modeChoiceView: some View {
+        VStack(spacing: 64) {
+            Text("Comment voulez-vous scanner ?")
+                .font(.largeTitle)
+                .bold()
+                .multilineTextAlignment(.center)
+            
+            VStack(spacing: 16) {
+                Button(action: { store.send(.view(.scanDocumentButtonTapped)) }) {
+                    HStack(alignment: .center, spacing: 8) {
+                            Image(systemName: "camera.viewfinder")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(maxWidth: 32)
+                            Text("Utiliser la caméra")
+                                .font(.title2)
+                        Spacer()
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(ColorTokens.surface)
+                    .cornerRadius(8)
+                }
+                Button(action: { store.send(.view(.pickPhotoButtonTapped)) }) {
+                    HStack(alignment: .center, spacing: 8) {
+                            Image(systemName: "photo.on.rectangle.angled")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(maxWidth: 32)
+                        Text("Choisir une photo")
+                                .font(.title2)
+                        Spacer()
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(ColorTokens.surface)
+                    .cornerRadius(8)
+                }
+                Button(action: { store.send(.view(.importFileButtonTapped)) }) {
+                    HStack(alignment: .center, spacing: 8) {
+                            Image(systemName: "folder")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(maxWidth: 32)
+                        Text("Importer un fichier")
+                                .font(.title2)
+                        Spacer()
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(ColorTokens.surface)
+                    .cornerRadius(8)
+                }
+            }
+            
+            Spacer()
+        }
+        .padding([.horizontal, .bottom])
+        .padding(.top, 64)
+    }
 
     private var previewView: some View {
         VStack(spacing: Spacing.lg) {
@@ -233,8 +283,89 @@ struct VehicleCardDocumentScanView: View {
     }
 }
 
-#Preview {
-    VehicleCardDocumentScanView(store: Store(initialState: VehicleCardDocumentScanStore.State()) {
+// MARK: - Previews
+
+#Preview("Mode Choice") {
+    VehicleCardDocumentScanView(store: Store(
+        initialState: VehicleCardDocumentScanStore.State(
+            viewState: .modeChoice
+        )
+    ) {
+        VehicleCardDocumentScanStore()
+    })
+}
+
+#Preview("Loading") {
+    VehicleCardDocumentScanView(store: Store(
+        initialState: VehicleCardDocumentScanStore.State(
+            viewState: .loading
+        )
+    ) {
+        VehicleCardDocumentScanStore()
+    })
+}
+
+#Preview("Preview - High Confidence") {
+    VehicleCardDocumentScanView(store: Store(
+        initialState: VehicleCardDocumentScanStore.State(
+            viewState: .preview,
+            extractedData: ScannedVehicleData(
+                brand: "Tesla",
+                model: "Model 3",
+                plate: "AB-123-CD",
+                registrationDate: Date(timeIntervalSince1970: 1609459200), // 1 Jan 2021
+                confidence: .high,
+                sourceDocument: .registrationCard
+            )
+        )
+    ) {
+        VehicleCardDocumentScanStore()
+    })
+}
+
+#Preview("Preview - Medium Confidence") {
+    VehicleCardDocumentScanView(store: Store(
+        initialState: VehicleCardDocumentScanStore.State(
+            viewState: .preview,
+            extractedData: ScannedVehicleData(
+                brand: "Renault",
+                model: nil,
+                plate: "EF-456-GH",
+                registrationDate: nil,
+                confidence: .medium,
+                sourceDocument: .invoice
+            )
+        )
+    ) {
+        VehicleCardDocumentScanStore()
+    })
+}
+
+#Preview("Preview - Low Confidence") {
+    VehicleCardDocumentScanView(store: Store(
+        initialState: VehicleCardDocumentScanStore.State(
+            viewState: .preview,
+            extractedData: ScannedVehicleData(
+                brand: "BMW",
+                model: nil,
+                plate: nil,
+                registrationDate: nil,
+                confidence: .low,
+                sourceDocument: .receipt
+            )
+        )
+    ) {
+        VehicleCardDocumentScanStore()
+    })
+}
+
+#Preview("Error") {
+    VehicleCardDocumentScanView(store: Store(
+        initialState: VehicleCardDocumentScanStore.State(
+            viewState: .error,
+            scanError: .noTextDetected
+        )
+    ) {
         VehicleCardDocumentScanStore()
     })
 }

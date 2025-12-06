@@ -16,8 +16,11 @@ struct AppStore {
         @Shared(.vehicles) var vehicles: [Vehicle] = []
         @Shared(.selectedVehicle) var selectedVehicle: Vehicle?
         @Shared(.lastOpenedVehicleId) var lastOpenedVehicleId: UUID?
+        @Shared(.hasCompletedOnboarding) var hasCompletedOnboarding = false
+        @Shared(.isStorageConfigured) var isStorageConfigured = false
+        @Presents var onboarding: OnboardingStore.State?
+        @Presents var storageOnboarding: StorageOnboardingStore.State?
         var path = StackState<Path.State>()
-        var isStorageConfigured = false
     }
 
     enum Action: Equatable {
@@ -26,6 +29,8 @@ struct AppStore {
         case storageStateChecked(VehicleStorageManager.StorageState)
         case initiateCompleted
         case path(StackActionOf<Path>)
+        case onboarding(PresentationAction<OnboardingStore.Action>)
+        case storageOnboarding(PresentationAction<StorageOnboardingStore.Action>)
         case getAllVehicles
         case vehiclesLoaded([Vehicle])
         case vehicleListChanged
@@ -40,6 +45,16 @@ struct AppStore {
         Reduce { state, action in
             switch action {
             case .initiate:
+                // Toujours naviguer vers MainView en premier
+                state.path.append(.main(MainStore.State()))
+
+                // Vérifier si onboarding complété
+                if !state.hasCompletedOnboarding {
+                    state.onboarding = OnboardingStore.State()
+                    return .none
+                }
+
+                // Sinon vérifier le storage
                 return .send(.checkStorage)
 
             case .checkStorage:
@@ -51,12 +66,12 @@ struct AppStore {
             case .storageStateChecked(let storageState):
                 switch storageState {
                 case .notConfigured, .invalidAccess:
-                    state.isStorageConfigured = false
-                    state.path.append(.storageOnboarding(StorageOnboardingStore.State()))
+                    state.$isStorageConfigured.withLock { $0 = false }
+                    state.storageOnboarding = StorageOnboardingStore.State()
                     return .none
 
                 case .configured:
-                    state.isStorageConfigured = true
+                    state.$isStorageConfigured.withLock { $0 = true }
                     return .send(.getAllVehicles)
                 }
 
@@ -132,9 +147,40 @@ struct AppStore {
                 state.path.append(.main(MainStore.State()))
                 return .none
                 
+            // Gérer fermeture sheet onboarding
+            case .onboarding(.dismiss):
+                state.$hasCompletedOnboarding.withLock { $0 = true }
+                state.onboarding = nil
+                state.storageOnboarding = StorageOnboardingStore.State()
+                return .none
+
+            case .onboarding(.presented(.completeOnboarding)):
+                state.$hasCompletedOnboarding.withLock { $0 = true }
+                state.onboarding = nil
+                state.storageOnboarding = StorageOnboardingStore.State()
+                return .none
+
+            // Gérer fermeture sheet storage
+            case .storageOnboarding(.dismiss):
+                // L'utilisateur a fermé sans choisir de dossier
+                // On ré-affiche la sheet (obligatoire)
+                state.storageOnboarding = StorageOnboardingStore.State()
+                return .none
+
+            case .storageOnboarding(.presented(.folderSaved)):
+                state.storageOnboarding = nil
+                state.$isStorageConfigured.withLock { $0 = true }
+                return .send(.getAllVehicles)
+
+            case .onboarding:
+                return .none
+
+            case .storageOnboarding:
+                return .none
+
             case .path(let action):
                 switch action {
-                // Handle storage configuration completion
+                // Handle storage configuration completion (pas utilisé maintenant)
                 case .element(id: _, action: .storageOnboarding(.folderSaved)):
                     return .send(.getAllVehicles)
                     
@@ -196,6 +242,12 @@ struct AppStore {
                 }
             default: return .none
             }
+        }
+        .ifLet(\.$onboarding, action: \.onboarding) {
+            OnboardingStore()
+        }
+        .ifLet(\.$storageOnboarding, action: \.storageOnboarding) {
+            StorageOnboardingStore()
         }
         .forEach(\.path, action: \.path) {
             Path()

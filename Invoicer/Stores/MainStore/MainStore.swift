@@ -14,16 +14,17 @@ struct MainStore {
     struct State: Equatable {
         @Shared(.vehicles) var vehicles: [Vehicle] = []
         @Shared(.selectedVehicle) var selectedVehicle: Vehicle?
+        @Shared(.isStorageConfigured) var isStorageConfigured = false
         @Presents var vehicleDetail: VehicleDetailsStore.State?
         @Presents var deleteAlert: AlertState<Action.Alert>?
         @Presents var vehiclesList: VehiclesListStore.State?
         @Presents var addVehicle: AddVehicleStore.State?
         @Presents var addDocument: AddDocumentStore.State?
-        
+
         var warningVehicle: WarningVehicleStore.State = WarningVehicleStore.State()
         var totalCostVehicle: TotalCostVehicleStore.State = TotalCostVehicleStore.State()
         var vehicleMonthlyExpenses: VehicleMonthlyExpensesStore.State = VehicleMonthlyExpensesStore.State()
-        
+
         var showEmptyState: Bool = false
 
         var currentVehicle: Vehicle? {
@@ -39,9 +40,9 @@ struct MainStore {
         case warningVehicle(WarningVehicleStore.Action)
         case totalCostVehicle(TotalCostVehicleStore.Action)
         case vehicleMonthlyExpenses(VehicleMonthlyExpensesStore.Action)
-        
+
         case view(ActionView)
-        
+
         case onAppear
         case vehicleDetail(PresentationAction<VehicleDetailsStore.Action>)
         case vehiclesList(PresentationAction<VehiclesListStore.Action>)
@@ -110,6 +111,10 @@ struct MainStore {
                 return .none
 
             case .presentAddVehicleView:
+                // Bloquer si le storage n'est pas configuré
+                guard state.isStorageConfigured else {
+                    return .none
+                }
                 state.addVehicle = AddVehicleStore.State()
                 return .none
                 

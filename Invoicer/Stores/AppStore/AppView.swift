@@ -54,6 +54,14 @@ struct AppView: View {
             }
         }
         .navigationViewStyle(.stack)
+        .sheet(item: $store.scope(state: \.onboarding, action: \.onboarding)) { store in
+            OnboardingView(store: store)
+                .interactiveDismissDisabled(false)
+        }
+        .sheet(item: $store.scope(state: \.storageOnboarding, action: \.storageOnboarding)) { store in
+            StorageOnboardingView(store: store)
+                .interactiveDismissDisabled(true)
+        }
     }
 }
 

@@ -26,3 +26,14 @@ extension SharedReaderKey where Self == AppStorageKey<UUID?>.Default {
         Self[.appStorage("lastOpenedVehicleId"), default: nil]
     }
 }
+
+// MARK: - Onboarding SharedKeys
+extension SharedReaderKey where Self == AppStorageKey<Bool>.Default {
+    static var hasCompletedOnboarding: Self {
+        Self[.appStorage("hasCompletedOnboarding"), default: false]
+    }
+
+    static var isStorageConfigured: Self {
+        Self[.appStorage("isStorageConfigured"), default: false]
+    }
+}

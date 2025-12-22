@@ -129,7 +129,7 @@ struct MainStore {
                 guard let currentVehicle = state.currentVehicle else {
                     return .none
                 }
-                state.addDocument = AddDocumentStore.State(vehicleId: currentVehicle.id)
+                state.addDocument = AddDocumentStore.State.initialState(vehicleId: currentVehicle.id)
                 return .none
 
             case .showDocumentDetail:

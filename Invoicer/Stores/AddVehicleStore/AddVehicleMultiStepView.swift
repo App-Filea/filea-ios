@@ -17,7 +17,6 @@ struct AddVehicleMultiStepView: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
-                // Header fixe
                 HStack {
                     Button("Annuler") {
                         store.send(.cancelCreation)
@@ -36,10 +35,8 @@ struct AddVehicleMultiStepView: View {
                 .padding(.vertical, Spacing.sm)
                 .background(ColorTokens.background)
 
-                // Contenu scrollable - Toutes les étapes affichées
                 ScrollView {
                     VStack(spacing: Spacing.xl) {
-                        // Étape 1 : Type
                         VStack(alignment: .leading, spacing: Spacing.xs) {
                             Text("Type de véhicule")
                                 .font(Typography.subheadline)
@@ -49,7 +46,6 @@ struct AddVehicleMultiStepView: View {
                         }
                         .padding(.horizontal, Spacing.md)
 
-                        // Étape 2 : Informations
                         VStack(alignment: .leading, spacing: Spacing.xs) {
                             HStack(alignment: .bottom) {
                                 Text("Informations du véhicule")
@@ -58,27 +54,26 @@ struct AddVehicleMultiStepView: View {
 
                                 Spacer()
 
-                                Button {
-                                    store.send(.view(.scanButtonTapped))
-                                } label: {
-                                    HStack(spacing: Spacing.xxs) {
-                                        Image(systemName: "doc.text.viewfinder")
-                                        Text("Scanner")
-                                    }
-                                    .font(Typography.footnote)
-                                    .foregroundStyle(ColorTokens.actionPrimary)
-                                    .padding(.horizontal, Spacing.sm)
-                                    .padding(.vertical, Spacing.xs)
-                                    .background(ColorTokens.actionPrimary.opacity(0.1))
-                                    .cornerRadius(Radius.sm)
-                                }
+//                                Button {
+//                                    store.send(.view(.scanButtonTapped))
+//                                } label: {
+//                                    HStack(spacing: Spacing.xxs) {
+//                                        Image(systemName: "doc.text.viewfinder")
+//                                        Text("Scanner")
+//                                    }
+//                                    .font(Typography.footnote)
+//                                    .foregroundStyle(ColorTokens.actionPrimary)
+//                                    .padding(.horizontal, Spacing.sm)
+//                                    .padding(.vertical, Spacing.xs)
+//                                    .background(ColorTokens.actionPrimary.opacity(0.1))
+//                                    .cornerRadius(Radius.sm)
+//                                }
                             }
 
                             brandAndModelContent
                         }
                         .padding(.horizontal, Spacing.md)
 
-                        // Étape 3 : Détails
                         VStack(alignment: .leading, spacing: Spacing.xs) {
                             Text("Détails complémentaires")
                                 .font(Typography.subheadline)
@@ -98,8 +93,6 @@ struct AddVehicleMultiStepView: View {
         }
         .alert($store.scope(state: \.alert, action: \.alert))
     }
-    
-    // MARK: - Content Components
 
     private var vehicleTypePicker: some View {
         VStack(alignment: .leading, spacing: Spacing.md) {
@@ -142,7 +135,6 @@ struct AddVehicleMultiStepView: View {
 
     private var brandAndModelContent: some View {
         VStack(spacing: Spacing.formFieldSpacing) {
-            // Marque
             VStack(alignment: .leading) {
                 Text("Marque")
                     .font(Typography.subheadline)
@@ -158,7 +150,6 @@ struct AddVehicleMultiStepView: View {
                     .foregroundStyle(ColorTokens.textSecondary)
             }
 
-            // Modèle
             VStack(alignment: .leading) {
                 Text("Modèle")
                     .font(Typography.subheadline)
@@ -174,7 +165,6 @@ struct AddVehicleMultiStepView: View {
                     .foregroundStyle(ColorTokens.textSecondary)
             }
 
-            // Plaque d'immatriculation
             VStack(alignment: .leading) {
                 Text("Immatriculation")
                     .font(Typography.subheadline)
@@ -190,7 +180,6 @@ struct AddVehicleMultiStepView: View {
                     .foregroundStyle(ColorTokens.textSecondary)
             }
 
-            // Date de mise en circulation
             VStack(alignment: .leading) {
                 Text("Mise en circulation")
                     .font(Typography.subheadline)
@@ -212,7 +201,6 @@ struct AddVehicleMultiStepView: View {
 
     private var detailsContent: some View {
         VStack(alignment: .leading, spacing: Spacing.md) {
-            // Kilométrage
             VStack(alignment: .leading) {
                 Text("Kilométrage")
                     .font(Typography.subheadline)
@@ -234,7 +222,6 @@ struct AddVehicleMultiStepView: View {
                     .foregroundStyle(ColorTokens.textSecondary)
             }
 
-            // Véhicule principal
             VStack(alignment: .leading, spacing: Spacing.xs) {
                 Toggle(isOn: $store.isPrimary) {
                     VStack(alignment: .leading, spacing: Spacing.xxs) {

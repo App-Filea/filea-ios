@@ -68,23 +68,19 @@ struct AddDocumentMultiStepView: View {
         }
     }
 
-    // MARK: - Mode Choice View
 
     private var modeChoiceView: some View {
         VStack(spacing: Spacing.xxl) {
             Spacer()
                 .frame(height: Spacing.xl)
 
-            // Title
             Text("Comment créer votre document ?")
                 .font(Typography.largeTitle)
                 .foregroundStyle(ColorTokens.textPrimary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, Spacing.md)
 
-            // Options List
             VStack(spacing: Spacing.md) {
-                // Option 1: Camera Scan
                 modeOptionCard(
                     icon: "camera.viewfinder",
                     title: "Scanner avec la caméra",
@@ -92,7 +88,6 @@ struct AddDocumentMultiStepView: View {
                     action: { store.send(.view(.openCameraViewButtonTapped)) }
                 )
 
-                // Option 2: Import Photo
                 modeOptionCard(
                     icon: "photo.on.rectangle.angled",
                     title: "Importer une photo",
@@ -100,7 +95,6 @@ struct AddDocumentMultiStepView: View {
                     action: { store.send(.view(.openPhotoPickerButtonTapped)) }
                 )
 
-                // Option 3: Import File
                 modeOptionCard(
                     icon: "folder",
                     title: "Importer un fichier",
@@ -108,13 +102,6 @@ struct AddDocumentMultiStepView: View {
                     action: { store.send(.view(.openFileManagerButtonTapped)) }
                 )
 
-//                // Option 4: Manual Entry
-//                modeOptionCard(
-//                    icon: "square.and.pencil",
-//                    title: "Saisie manuelle",
-//                    subtitle: "Sans document à scanner",
-//                    action: { /* TODO: Handle manual entry */ }
-//                )
             }
             .padding(.horizontal, Spacing.md)
 
@@ -130,14 +117,12 @@ struct AddDocumentMultiStepView: View {
     ) -> some View {
         Button(action: action) {
             HStack(alignment: .center, spacing: Spacing.md) {
-                // Icon
                 Image(systemName: icon)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 32, height: 32)
                     .foregroundStyle(ColorTokens.actionPrimary)
 
-                // Text Content
                 VStack(alignment: .leading, spacing: Spacing.xxs) {
                     Text(title)
                         .font(Typography.title3)
@@ -164,7 +149,6 @@ struct AddDocumentMultiStepView: View {
     
     private var metadataFormView: some View {
         VStack(spacing: 0) {
-            // Header with navigation buttons
             HStack {
                 // Back button
                 Button(action: {
@@ -181,14 +165,12 @@ struct AddDocumentMultiStepView: View {
 
                 Spacer()
 
-                // Title
                 Text("Détails du document")
                     .font(Typography.headline)
                     .foregroundStyle(ColorTokens.textPrimary)
 
                 Spacer()
 
-                // Save button
                 Button("Enregistrer") {
                     store.send(.saveDocument)
                 }
@@ -199,24 +181,20 @@ struct AddDocumentMultiStepView: View {
             .padding(.vertical, Spacing.sm)
             .background(ColorTokens.background)
 
-            // Form content
             ScrollView {
                 VStack(spacing: Spacing.xl) {
-                    // Single section for all fields
                     VStack(alignment: .leading, spacing: Spacing.xs) {
                         Text("Informations du document")
                             .font(Typography.subheadline)
                             .foregroundStyle(ColorTokens.textPrimary)
 
                         VStack(spacing: Spacing.formFieldSpacing) {
-                            // Document name (required)
                             FormTextField(
                                 title: "Nom du document",
                                 text: $store.documentName,
                                 placeholder: "Ex: Facture révision"
                             )
 
-                            // Document date
                             FormDatePicker(
                                 title: "Date du document",
                                 date: $store.documentDate,
@@ -224,7 +202,6 @@ struct AddDocumentMultiStepView: View {
                                 dateRange: Date.distantPast...Date()
                             )
 
-                            // Mileage (optional)
                             FormTextField(
                                 title: "Kilométrage (optionnel)",
                                 text: $store.documentMileage,
@@ -232,7 +209,6 @@ struct AddDocumentMultiStepView: View {
                                 keyboardType: .numberPad
                             )
 
-                            // Amount (optional)
                             FormTextField(
                                 title: "Montant (optionnel)",
                                 text: $store.documentAmount,
@@ -253,8 +229,12 @@ struct AddDocumentMultiStepView: View {
     }
 }
 
-#Preview {
-        AddDocumentMultiStepView(store: Store(initialState: AddDocumentStore.State(vehicleId: UUID())) {
+#Preview("ModeChoice") {
+    AddDocumentMultiStepView(store: Store(initialState: AddDocumentStore.State.initialState(vehicleId: UUID())) {
             AddDocumentStore()
         })
+}
+
+#Preview("Metadata") {
+    AddDocumentMultiStepView(store: Store(initialState: AddDocumentStore.State.initialState(vehicleId: UUID(), viewState: .metadataForm), reducer: { AddDocumentStore() }))
 }

@@ -16,7 +16,7 @@ struct AddDocumentStore {
     @ObservableState
     struct State: Equatable {
         let vehicleId: UUID
-        var viewState: ViewState = .modeChoice
+        var viewState: ViewState
         var isLoading = false
         var showDocumentScanView = false
         var showPhotoPickerView = false
@@ -27,6 +27,10 @@ struct AddDocumentStore {
         var showValidationError = false
         @Shared(.vehicles) var vehicles: [Vehicle] = []
         @Shared(.selectedVehicle) var selectedVehicle: Vehicle?
+        
+        static func initialState(vehicleId: UUID, viewState: ViewState = .modeChoice) -> Self {
+            .init(vehicleId: vehicleId, viewState: viewState)
+        }
 
         // Document metadata
         var documentName: String = ""

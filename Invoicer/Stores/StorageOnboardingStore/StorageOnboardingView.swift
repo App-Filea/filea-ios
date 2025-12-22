@@ -26,13 +26,6 @@ struct StorageOnboardingView: View {
                     .foregroundStyle(Color.primary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)
-                    .padding(.bottom, 16)
-
-                Text("Vos documents seront stockés dans le dossier que vous sélectionnez.")
-                    .font(.body)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
                     .padding(.bottom, 40)
 
                 VStack(alignment: .leading, spacing: 24) {
@@ -192,7 +185,7 @@ struct ErrorMessageView: View {
 
 #Preview("Avec erreur") {
     StorageOnboardingView(
-        store: Store(initialState: StorageOnboardingStore.State(errorMessage: "Le dossier sélectionné n'est pas accessible.")) { StorageOnboardingStore() } )
+        store: Store(initialState: StorageOnboardingStore.State(currentError: .accessFailure)) { StorageOnboardingStore() } )
 }
 
 #Preview("Chargement") {

@@ -149,6 +149,7 @@ actor VehicleStorageManager {
                 logger.info("📁 Vehicles directory verified/created")
             } catch {
                 logger.error("❌ Failed to create vehicles directory during restore: \(error.localizedDescription)")
+                return .invalidAccess
                 // Continue anyway - it will be retried later if needed
             }
 

@@ -20,125 +20,21 @@ struct AddDocumentMultiStepView: View {
     }
 
     var body: some View {
-        ZStack {
+        ZStack(alignment: .topTrailing) {
             ColorTokens.surfaceSecondary
                 .ignoresSafeArea()
 
+            Button(action: { store.send(.view(.closeButtonTapped)) }) {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.title)
+                    .padding(.trailing)
+            }
+            
             switch store.viewState {
             case .modeChoice: modeChoiceView
             case .metadataForm: metadataFormView
             }
-
-            // MARK: - Old Multi-Step UI (Commented)
-            // VStack(spacing: Spacing.xl) {
-            //     // Header with navigation
-            //     VStack(spacing: Spacing.md) {
-            //         HStack {
-            //             Button("Retour", action: {
-            //                 if let previousStep = currentStep.previous {
-            //                     withAnimation(.easeInOut(duration: 0.3)) {
-            //                         currentStep = previousStep
-            //                     }
-            //                 } else {
-            //                     store.send(.cancelCreation)
-            //                 }
-            //             })
-            //             .foregroundStyle(ColorTokens.actionPrimary)
-            //
-            //             Spacer()
-            //
-            //             Text(currentStep.title)
-            //                 .font(Typography.title2)
-            //                 .foregroundStyle(ColorTokens.textPrimary)
-            //                 .multilineTextAlignment(.center)
-            //
-            //             Spacer()
-            //
-            //             Button(currentStep == .metadata ? "Enregistrer" : "Suivant", action: {
-            //                 // Validate current step
-            //                 let validation = currentStep.validate(
-            //                     hasSource: store.hasSourceSelected,
-            //                     name: store.documentName,
-            //                     mileage: store.documentMileage,
-            //                     amount: store.documentAmount
-            //                 )
-            //
-            //                 if !validation.isValid {
-            //                     store.send(.setShowValidationError(true))
-            //                     return
-            //                 }
-            //
-            //                 store.send(.setShowValidationError(false))
-            //
-            //                 if currentStep == .metadata {
-            //                     store.send(.saveDocument)
-            //                 } else {
-            //                     if let nextStep = currentStep.next {
-            //                         withAnimation(.easeInOut(duration: 0.3)) {
-            //                             currentStep = nextStep
-            //                         }
-            //                     }
-            //                 }
-            //             })
-            //             .foregroundStyle(ColorTokens.actionPrimary)
-            //             .disabled(store.isLoading)
-            //         }
-            //     }
-            //     .padding(.horizontal, Spacing.md)
-            //
-            //     Text(currentStep.subtitle)
-            //         .bodyDefaultRegular()
-            //         .foregroundStyle(ColorTokens.textSecondary)
-            //         .multilineTextAlignment(.center)
-            //         .fixedSize(horizontal: false, vertical: true)
-            //         .frame(height: 40, alignment: .top)
-            //         .padding(.horizontal, Spacing.md)
-            //
-            //     // Validation error
-            //     if store.showValidationError {
-            //         HStack(spacing: Spacing.xs) {
-            //             Image(systemName: "exclamationmark.triangle.fill")
-            //                 .foregroundStyle(ColorTokens.warning)
-            //             Text(currentStep.validate(
-            //                 hasSource: store.hasSourceSelected,
-            //                 name: store.documentName,
-            //                 mileage: store.documentMileage,
-            //                 amount: store.documentAmount
-            //             ).error ?? "")
-            //                 .font(Typography.caption1)
-            //                 .foregroundStyle(ColorTokens.textPrimary)
-            //         }
-            //         .padding(Spacing.sm)
-            //         .background(ColorTokens.warning.opacity(0.1))
-            //         .cornerRadius(Radius.sm)
-            //         .overlay(
-            //             RoundedRectangle(cornerRadius: Radius.sm)
-            //                 .stroke(ColorTokens.warning, lineWidth: 1)
-            //         )
-            //         .padding(.horizontal, Spacing.md)
-            //         .transition(.scale.combined(with: .opacity))
-            //     }
-            //
-            //     // Vertical scrolling step content with animations
-            //     ScrollView {
-            //         VStack(spacing: Spacing.lg) {
-            //             AddDocumentStepView(
-            //                 step: currentStep,
-            //                 store: store
-            //             )
-            //         }
-            //         .padding(.horizontal, Spacing.md)
-            //         .padding(.vertical, Spacing.lg)
-            //     }
-            //     .scrollDismissesKeyboard(.interactively)
-            //     .transition(.asymmetric(
-            //         insertion: .scale(scale: 0.95).combined(with: .opacity),
-            //         removal: .scale(scale: 1.05).combined(with: .opacity)
-            //     ))
-            //     .id(currentStep.id)
-            // }
         }
-        .navigationBarHidden(true)
         .quickLookPreview($previewURL)
         .fullScreenCover(isPresented: $store.showDocumentScanView) {
             DocumentScannerView(
@@ -147,7 +43,7 @@ struct AddDocumentMultiStepView: View {
                     let images = (0..<scan.pageCount).map { scan.imageOfPage(at: $0) }
                     store.send(.view(.documentScanned(images)))
                 },
-                onCancel: { },
+                onCancel: { store.send(.view(.cancelCameraViewButtonTapped)) },
                 onError: { _ in }
             )
             .ignoresSafeArea()
@@ -167,7 +63,7 @@ struct AddDocumentMultiStepView: View {
                 onFileSelected: { url in
                     store.send(.filePickedFromManager(url))
                 },
-                onCancel: { }
+                onCancel: { store.send(.view(.cancelFileManagerButtonTapped)) }
             )
         }
     }
@@ -358,7 +254,7 @@ struct AddDocumentMultiStepView: View {
 }
 
 #Preview {
-    AddDocumentMultiStepView(store: Store(initialState: AddDocumentStore.State(vehicleId: UUID())) {
-        AddDocumentStore()
-    })
+        AddDocumentMultiStepView(store: Store(initialState: AddDocumentStore.State(vehicleId: UUID())) {
+            AddDocumentStore()
+        })
 }

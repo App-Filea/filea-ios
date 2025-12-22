@@ -63,10 +63,14 @@ struct AddDocumentStore {
 
         enum ActionView: Equatable {
             case openCameraViewButtonTapped
+            case cancelCameraViewButtonTapped
             case openPhotoPickerButtonTapped
+            case cancelPhotoPickerButtonTapped
             case openFileManagerButtonTapped
+            case cancelFileManagerButtonTapped
             case documentScanned([UIImage])
             case backFromMetadataFormButtonTapped
+            case closeButtonTapped
         }
     }
 
@@ -110,15 +114,26 @@ struct AddDocumentStore {
                 switch actionView {
                 case .openCameraViewButtonTapped:
                     return .send(.openCameraScan)
+                case .cancelCameraViewButtonTapped:
+                    state.showDocumentScanView = false
+                    return .none
                 case .openPhotoPickerButtonTapped:
                     return .send(.openPhotoPicker)
+                case .cancelPhotoPickerButtonTapped:
+                    state.showPhotoPickerView = false
+                    return .none
                 case .openFileManagerButtonTapped:
                     return .send(.openFileManager)
+                case .cancelFileManagerButtonTapped:
+                    state.showFileManagerView = false
+                    return .none
                 case .documentScanned(let images):
                     return .send(.transformToPdf(images))
                 case .backFromMetadataFormButtonTapped:
                     state.viewState = .modeChoice
                     return .none
+                case .closeButtonTapped:
+                    return .send(.cancelCreation)
                 }
 
             case .openCameraScan:

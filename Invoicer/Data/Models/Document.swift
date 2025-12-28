@@ -8,26 +8,10 @@
 import Foundation
 
 enum DocumentType: String, Codable, CaseIterable, Identifiable, Hashable, CustomStringConvertible {
-    // Administratif
-    case carteGrise = "Carte grise"
-    case assurance = "Assurance"
-    case controleTechnique = "Contrôle technique"
-
-    // Entretien
-    case entretien = "Entretien"
-    case vidange = "Vidange"
-    case revision = "Révision"
-
-    // Réparation
-    case reparation = "Réparation"
-    case panne = "Panne"
-    case accident = "Accident"
-
-    // Autres dépenses
-    case carburant = "Carburant"
-    case achatPiece = "Achat de pièce"
-    case peage = "Péage/Parking"
-    case autre = "Autre"
+    case technicalInspection = "Contrôle technique"
+    case maintenance = "Entretien"
+    case repair = "Réparation"
+    case other = "Autre"
 
     var id: Self { self }
 
@@ -39,54 +23,11 @@ enum DocumentType: String, Codable, CaseIterable, Identifiable, Hashable, Custom
 
     var imageName: String {
         switch self {
-        // Administratif
-        case .carteGrise: "menucard.fill"
-        case .assurance: "shield.fill"
-        case .controleTechnique: "checkmark.seal.fill"
-
-        // Entretien
-        case .entretien: "wrench.fill"
-        case .vidange: "drop.fill"
-        case .revision: "checklist"
-
-        // Réparation
-        case .reparation: "wrench.and.screwdriver.fill"
-        case .panne: "exclamationmark.triangle.fill"
-        case .accident: "car.side.fill"
-
-        // Autres dépenses
-        case .carburant: "fuelpump.fill"
-        case .achatPiece: "cart.fill"
-        case .peage: "road.lanes"
-        case .autre: "doc.fill"
+        case .technicalInspection: "checkmark.seal.fill"
+        case .maintenance: "wrench.fill"
+        case .repair: "wrench.and.screwdriver.fill"
+        case .other: "doc.fill"
         }
-    }
-
-    var category: DocumentCategory {
-        switch self {
-        case .carteGrise, .assurance, .controleTechnique:
-            return .administratif
-        case .entretien, .vidange, .revision:
-            return .entretien
-        case .reparation, .panne, .accident:
-            return .reparation
-        case .carburant:
-            return .carburant
-        case .achatPiece, .peage, .autre:
-            return .autres
-        }
-    }
-}
-
-enum DocumentCategory: String, CaseIterable {
-    case administratif = "Administratif"
-    case entretien = "Entretien"
-    case reparation = "Réparation"
-    case carburant = "Carburant"
-    case autres = "Autres"
-
-    var displayName: String {
-        return self.rawValue
     }
 }
 

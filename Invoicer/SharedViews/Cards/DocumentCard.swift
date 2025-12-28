@@ -115,7 +115,7 @@ struct DocumentCard: View {
                 name: "Vidange moteur",
                 date: Date(),
                 mileage: "45000",
-                type: .vidange,
+                type: .maintenance,
                 amount: 89.99
             ),
             action: {}
@@ -129,7 +129,7 @@ struct DocumentCard: View {
                 name: "Assurance auto",
                 date: Date().addingDays(-30) ?? Date(),
                 mileage: "44500",
-                type: .assurance,
+                type: .other,
                 amount: nil
             ),
             action: {}

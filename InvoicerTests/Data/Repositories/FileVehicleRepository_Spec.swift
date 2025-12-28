@@ -195,7 +195,7 @@ final class FileVehicleRepository_Spec: XCTestCase {
                 name: "Orphaned Doc",
                 date: Date(),
                 mileage: "0",
-                type: .assurance
+                type: .other
             )
         ]
 

@@ -228,7 +228,7 @@ struct MainView: View {
                         registrationDate: Date(timeIntervalSince1970: 1322784000),
                         plate: "BZ-029-YV",
                         documents: [
-                            .init(fileURL: "", name: "Vidange", date: .now, mileage: "100000", type: .entretien)
+                            .init(fileURL: "", name: "Vidange", date: .now, mileage: "100000", type: .maintenance)
                         ]
                     ))
                 ),

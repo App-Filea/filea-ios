@@ -152,7 +152,7 @@ final class DefaultStatisticsRepository: @unchecked Sendable {
         logger.info("📊 Regroupement par catégorie de \(documents.count) documents")
         
         let grouped = Dictionary(grouping: documents) { document in
-            mapToStatisticsCategory(document.type.category)
+            mapToStatisticsCategory(document.type)
         }
         
         logger.info("📂 \(grouped.keys.count) catégories trouvées")
@@ -174,17 +174,15 @@ final class DefaultStatisticsRepository: @unchecked Sendable {
     
     // MARK: - Private Helpers
     
-    private func mapToStatisticsCategory(_ category: DocumentCategory) -> StatisticsDocumentCategory {
-        switch category {
-        case .administratif:
+    private func mapToStatisticsCategory(_ type: DocumentType) -> StatisticsDocumentCategory {
+        switch type {
+        case .technicalInspection:
             return .administrative
-        case .entretien:
+        case .maintenance:
             return .maintenance
-        case .reparation:
+        case .repair:
             return .repair
-        case .carburant:
-            return .fuel
-        case .autres:
+        case .other:
             return .other
         }
     }

@@ -150,7 +150,6 @@ struct AddDocumentMultiStepView: View {
     private var metadataFormView: some View {
         VStack(spacing: 0) {
             HStack {
-                // Back button
                 Button(action: {
                     store.send(.view(.backFromMetadataFormButtonTapped))
                 }) {
@@ -184,41 +183,115 @@ struct AddDocumentMultiStepView: View {
             ScrollView {
                 VStack(spacing: Spacing.xl) {
                     VStack(alignment: .leading, spacing: Spacing.xs) {
-                        Text("Informations du document")
-                            .font(Typography.subheadline)
-                            .foregroundStyle(ColorTokens.textPrimary)
+                        VStack(spacing: Spacing.md) {
+                            VStack(alignment: .leading, spacing: Spacing.xs) {
+                                Text("Type de document")
+                                    .font(Typography.subheadline)
+                                    .foregroundStyle(ColorTokens.textPrimary)
 
-                        VStack(spacing: Spacing.formFieldSpacing) {
-                            FormTextField(
-                                title: "Nom du document",
-                                text: $store.documentName,
-                                placeholder: "Ex: Facture révision"
-                            )
+                                HStack {
+                                    Text("Type")
+                                        .foregroundStyle(ColorTokens.textPrimary)
 
-                            FormDatePicker(
-                                title: "Date du document",
-                                date: $store.documentDate,
-                                displayedComponents: [.date],
-                                dateRange: Date.distantPast...Date()
-                            )
+                                    Spacer()
 
-                            FormTextField(
-                                title: "Kilométrage (optionnel)",
-                                text: $store.documentMileage,
-                                placeholder: "120000",
-                                keyboardType: .numberPad
-                            )
+                                    Picker("Type", selection: $store.documentType) {
+                                        ForEach(DocumentType.allCases) { type in
+                                            Text(type.displayName)
+                                                .tag(type)
+                                        }
+                                    }
+                                    .pickerStyle(.menu)
+                                    .labelsHidden()
+                                }
+                                .padding(Spacing.screenMargin)
+                                .background(ColorTokens.surfaceDim)
+                                .cornerRadius(Radius.textField, corners: .allCorners)
+                            }
 
-                            FormTextField(
-                                title: "Montant (optionnel)",
-                                text: $store.documentAmount,
-                                placeholder: "150.00",
-                                keyboardType: .decimalPad
-                            )
+                            VStack(alignment: .leading) {
+                                Text("Nom du document")
+                                    .font(Typography.subheadline)
+                                    .foregroundStyle(ColorTokens.textPrimary)
+
+                                TextField("Ex: Facture révision", text: $store.documentName)
+                                    .textInputAutocapitalization(.sentences)
+                                    .submitLabel(.done)
+                                    .padding(Spacing.screenMargin)
+                                    .background(ColorTokens.surfaceDim)
+                                    .cornerRadius(Radius.textField, corners: .allCorners)
+
+                                Label("Nom descriptif du document", systemImage: "info.circle")
+                                    .font(Typography.footnote)
+                                    .foregroundStyle(ColorTokens.textSecondary)
+                            }
+
+                            VStack(alignment: .leading, spacing: Spacing.xs) {
+                                Text("Date du document")
+                                    .font(Typography.subheadline)
+                                    .foregroundStyle(ColorTokens.textPrimary)
+
+                                HStack {
+                                    Text("Date")
+                                        .foregroundStyle(ColorTokens.textPrimary)
+
+                                    Spacer()
+
+                                    DatePicker("Date", selection: $store.documentDate, in: Date.distantPast...Date(), displayedComponents: [.date])
+                                        .datePickerStyle(.compact)
+                                        .labelsHidden()
+                                }
+                                .padding(Spacing.screenMargin)
+                                .background(ColorTokens.surfaceDim)
+                                .cornerRadius(Radius.textField, corners: .allCorners)
+
+                                Label("Date d'émission du document", systemImage: "info.circle")
+                                    .font(Typography.footnote)
+                                    .foregroundStyle(ColorTokens.textSecondary)
+                            }
+
+                            VStack(alignment: .leading) {
+                                Text("Kilométrage (optionnel)")
+                                    .font(Typography.subheadline)
+                                    .foregroundStyle(ColorTokens.textPrimary)
+
+                                HStack {
+                                    TextField("120000", text: $store.documentMileage)
+                                        .keyboardType(.numberPad)
+
+                                    Text("km")
+                                        .foregroundStyle(ColorTokens.textSecondary)
+                                }
+                                .padding(Spacing.screenMargin)
+                                .background(ColorTokens.surfaceDim)
+                                .cornerRadius(Radius.textField, corners: .allCorners)
+
+                                Label("Kilométrage au moment du document", systemImage: "info.circle")
+                                    .font(Typography.footnote)
+                                    .foregroundStyle(ColorTokens.textSecondary)
+                            }
+
+                            VStack(alignment: .leading) {
+                                Text("Montant (optionnel)")
+                                    .font(Typography.subheadline)
+                                    .foregroundStyle(ColorTokens.textPrimary)
+
+                                HStack {
+                                    TextField("150.00", text: $store.documentAmount)
+                                        .keyboardType(.decimalPad)
+
+                                    Text("€")
+                                        .foregroundStyle(ColorTokens.textSecondary)
+                                }
+                                .padding(Spacing.screenMargin)
+                                .background(ColorTokens.surfaceDim)
+                                .cornerRadius(Radius.textField, corners: .allCorners)
+
+                                Label("Montant TTC du document", systemImage: "info.circle")
+                                    .font(Typography.footnote)
+                                    .foregroundStyle(ColorTokens.textSecondary)
+                            }
                         }
-                        .padding(Spacing.cardPadding)
-                        .background(ColorTokens.surfaceElevated)
-                        .cornerRadius(Radius.xl)
                     }
                     .padding(.horizontal, Spacing.md)
                 }

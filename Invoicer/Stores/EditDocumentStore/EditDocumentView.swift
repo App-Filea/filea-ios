@@ -61,16 +61,9 @@ struct EditDocumentView: View {
                             get: { store.type },
                             set: { store.send(.updateType($0)) }
                         )) {
-                            ForEach(DocumentCategory.allCases, id: \.self) { category in
-                                Section(category.displayName) {
-                                    ForEach(DocumentType.allCases.filter { $0.category == category }, id: \.self) { type in
-                                        HStack {
-                                            Image(systemName: type.imageName)
-                                            Text(type.displayName)
-                                        }
-                                        .tag(type)
-                                    }
-                                }
+                            ForEach(DocumentType.allCases) { type in
+                                Label(type.displayName, systemImage: type.imageName)
+                                    .tag(type)
                             }
                         }
                         .pickerStyle(.menu)
@@ -129,7 +122,7 @@ struct EditDocumentView: View {
             name: "Test Document",
             date: Date(),
             mileage: "50000",
-            type: .entretien
+            type: .maintenance
         )
     )) {
         EditDocumentStore()

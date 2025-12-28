@@ -152,7 +152,7 @@ extension VehicleType {
                     name: "Doc",
                     date: Date(),
                     mileage: "1000",
-                    type: .entretien
+                    type: .maintenance
                 ), count: 12)
             ),
             isSelected: false,

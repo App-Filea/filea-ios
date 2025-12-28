@@ -36,7 +36,7 @@ struct AddDocumentStore {
         var documentName: String = ""
         var documentDate: Date = Date()
         var documentMileage: String = ""
-        var documentType: DocumentType = .entretien
+        var documentType: DocumentType = .maintenance
         var documentAmount: String = ""
 
         enum ViewState: Equatable {

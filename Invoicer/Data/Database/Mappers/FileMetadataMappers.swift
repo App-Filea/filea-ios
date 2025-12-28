@@ -72,7 +72,7 @@ extension FileMetadataRecord {
             name: documentName,
             date: date,
             mileage: mileage,
-            type: DocumentType(rawValue: documentType) ?? .autre,
+            type: DocumentType(rawValue: documentType) ?? .other,
             amount: amount
         )
     }
@@ -119,7 +119,7 @@ extension FileMetadataDTO {
             name: documentName,
             date: date,
             mileage: mileage,
-            type: DocumentType(rawValue: documentType) ?? .autre,
+            type: DocumentType(rawValue: documentType) ?? .other,
             amount: amount
         )
     }

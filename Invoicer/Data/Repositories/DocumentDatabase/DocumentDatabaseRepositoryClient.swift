@@ -79,7 +79,7 @@ extension DocumentDatabaseRepositoryClient: DependencyKey {
                     name: "Vidange",
                     date: Date(),
                     mileage: "15000",
-                    type: .entretien,
+                    type: .maintenance,
                     amount: 80.0
                 ),
                 Document(
@@ -87,7 +87,7 @@ extension DocumentDatabaseRepositoryClient: DependencyKey {
                     name: "Assurance",
                     date: Date(),
                     mileage: "15500",
-                    type: .assurance,
+                    type: .other,
                     amount: 350.0
                 )
             ]
@@ -98,7 +98,7 @@ extension DocumentDatabaseRepositoryClient: DependencyKey {
                 name: "Vidange",
                 date: Date(),
                 mileage: "15000",
-                type: .entretien,
+                type: .maintenance,
                 amount: 80.0
             )
         },

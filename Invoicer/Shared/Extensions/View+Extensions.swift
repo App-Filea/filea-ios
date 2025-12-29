@@ -242,3 +242,15 @@ extension View {
         }
     }
 }
+
+extension View {
+    func fieldCard() -> some View {
+        self
+            .background(Color(.systemBackground))
+            .cornerRadius(16)
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(Color(.separator), lineWidth: 1)
+            )
+    }
+}

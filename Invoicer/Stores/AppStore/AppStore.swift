@@ -171,7 +171,7 @@ struct AppStore {
                 case .element(id: _, action: .main(.showDocumentDetail(let document))):
                     if case .main(let mainState) = state.path.last,
                        let currentVehicle = mainState.currentVehicle {
-                        state.path.append(.documentDetail(DocumentDetailCoordinatorStore.State(vehicleId: currentVehicle.id, documentId: document.id)))
+                        state.path.append(.documentDetail(DocumentDetailStore.State(viewState: .loading, vehicleId: currentVehicle.id, documentId: document.id)))
                     }
                     return .none
 
@@ -215,7 +215,7 @@ struct AppStore {
             case main(MainStore.State)
             case vehicleDetails(VehicleDetailsStore.State)
             case editVehicle(EditVehicleStore.State)
-            case documentDetail(DocumentDetailCoordinatorStore.State)
+            case documentDetail(DocumentDetailStore.State)
             case editDocument(EditDocumentStore.State)
             case settings(SettingsStore.State)
         }
@@ -225,7 +225,7 @@ struct AppStore {
             case main(MainStore.Action)
             case vehicleDetails(VehicleDetailsStore.Action)
             case editVehicle(EditVehicleStore.Action)
-            case documentDetail(DocumentDetailCoordinatorStore.Action)
+            case documentDetail(DocumentDetailStore.Action)
             case editDocument(EditDocumentStore.Action)
             case settings(SettingsStore.Action)
         }
@@ -234,7 +234,7 @@ struct AppStore {
             Scope(state: \.main, action: \.main) { MainStore() }
             Scope(state: \.vehicleDetails, action: \.vehicleDetails) { VehicleDetailsStore() }
             Scope(state: \.editVehicle, action: \.editVehicle) { EditVehicleStore() }
-            Scope(state: \.documentDetail, action: \.documentDetail) { DocumentDetailCoordinatorStore() }
+            Scope(state: \.documentDetail, action: \.documentDetail) { DocumentDetailStore() }
             Scope(state: \.editDocument, action: \.editDocument) { EditDocumentStore() }
             Scope(state: \.settings, action: \.settings) { SettingsStore() }
         }

@@ -41,7 +41,7 @@ struct AppView: View {
                 }
             case .documentDetail:
                 if let store = store.scope(state: \.documentDetail, action: \.documentDetail) {
-                    DocumentDetailCoordinatorView(store: store)
+                    DocumentDetailView(store: store)
                 }
             case .editDocument:
                 if let store = store.scope(state: \.editDocument, action: \.editDocument) {

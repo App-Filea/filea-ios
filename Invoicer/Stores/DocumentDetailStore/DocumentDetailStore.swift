@@ -11,27 +11,26 @@ import SwiftUI
 
 @Reducer
 struct DocumentDetailStore {
+    
+    enum ViewState: Equatable {
+        case loading
+        case document(Document)
+    }
+    
     @ObservableState
     struct State: Equatable {
+        var viewState: ViewState
         let vehicleId: UUID
         let documentId: UUID
-        var document: Document?
-        var image: UIImage?
-        var isLoading = false
-        var showCamera = false
         @Shared(.vehicles) var vehicles: [Vehicle] = []
         @Shared(.selectedVehicle) var selectedVehicle: Vehicle?
     }
     
     enum Action: Equatable {
         case loadDocument
-        case documentLoaded(Document?)
+        case documentLoaded(Document)
         case loadImage
         case imageLoaded(UIImage?)
-        case showCamera
-        case hideCamera
-        case imageCapture(UIImage?)
-        case photoReplaced
         case deleteDocument
         case documentDeleted
         case goBack
@@ -53,111 +52,69 @@ struct DocumentDetailStore {
                             await send(.documentLoaded(document))
                         } else {
                             print("❌ [DocumentDetailStore] Document non trouvé avec ID: \(documentId)")
-                            await send(.documentLoaded(nil))
+//                            await send(.documentLoaded(nil))
                         }
                     } catch {
                         print("❌ [DocumentDetailStore] Erreur lors du chargement: \(error.localizedDescription)")
-                        await send(.documentLoaded(nil))
+//                        await send(.documentLoaded(nil))
                     }
                 }
                 
             case .documentLoaded(let document):
-                state.document = document
-                if let doc = document {
-                    print("📄 [DocumentDetailStore] Document chargé, début du chargement de l'image")
-                    return .run { send in
-                        await send(.loadImage)
-                    }
-                } else {
-                    print("⚠️ [DocumentDetailStore] Aucun document chargé")
-                }
+                state.viewState = .document(document)
+//                if let doc = document {
+//                    print("📄 [DocumentDetailStore] Document chargé, début du chargement de l'image")
+//                    return .run { send in
+//                        await send(.loadImage)
+//                    }
+//                } else {
+//                    print("⚠️ [DocumentDetailStore] Aucun document chargé")
+//                }
                 return .none
                 
             case .loadImage:
-                guard let document = state.document else {
-                    print("❌ [DocumentDetailStore] Impossible de charger l'image - aucun document")
-                    return .none
-                }
-                print("🔄 [DocumentDetailStore] Début du chargement de l'image: \(document.fileURL)")
-                state.isLoading = true
-                return .run { [fileURL = document.fileURL] send in
-                    let image = await loadImageFromFile(fileURL)
-                    await send(.imageLoaded(image))
-                }
+//                guard let document = state.document else {
+//                    print("❌ [DocumentDetailStore] Impossible de charger l'image - aucun document")
+//                    return .none
+//                }
+//                print("🔄 [DocumentDetailStore] Début du chargement de l'image: \(document.fileURL)")
+//                state.isLoading = true
+//                return .run { [fileURL = document.fileURL] send in
+//                    let image = await loadImageFromFile(fileURL)
+//                    await send(.imageLoaded(image))
+//                }
+                return .none
                 
             case .imageLoaded(let image):
-                if image != nil {
-                    print("✅ [DocumentDetailStore] Image chargée avec succès")
-                } else {
-                    print("❌ [DocumentDetailStore] Échec du chargement de l'image")
-                }
-                state.image = image
-                state.isLoading = false
+//                if image != nil {
+//                    print("✅ [DocumentDetailStore] Image chargée avec succès")
+//                } else {
+//                    print("❌ [DocumentDetailStore] Échec du chargement de l'image")
+//                }
+//                state.image = image
+//                state.isLoading = false
                 return .none
-                
-            case .showCamera:
-                print("📷 [DocumentDetailStore] Ouverture de la caméra")
-                state.showCamera = true
-                return .none
-                
-            case .hideCamera:
-                print("🚫 [DocumentDetailStore] Fermeture de la caméra (appelé automatiquement par SwiftUI)")
-                state.showCamera = false
-                return .none
-                
-            case .imageCapture(let image):
-                if let capturedImage = image {
-                    print("✅ [DocumentDetailStore] Photo acceptée, remplacement direct en cours...")
-                    print("🔍 [DocumentDetailStore] Taille de la nouvelle image: \(capturedImage.size)")
-                    
-                    // Remplacer directement sans prévisualisation
-                    state.isLoading = true
-                    state.showCamera = false
-                    
-                    return .run { [vehicleId = state.vehicleId, documentId = state.documentId] send in
-                        do {
-                            try await documentRepository.replacePhoto(documentId, for: vehicleId, with: capturedImage)
-                            await send(.photoReplaced)
-                        } catch {
-                            print("❌ [DocumentDetailStore] Erreur lors du remplacement: \(error.localizedDescription)")
-                            await send(.photoReplaced)
-                        }
-                    }
-                } else {
-                    print("❌ [DocumentDetailStore] Photo annulée avec le bouton 'Annuler' dans l'interface iOS")
-                }
-                state.showCamera = false
-                return .none
-                
-            case .photoReplaced:
-                print("✅ [DocumentDetailStore] Photo remplacée avec succès, rechargement du document")
-                state.isLoading = false
-                // Clear the current image to force reload
-                state.image = nil
-                return .run { send in
-                    await send(.loadDocument)
-                }
                 
             case .deleteDocument:
-                guard let document = state.document else {
-                    print("❌ [DocumentDetailStore] Impossible de supprimer - aucun document")
-                    return .none
-                }
-                print("🗑️ [DocumentDetailStore] Début de la suppression du document: \(state.documentId)")
-                state.isLoading = true
-                return .run { [vehicleId = state.vehicleId, documentId = state.documentId] send in
-                    do {
-                        try await documentRepository.delete(documentId, for: vehicleId)
-                        await send(.documentDeleted)
-                    } catch {
-                        print("❌ [DocumentDetailStore] Erreur lors de la suppression: \(error.localizedDescription)")
-                        await send(.documentDeleted)
-                    }
-                }
+//                guard let document = state.document else {
+//                    print("❌ [DocumentDetailStore] Impossible de supprimer - aucun document")
+//                    return .none
+//                }
+//                print("🗑️ [DocumentDetailStore] Début de la suppression du document: \(state.documentId)")
+//                state.isLoading = true
+//                return .run { [vehicleId = state.vehicleId, documentId = state.documentId] send in
+//                    do {
+//                        try await documentRepository.delete(documentId, for: vehicleId)
+//                        await send(.documentDeleted)
+//                    } catch {
+//                        print("❌ [DocumentDetailStore] Erreur lors de la suppression: \(error.localizedDescription)")
+//                        await send(.documentDeleted)
+//                    }
+//                }
+                return .none
                 
             case .documentDeleted:
                 print("✅ [DocumentDetailStore] Document supprimé avec succès")
-                state.isLoading = false
                 // Recharger le véhicule pour mettre à jour la liste des documents
                 return .run { [vehicleId = state.vehicleId, vehicles = state.$vehicles, selectedVehicle = state.$selectedVehicle] send in
                     do {

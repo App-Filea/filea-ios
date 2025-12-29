@@ -35,11 +35,12 @@ struct DocumentDetailStore {
         case documentDeleted
         case editDocumentButtonTapped
         case showEditDocument(UUID, Document)
-        case goBack
+        case dismiss
     }
     
     @Dependency(\.vehicleRepository) var vehicleRepository
     @Dependency(\.documentRepository) var documentRepository
+    @Dependency(\.dismiss) var dismiss
     
     var body: some ReducerOf<Self> {
         Reduce { state, action in
@@ -98,21 +99,20 @@ struct DocumentDetailStore {
                 return .none
                 
             case .deleteDocument:
-//                guard let document = state.document else {
-//                    print("❌ [DocumentDetailStore] Impossible de supprimer - aucun document")
-//                    return .none
-//                }
-//                print("🗑️ [DocumentDetailStore] Début de la suppression du document: \(state.documentId)")
-//                state.isLoading = true
-//                return .run { [vehicleId = state.vehicleId, documentId = state.documentId] send in
-//                    do {
-//                        try await documentRepository.delete(documentId, for: vehicleId)
-//                        await send(.documentDeleted)
-//                    } catch {
-//                        print("❌ [DocumentDetailStore] Erreur lors de la suppression: \(error.localizedDescription)")
-//                        await send(.documentDeleted)
-//                    }
-//                }
+                guard case let .document(document) = state.viewState else {
+                    print("❌ [DocumentDetailStore] Impossible de supprimer - aucun document")
+                    return .none
+                }
+                print("🗑️ [DocumentDetailStore] Début de la suppression du document: \(state.documentId)")
+                return .run { [vehicleId = state.vehicleId, documentId = state.documentId] send in
+                    do {
+                        try await documentRepository.delete(documentId, for: vehicleId)
+                        await send(.documentDeleted)
+                    } catch {
+                        print("❌ [DocumentDetailStore] Erreur lors de la suppression: \(error.localizedDescription)")
+                        await send(.documentDeleted)
+                    }
+                }
                 return .none
                 
             case .documentDeleted:
@@ -135,15 +135,13 @@ struct DocumentDetailStore {
                                 }
                             }
                         }
+                        await send(.dismiss)
                     } catch {
                         print("❌ [DocumentDetailStore] Erreur lors du rechargement du véhicule: \(error.localizedDescription)")
                     }
-                    await send(.goBack)
                 }
                 
-            case .goBack:
-                print("🔙 [DocumentDetailStore] Retour à la vue précédente")
-                return .none
+            case .dismiss: return .run { _ in await self.dismiss() }
                 
             case .editDocumentButtonTapped:
                 guard case let .document(document) = state.viewState else { return .none }

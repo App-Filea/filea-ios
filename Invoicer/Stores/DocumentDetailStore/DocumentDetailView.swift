@@ -39,7 +39,7 @@ struct DocumentDetailView: View {
             }
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
-                    Button(action: {}) {
+                    Button(action: { store.send(.deleteDocument) }) {
                         Image(systemName: "trash.fill")
                             .foregroundStyle(.black)
                     }

@@ -33,6 +33,8 @@ struct DocumentDetailStore {
         case imageLoaded(UIImage?)
         case deleteDocument
         case documentDeleted
+        case editDocumentButtonTapped
+        case showEditDocument(UUID, Document)
         case goBack
     }
     
@@ -142,6 +144,11 @@ struct DocumentDetailStore {
             case .goBack:
                 print("🔙 [DocumentDetailStore] Retour à la vue précédente")
                 return .none
+                
+            case .editDocumentButtonTapped:
+                guard case let .document(document) = state.viewState else { return .none }
+                return .send(.showEditDocument(state.vehicleId, document))
+            default: return .none
             }
         }
     }

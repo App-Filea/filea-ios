@@ -18,6 +18,7 @@ struct EditDocumentStore {
         var originalDocument: Document
         var isLoading = false
         @Shared(.vehicles) var vehicles: [Vehicle] = []
+        @Shared(.selectedVehicle) var selectedVehicle: Vehicle?
         
         // Editing fields
         var name: String
@@ -38,27 +39,10 @@ struct EditDocumentStore {
             self.type = document.type
             self.amount = document.amount.map { String($0) } ?? ""
         }
-
-        var hasChanges: Bool {
-            let amountDouble = Double(amount.replacingOccurrences(of: ",", with: "."))
-            return name != originalDocument.name ||
-                   date != originalDocument.date ||
-                   mileage != originalDocument.mileage ||
-                   type != originalDocument.type ||
-                   amountDouble != originalDocument.amount
-        }
-        
-        var canSave: Bool {
-            return !name.isEmpty && hasChanges && !isLoading
-        }
     }
     
-    enum Action: Equatable {
-        case updateName(String)
-        case updateDate(Date)
-        case updateMileage(String)
-        case updateType(DocumentType)
-        case updateAmount(String)
+    enum Action: Equatable, BindableAction {
+        case binding(BindingAction<State>)
         case save
         case cancel
         case documentSaved
@@ -70,34 +54,10 @@ struct EditDocumentStore {
     @Dependency(\.dismiss) var dismiss
     
     var body: some ReducerOf<Self> {
+        BindingReducer()
         Reduce { state, action in
             switch action {
-            case .updateName(let name):
-                state.name = name
-                return .none
-                
-            case .updateDate(let date):
-                state.date = date
-                return .none
-                
-            case .updateMileage(let mileage):
-                state.mileage = mileage
-                return .none
-                
-            case .updateType(let type):
-                state.type = type
-                return .none
-
-            case .updateAmount(let amount):
-                state.amount = amount
-                return .none
-
             case .save:
-                guard state.canSave else { return .none }
-
-                state.isLoading = true
-
-                // Create updated document
                 var updatedDocument = state.originalDocument
                 updatedDocument.name = state.name
                 updatedDocument.date = state.date
@@ -123,7 +83,7 @@ struct EditDocumentStore {
             case .documentSaved:
                 state.isLoading = false
                 // Recharger le véhicule pour mettre à jour la liste des documents dans @Shared
-                return .run { [vehicleId = state.vehicleId, vehicles = state.$vehicles] send in
+                return .run { [vehicleId = state.vehicleId, vehicles = state.$vehicles, selectedVehicle = state.$selectedVehicle] send in
                     do {
                         if let updatedVehicle = try await vehicleRepository.getVehicle(vehicleId) {
                             await vehicles.withLock { vehicles in
@@ -131,6 +91,7 @@ struct EditDocumentStore {
                                     vehicles[index] = updatedVehicle
                                 }
                             }
+                            await selectedVehicle.withLock { $0 = updatedVehicle }
                         }
                     } catch {
                         print("❌ [EditDocumentStore] Erreur lors du rechargement du véhicule: \(error.localizedDescription)")
@@ -141,6 +102,8 @@ struct EditDocumentStore {
             case .documentSaveFailed:
                 state.isLoading = false
                 return .none
+                
+            default: return .none
             }
         }
     }

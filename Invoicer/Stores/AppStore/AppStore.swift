@@ -178,6 +178,10 @@ struct AppStore {
                 case .element(id: _, action: .vehicleDetails(.vehicleDeleted)):
                     return .send(.vehicleListChanged)
 
+                case .element(id: _, action: .documentDetail(.showEditDocument(let vehicleId, let document))):
+                    state.path.append(.editDocument(.init(vehicleId: vehicleId, document: document)))
+                    return .none
+                    
                 default: return .none
                 }
                 

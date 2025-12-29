@@ -113,7 +113,7 @@ struct DocumentDetailView: View {
                     .cornerRadius(14)
                 }
                 
-                Button(action: {}) {
+                Button(action: { store.send(.editDocumentButtonTapped) }) {
                     HStack(spacing: 8) {
                         Image(systemName: "square.and.pencil")
                             .font(.system(size: 18, weight: .semibold))

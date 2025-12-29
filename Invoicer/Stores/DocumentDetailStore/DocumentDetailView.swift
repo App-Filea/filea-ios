@@ -10,6 +10,7 @@ import ComposableArchitecture
 
 struct DocumentDetailView: View {
     @Bindable var store: StoreOf<DocumentDetailStore>
+    @State private var selectedDocumentURL: URL?
 
     var body: some View {
         GeometryReader { geometry in
@@ -45,6 +46,7 @@ struct DocumentDetailView: View {
                 }
             }
         }
+        .quickLookPreview($selectedDocumentURL)
     }
 
     private func documentView(_ document: Document) -> some View {
@@ -95,7 +97,9 @@ struct DocumentDetailView: View {
             Spacer()
             
             VStack {
-                Button(action: {}) {
+                Button(action: {
+                    selectedDocumentURL = URL(fileURLWithPath: document.fileURL)
+                }) {
                     HStack(spacing: 8) {
                         Image(systemName: "text.document")
                             .font(.system(size: 18, weight: .semibold))

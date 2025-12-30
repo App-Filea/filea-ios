@@ -30,20 +30,20 @@ struct DocumentDetailView: View {
                     case .document(let document):
                         documentView(document)
                             .frame(minWidth: geometry.size.width, minHeight: geometry.size.height)
+                            .toolbar {
+                                ToolbarItem(placement: .primaryAction) {
+                                    Button(action: { store.send(.deleteDocument) }) {
+                                        Image(systemName: "trash.fill")
+                                            .foregroundStyle(.black)
+                                    }
+                                }
+                            }
                     }
                 }
                 .scrollBounceBehavior(.basedOnSize)
             }
             .onAppear {
                 store.send(.loadDocument)
-            }
-            .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    Button(action: { store.send(.deleteDocument) }) {
-                        Image(systemName: "trash.fill")
-                            .foregroundStyle(.black)
-                    }
-                }
             }
         }
         .quickLookPreview($selectedDocumentURL)
@@ -55,10 +55,10 @@ struct DocumentDetailView: View {
                 ZStack {
                     RoundedRectangle(cornerRadius: 16)
                         .fill(.black)
-                        .frame(width: 56, height: 56)
+                        .frame(width: 80, height: 80)
                     
                     Image(systemName: document.type.imageName)
-                        .font(.system(size: 24))
+                        .font(.system(size: 36))
                         .foregroundColor(.white)
                 }
                 
@@ -75,19 +75,19 @@ struct DocumentDetailView: View {
             }
             
             VStack(spacing: 12) {
-                MetricCard2(
+                DetailCard(
                     icon: "eurosign",
                     label: "Montant",
                     value: document.amount?.asCurrencyStringNoDecimals ?? "-- €"
                 )
                 
-                MetricCard2(
+                DetailCard(
                     icon: "gauge.open.with.lines.needle.33percent",
                     label: "Kilométrage",
                     value: document.mileage.isEmpty ? "-- km" : document.mileage.asFormattedMileage
                 )
                 
-                MetricCard2(
+                DetailCard(
                     icon: "calendar",
                     label: "Date",
                     value: document.date.shortDateString
@@ -167,47 +167,5 @@ struct DocumentDetailView: View {
         ) {
             DocumentDetailStore()
         })
-    }
-}
-
-// MARK: - Metric Card Component
-struct MetricCard2: View {
-    let icon: String
-    let label: String
-    let value: String
-    var valueSize: CGFloat = 28
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack(alignment: .center, spacing: 12) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(Color(.systemGray6))
-                        .frame(width: 36, height: 36)
-                    
-                    Image(systemName: icon)
-                        .font(.system(size: 18))
-                        .foregroundColor(.secondary)
-                }
-                
-                Text(label)
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(.secondary)
-
-                
-                Spacer()
-            }
-            
-            Text(value)
-                .font(.system(size: valueSize, weight: .bold))
-                .foregroundColor(.primary)
-        }
-        .padding(16)
-        .background(Color(.systemBackground))
-        .cornerRadius(16)
-        .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(Color(.separator), lineWidth: 1)
-        )
     }
 }

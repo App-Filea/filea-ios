@@ -148,156 +148,137 @@ struct AddDocumentMultiStepView: View {
     }
     
     private var metadataFormView: some View {
-        VStack(spacing: 0) {
-            HStack {
-                Button(action: {
-                    store.send(.view(.backFromMetadataFormButtonTapped))
-                }) {
-                    HStack(spacing: Spacing.xs) {
-                        Image(systemName: "chevron.left")
-                            .font(.body)
-                        Text("Retour")
-                            .font(Typography.body)
-                    }
-                    .foregroundStyle(ColorTokens.actionPrimary)
-                }
+        ZStack {
+            ColorTokens.background
+                .ignoresSafeArea()
 
-                Spacer()
-
+            VStack(spacing: 0) {
                 Text("Détails du document")
-                    .font(Typography.headline)
+                    .font(.system(size: 17, weight: .semibold))
                     .foregroundStyle(ColorTokens.textPrimary)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(ColorTokens.background)
 
-                Spacer()
+                Divider()
 
-                Button("Enregistrer") {
-                    store.send(.saveDocument)
-                }
-                .disabled(!isFormValid || store.isLoading)
-                .foregroundStyle(ColorTokens.actionPrimary)
-            }
-            .padding(.horizontal, Spacing.md)
-            .padding(.vertical, Spacing.sm)
-            .background(ColorTokens.background)
+                ScrollView {
+                    VStack(spacing: 24) {
+                        FormField(titleLabel: "Type de document") {
+                            HStack {
+                                Text("Type")
+                                    .font(.system(size: 17))
+                                    .foregroundColor(.primary)
 
-            ScrollView {
-                VStack(spacing: Spacing.xl) {
-                    VStack(alignment: .leading, spacing: Spacing.xs) {
-                        VStack(spacing: Spacing.md) {
-                            VStack(alignment: .leading, spacing: Spacing.xs) {
-                                Text("Type de document")
-                                    .font(Typography.subheadline)
-                                    .foregroundStyle(ColorTokens.textPrimary)
+                                Spacer()
 
-                                HStack {
-                                    Text("Type")
-                                        .foregroundStyle(ColorTokens.textPrimary)
-
-                                    Spacer()
-
-                                    Picker("Type", selection: $store.documentType) {
-                                        ForEach(DocumentType.allCases) { type in
-                                            Text(type.displayName)
-                                                .tag(type)
-                                        }
+                                Picker("Type", selection: $store.documentType) {
+                                    ForEach(DocumentType.allCases) { type in
+                                        Text(type.displayName)
+                                            .tag(type)
                                     }
-                                    .pickerStyle(.menu)
+                                }
+                                .pickerStyle(.menu)
+                                .labelsHidden()
+                            }
+                        }
+
+                        FormField(titleLabel: "Nom du document", infoLabel: "Nom descriptif du document") {
+                            TextField("Ex: Facture révision", text: $store.documentName)
+                                .font(.system(size: 17))
+                                .textInputAutocapitalization(.sentences)
+                                .submitLabel(.done)
+                                .multilineTextAlignment(.leading)
+                        }
+
+                        FormField(titleLabel: "Date du document", infoLabel: "Date d'émission du document") {
+                            HStack {
+                                Text("Date")
+                                    .font(.system(size: 17))
+                                    .foregroundColor(.primary)
+
+                                Spacer()
+
+                                DatePicker("", selection: $store.documentDate, in: Date.distantPast...Date(), displayedComponents: .date)
                                     .labelsHidden()
-                                }
-                                .padding(Spacing.screenMargin)
-                                .background(ColorTokens.surfaceDim)
-                                .cornerRadius(Radius.textField, corners: .allCorners)
+                                    .datePickerStyle(.compact)
                             }
+                        }
 
-                            VStack(alignment: .leading) {
-                                Text("Nom du document")
-                                    .font(Typography.subheadline)
-                                    .foregroundStyle(ColorTokens.textPrimary)
+                        FormField(titleLabel: "Kilométrage (optionnel)", infoLabel: "Kilométrage au moment du document") {
+                            HStack(spacing: 12) {
+                                Text("Kilométrage")
+                                    .font(.system(size: 17))
+                                    .foregroundColor(.primary)
 
-                                TextField("Ex: Facture révision", text: $store.documentName)
-                                    .textInputAutocapitalization(.sentences)
-                                    .submitLabel(.done)
-                                    .padding(Spacing.screenMargin)
-                                    .background(ColorTokens.surfaceDim)
-                                    .cornerRadius(Radius.textField, corners: .allCorners)
+                                Spacer()
 
-                                Label("Nom descriptif du document", systemImage: "info.circle")
-                                    .font(Typography.footnote)
-                                    .foregroundStyle(ColorTokens.textSecondary)
+                                TextField("120000", text: $store.documentMileage)
+                                    .font(.system(size: 17))
+                                    .keyboardType(.numberPad)
+                                    .multilineTextAlignment(.trailing)
+
+                                Text("km")
+                                    .font(.system(size: 17))
+                                    .foregroundColor(.secondary)
                             }
+                        }
 
-                            VStack(alignment: .leading, spacing: Spacing.xs) {
-                                Text("Date du document")
-                                    .font(Typography.subheadline)
-                                    .foregroundStyle(ColorTokens.textPrimary)
+                        FormField(titleLabel: "Montant (optionnel)", infoLabel: "Montant TTC du document") {
+                            HStack(spacing: 12) {
+                                Text("Montant")
+                                    .font(.system(size: 17))
+                                    .foregroundColor(.primary)
 
-                                HStack {
-                                    Text("Date")
-                                        .foregroundStyle(ColorTokens.textPrimary)
+                                Spacer()
 
-                                    Spacer()
+                                TextField("150.00", text: $store.documentAmount)
+                                    .font(.system(size: 17))
+                                    .keyboardType(.decimalPad)
+                                    .multilineTextAlignment(.trailing)
 
-                                    DatePicker("Date", selection: $store.documentDate, in: Date.distantPast...Date(), displayedComponents: [.date])
-                                        .datePickerStyle(.compact)
-                                        .labelsHidden()
-                                }
-                                .padding(Spacing.screenMargin)
-                                .background(ColorTokens.surfaceDim)
-                                .cornerRadius(Radius.textField, corners: .allCorners)
-
-                                Label("Date d'émission du document", systemImage: "info.circle")
-                                    .font(Typography.footnote)
-                                    .foregroundStyle(ColorTokens.textSecondary)
-                            }
-
-                            VStack(alignment: .leading) {
-                                Text("Kilométrage (optionnel)")
-                                    .font(Typography.subheadline)
-                                    .foregroundStyle(ColorTokens.textPrimary)
-
-                                HStack {
-                                    TextField("120000", text: $store.documentMileage)
-                                        .keyboardType(.numberPad)
-
-                                    Text("km")
-                                        .foregroundStyle(ColorTokens.textSecondary)
-                                }
-                                .padding(Spacing.screenMargin)
-                                .background(ColorTokens.surfaceDim)
-                                .cornerRadius(Radius.textField, corners: .allCorners)
-
-                                Label("Kilométrage au moment du document", systemImage: "info.circle")
-                                    .font(Typography.footnote)
-                                    .foregroundStyle(ColorTokens.textSecondary)
-                            }
-
-                            VStack(alignment: .leading) {
-                                Text("Montant (optionnel)")
-                                    .font(Typography.subheadline)
-                                    .foregroundStyle(ColorTokens.textPrimary)
-
-                                HStack {
-                                    TextField("150.00", text: $store.documentAmount)
-                                        .keyboardType(.decimalPad)
-
-                                    Text("€")
-                                        .foregroundStyle(ColorTokens.textSecondary)
-                                }
-                                .padding(Spacing.screenMargin)
-                                .background(ColorTokens.surfaceDim)
-                                .cornerRadius(Radius.textField, corners: .allCorners)
-
-                                Label("Montant TTC du document", systemImage: "info.circle")
-                                    .font(Typography.footnote)
-                                    .foregroundStyle(ColorTokens.textSecondary)
+                                Text("€")
+                                    .font(.system(size: 17))
+                                    .foregroundColor(.secondary)
                             }
                         }
                     }
-                    .padding(.horizontal, Spacing.md)
+                    .padding(.top, 24)
+                    .padding(.horizontal, Spacing.screenMargin)
                 }
-                .padding(.vertical, Spacing.lg)
+                .scrollBounceBehavior(.basedOnSize)
+                .scrollDismissesKeyboard(.interactively)
+                .safeAreaInset(edge: .bottom, spacing: 24) {
+                    VStack(spacing: 0) {
+                        Divider()
+
+                        VStack(spacing: 0) {
+                            Button(action: { store.send(.view(.backFromMetadataFormButtonTapped)) }) {
+                                Text("Retour")
+                                    .font(.system(size: 17, weight: .semibold))
+                                    .foregroundColor(.red)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 16)
+                                    .cornerRadius(14)
+                            }
+
+                            Button(action: { store.send(.saveDocument) }) {
+                                Text("Enregistrer")
+                                    .font(.system(size: 17, weight: .semibold))
+                                    .foregroundColor(.white)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 16)
+                                    .background(.black)
+                                    .cornerRadius(14)
+                            }
+                            .disabled(!isFormValid || store.isLoading)
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 8)
+                    }
+                    .background(ColorTokens.background)
+                }
             }
-            .scrollDismissesKeyboard(.interactively)
         }
     }
 }

@@ -174,6 +174,10 @@ struct AppStore {
                         state.path.append(.documentDetail(DocumentDetailStore.State(viewState: .loading, vehicleId: currentVehicle.id, documentId: document.id)))
                     }
                     return .none
+                    
+                case .element(id: _, action: .vehicleDetails(.editVehicle(let vehicle))):
+                    state.path.append(.editVehicle(.init(vehicle: vehicle)))
+                    return .none
 
                 case .element(id: _, action: .vehicleDetails(.vehicleDeleted)):
                     return .send(.vehicleListChanged)

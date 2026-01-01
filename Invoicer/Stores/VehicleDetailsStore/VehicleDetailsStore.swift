@@ -13,13 +13,13 @@ struct VehicleDetailsStore {
     @ObservableState
     struct State: Equatable {
         @Shared(.vehicles) var vehicles: [Vehicle] = []
-        @Shared(.selectedVehicle) var selectedVehicle: Vehicle?
+        @Shared(.selectedVehicle) var selectedVehicle: Vehicle
     }
 
     enum Action: Equatable {
         case dismiss
         case editVehicleButtonTapped
-        case editVehicle(Vehicle)
+        case editVehicle
     }
     
     @Dependency(\.vehicleRepository) var vehicleRepository
@@ -29,10 +29,7 @@ struct VehicleDetailsStore {
         Reduce { state, action in
             switch action {
             case .editVehicleButtonTapped:
-                guard let vehicle = state.selectedVehicle else {
-                    return .none
-                }
-                return .send(.editVehicle(vehicle))
+                return .send(.editVehicle)
 
             case .editVehicle:
                 return .none

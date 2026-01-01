@@ -9,10 +9,10 @@ import Foundation
 import Dependencies
 
 struct VehicleMetadataSyncManagerClient: Sendable {
-    var syncAfterChange: @Sendable (UUID) async throws -> Void
-    var exportVehicleToJSON: @Sendable (UUID) async throws -> Void
-    var importVehicleFromJSON: @Sendable (String) async throws -> UUID
-    var scanAndRebuildDatabase: @Sendable (String) async throws -> [UUID]
+    var syncAfterChange: @Sendable (String) async throws -> Void
+    var exportVehicleToJSON: @Sendable (String) async throws -> Void
+    var importVehicleFromJSON: @Sendable (String) async throws -> String
+    var scanAndRebuildDatabase: @Sendable (String) async throws -> [String]
     var hasValidMetadata: @Sendable (String) -> Bool
 }
 
@@ -45,7 +45,7 @@ extension VehicleMetadataSyncManagerClient: DependencyKey {
     nonisolated static let testValue: VehicleMetadataSyncManagerClient = VehicleMetadataSyncManagerClient(
         syncAfterChange: { _ in },
         exportVehicleToJSON: { _ in },
-        importVehicleFromJSON: { _ in UUID() },
+        importVehicleFromJSON: { _ in "" },
         scanAndRebuildDatabase: { _ in [] },
         hasValidMetadata: { _ in false }
     )

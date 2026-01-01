@@ -16,10 +16,10 @@ struct FileMetadataRecord {
     // MARK: - Properties
 
     /// Identifiant unique du fichier
-    let id: UUID
+    let id: String
 
     /// Identifiant du véhicule associé
-    var vehicleId: UUID
+    var vehicleId: String
 
     /// Nom du fichier (avec extension)
     var fileName: String

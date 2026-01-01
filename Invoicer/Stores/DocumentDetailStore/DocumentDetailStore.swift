@@ -20,10 +20,10 @@ struct DocumentDetailStore {
     @ObservableState
     struct State: Equatable {
         var viewState: ViewState
-        let vehicleId: UUID
-        let documentId: UUID
+        let vehicleId: String
+        let documentId: String
         @Shared(.vehicles) var vehicles: [Vehicle] = []
-        @Shared(.selectedVehicle) var selectedVehicle: Vehicle?
+        @Shared(.selectedVehicle) var selectedVehicle: Vehicle
     }
     
     enum Action: Equatable {
@@ -34,7 +34,7 @@ struct DocumentDetailStore {
         case deleteDocument
         case documentDeleted
         case editDocumentButtonTapped
-        case showEditDocument(UUID, Document)
+        case showEditDocument(String, Document)
         case dismiss
     }
     
@@ -130,7 +130,7 @@ struct DocumentDetailStore {
 
                             // Also update selectedVehicle if it's the same vehicle
                             await selectedVehicle.withLock { selected in
-                                if selected?.id == vehicleId {
+                                if selected.id == vehicleId {
                                     selected = updatedVehicle
                                 }
                             }

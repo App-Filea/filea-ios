@@ -13,7 +13,7 @@ import Dependencies
 extension Vehicle {
     /// Creates a Vehicle with sensible default values for testing
     /// - Parameters:
-    ///   - id: Unique identifier (defaults to new UUID)
+    ///   - id: Unique identifier (defaults to new String)
     ///   - type: Vehicle type (defaults to .car)
     ///   - brand: Vehicle brand (defaults to "Tesla")
     ///   - model: Vehicle model (defaults to "Model 3")
@@ -24,7 +24,7 @@ extension Vehicle {
     ///   - documents: Associated documents (defaults to empty array)
     /// - Returns: A Vehicle instance configured for testing
     static func make(
-        id: UUID = UUID(),
+        id: String = String(),
         type: VehicleType = .car,
         brand: String = "Tesla",
         model: String = "Model 3",

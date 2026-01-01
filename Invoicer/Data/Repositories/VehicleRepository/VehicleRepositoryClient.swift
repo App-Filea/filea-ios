@@ -14,11 +14,11 @@ import Dependencies
 struct VehicleRepositoryClient: Sendable {
     var createVehicle: @Sendable (Vehicle) async throws -> Void
     var updateVehicle: @Sendable (Vehicle) async throws -> Void
-    var setPrimaryVehicle: @Sendable (UUID) async throws -> Void
+    var setPrimaryVehicle: @Sendable (String) async throws -> Void
     var hasPrimaryVehicle: @Sendable () async -> Bool
     var getAllVehicles: @Sendable () async throws -> [Vehicle]
-    var getVehicle: @Sendable (UUID) async throws -> Vehicle?
-    var deleteVehicle: @Sendable (UUID) async throws -> Void
+    var getVehicle: @Sendable (String) async throws -> Vehicle?
+    var deleteVehicle: @Sendable (String) async throws -> Void
 }
 
 // MARK: - Dependency Key
@@ -69,7 +69,7 @@ extension VehicleRepositoryClient: DependencyKey {
         getAllVehicles: {
             [
                 Vehicle(
-                    id: UUID(),
+                    id: String(),
                     type: .car,
                     brand: "Tesla",
                     model: "Model 3",
@@ -80,7 +80,7 @@ extension VehicleRepositoryClient: DependencyKey {
                     documents: []
                 ),
                 Vehicle(
-                    id: UUID(),
+                    id: String(),
                     type: .car,
                     brand: "BMW",
                     model: "i4",
@@ -94,7 +94,7 @@ extension VehicleRepositoryClient: DependencyKey {
         },
         getVehicle: { _ in
             Vehicle(
-                id: UUID(),
+                id: String(),
                 type: .car,
                 brand: "Tesla",
                 model: "Model 3",

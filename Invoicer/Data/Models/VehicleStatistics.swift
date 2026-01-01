@@ -119,8 +119,8 @@ import Foundation
 //
 //// MARK: - Alert Model (commented)
 //struct VehicleAlert: Identifiable, Equatable {
-//    let id = UUID()
-//    let vehicleId: UUID
+//    let id = String()
+//    let vehicleId: String
 //    let vehicleName: String
 //    let type: AlertType
 //    var daysRemaining: Int?

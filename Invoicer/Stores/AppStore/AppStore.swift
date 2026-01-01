@@ -14,8 +14,8 @@ struct AppStore {
     @ObservableState
     struct State: Equatable {
         @Shared(.vehicles) var vehicles: [Vehicle] = []
-        @Shared(.selectedVehicle) var selectedVehicle: Vehicle?
-        @Shared(.lastOpenedVehicleId) var lastOpenedVehicleId: UUID?
+        @Shared(.selectedVehicle) var selectedVehicle: Vehicle
+        @Shared(.lastOpenedVehicleId) var lastOpenedVehicleId: String?
         @Shared(.hasCompletedOnboarding) var hasCompletedOnboarding = false
         @Shared(.isStorageConfigured) var isStorageConfigured = false
         @Presents var onboarding: OnboardingStore.State?
@@ -158,36 +158,10 @@ struct AppStore {
 
             case .storageOnboarding:
                 return .none
-
+                
             case .path(let action):
-                switch action {
-                case .element(id: _, action: .storageOnboarding(.folderSaved)):
-                    return .send(.getAllVehicles)
-                    
-                case .element(id: _, action: .main(.showVehicleDetail(let vehicle))):
-                    state.path.append(.vehicleDetails(VehicleDetailsStore.State()))
-                    return .none
-
-                case .element(id: _, action: .main(.showDocumentDetail(let document))):
-                    if case .main(let mainState) = state.path.last,
-                       let currentVehicle = mainState.currentVehicle {
-                        state.path.append(.documentDetail(DocumentDetailStore.State(viewState: .loading, vehicleId: currentVehicle.id, documentId: document.id)))
-                    }
-                    return .none
-                    
-                case .element(id: _, action: .vehicleDetails(.editVehicle(let vehicle))):
-                    state.path.append(.editVehicle(.init(vehicle: vehicle)))
-                    return .none
-
-                case .element(id: _, action: .vehicleDetails(.vehicleDeleted)):
-                    return .send(.vehicleListChanged)
-
-                case .element(id: _, action: .documentDetail(.showEditDocument(let vehicleId, let document))):
-                    state.path.append(.editDocument(.init(vehicleId: vehicleId, document: document)))
-                    return .none
-                    
-                default: return .none
-                }
+                switchAccordingActions(action, state: &state)
+                return .none
                 
             case .initiateMainStore:
                 guard let mainId = state.path.ids.first(where: { id in

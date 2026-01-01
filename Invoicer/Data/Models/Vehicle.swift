@@ -47,7 +47,7 @@ enum VehicleType: String, Codable, CaseIterable, Identifiable {
 
 struct Vehicle: Codable, Equatable, Identifiable {
 
-    let id: UUID
+    let id: String
     var type: VehicleType
     var brand: String
     var model: String
@@ -57,7 +57,7 @@ struct Vehicle: Codable, Equatable, Identifiable {
     var isPrimary: Bool
     var documents: [Document] = []
 
-    init(id: UUID,
+    init(id: String,
          type: VehicleType = .car,
          brand: String = "",
          model: String = "",
@@ -75,5 +75,15 @@ struct Vehicle: Codable, Equatable, Identifiable {
         self.plate = plate
         self.isPrimary = isPrimary
         self.documents = documents
+    }
+    
+    var isNull: Bool {
+        self.id == "NULL" && self.brand == "NULL" && self.model == "NULL" && self.mileage == "NULL" && self.plate == "NULL"
+    }
+}
+
+extension Vehicle {
+    static func null() -> Self {
+        .init(id: "NULL", type: .other, brand: "NULL", model: "NULL", mileage: "NULL", registrationDate: .now, plate: "NULL", isPrimary: false, documents: [])
     }
 }

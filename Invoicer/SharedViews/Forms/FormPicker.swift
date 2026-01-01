@@ -77,7 +77,7 @@ struct FormPicker<Item: Identifiable & Hashable>: View where Item: CustomStringC
 
 #Preview {
     struct PreviewItem: Identifiable, Hashable, CustomStringConvertible {
-        let id: UUID = UUID()
+        let id: String = String()
         let name: String
 
         var description: String { name }

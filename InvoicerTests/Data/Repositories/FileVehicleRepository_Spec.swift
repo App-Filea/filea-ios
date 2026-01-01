@@ -175,7 +175,7 @@ final class FileVehicleRepository_Spec: XCTestCase {
 
     func test_find_returnsNilWhenNotFound() async throws {
         givenRepository()
-        let nonExistentId = UUID()
+        let nonExistentId = UUID().uuidString
         try await whenFindingVehicle(id: nonExistentId)
 
         thenVehicleShouldBeNil()
@@ -190,7 +190,7 @@ final class FileVehicleRepository_Spec: XCTestCase {
         var vehicleWithOrphan = vehicle
         vehicleWithOrphan.documents = [
             Document(
-                id: UUID(),
+                id: UUID().uuidString,
                 fileURL: orphanedDocumentURL,
                 name: "Orphaned Doc",
                 date: Date(),
@@ -225,11 +225,11 @@ final class FileVehicleRepository_Spec: XCTestCase {
         try await repository.update(vehicle)
     }
 
-    private func whenDeletingVehicle(_ id: UUID) async throws {
+    private func whenDeletingVehicle(_ id: String) async throws {
         try await repository.delete(id)
     }
 
-    private func whenFindingVehicle(id: UUID) async throws {
+    private func whenFindingVehicle(id: String) async throws {
         fetchedVehicle = try await repository.find(by: id)
     }
 
@@ -265,12 +265,12 @@ final class FileVehicleRepository_Spec: XCTestCase {
         )
     }
 
-    private func thenVehicleWithIdShouldHaveBrand(_ id: UUID, expectedBrand: String) {
+    private func thenVehicleWithIdShouldHaveBrand(_ id: String, expectedBrand: String) {
         let vehicle = fetchedVehicles.first(where: { $0.id == id })
         XCTAssertEqual(vehicle?.brand, expectedBrand, "Brand should be updated")
     }
 
-    private func thenVehicleWithIdShouldHaveDocumentCount(_ id: UUID, expectedCount: Int) {
+    private func thenVehicleWithIdShouldHaveDocumentCount(_ id: String, expectedCount: Int) {
         let vehicle = fetchedVehicles.first(where: { $0.id == id })
         XCTAssertEqual(
             vehicle?.documents.count,

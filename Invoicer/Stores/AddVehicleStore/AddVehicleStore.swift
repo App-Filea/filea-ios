@@ -25,7 +25,7 @@ struct AddVehicleStore {
         var showErrorAlert: Bool = false
         var errorMessage: String? = nil
         @Shared(.vehicles) var vehicles: [Vehicle] = []
-        @Shared(.selectedVehicle) var selectedVehicle: Vehicle?
+        @Shared(.selectedVehicle) var selectedVehicle: Vehicle
         @Presents var scanStore: VehicleCardDocumentScanStore.State?
         @Presents var alert: AlertState<Action.Alert>?
 
@@ -162,7 +162,7 @@ struct AddVehicleStore {
             case .saveVehicle:
                 state.isLoading = true
                 let vehicle = Vehicle(
-                    id: self.uuid(),
+                    id: self.uuid().uuidString,
                     type: state.vehicleType ?? .car,
                     brand: state.brand,
                     model: state.model,

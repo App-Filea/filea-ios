@@ -46,7 +46,7 @@ actor VehicleRepository {
         }
     }
 
-    func setPrimaryVehicle(_ id: UUID) async throws {
+    func setPrimaryVehicle(_ id: String) async throws {
         try await grdbRepo.setPrimary(id)
 
         let allVehicles = try await grdbRepo.fetchAll()
@@ -92,13 +92,13 @@ actor VehicleRepository {
         }
     }
 
-    func getVehicle(_ id: UUID) async throws -> Vehicle? {
+    func getVehicle(_ id: String) async throws -> Vehicle? {
         // ✅ Utiliser fetchWithDocuments() pour récupérer les documents depuis GRDB
         let vehicle = try await grdbRepo.fetchWithDocuments(id)
         return vehicle
     }
 
-    func deleteVehicle(_ id: UUID) async throws {
+    func deleteVehicle(_ id: String) async throws {
         try await grdbRepo.delete(id)
 
         do {
@@ -110,7 +110,7 @@ actor VehicleRepository {
 
 enum VehicleRepositoryError: Error, LocalizedError {
     case storageNotConfigured
-    case vehicleNotFound(UUID)
+    case vehicleNotFound(String)
 
     var errorDescription: String? {
         switch self {

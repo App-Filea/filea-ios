@@ -31,7 +31,7 @@ final class VehicleRepository_Spec: XCTestCase {
     }
 
     func test_setPrimaryVehicle_callsGRDBAndSyncsAllVehicles() async throws {
-        let vehicleId = UUID()
+        let vehicleId = String()
         let vehicles = [
             Vehicle.make(id: vehicleId, brand: "Audi", model: "A4"),
             Vehicle.make(brand: "BMW", model: "X3")
@@ -55,7 +55,7 @@ final class VehicleRepository_Spec: XCTestCase {
     }
 
     func test_getVehicle_fetchesFromGRDB() async throws {
-        let vehicleId = UUID()
+        let vehicleId = String()
         let vehicle = Vehicle.make(id: vehicleId, brand: "Mercedes", model: "C-Class")
         givenRepository(vehicles: [vehicle])
         try await whenGettingVehicle(vehicleId)
@@ -64,7 +64,7 @@ final class VehicleRepository_Spec: XCTestCase {
     }
 
     func test_deleteVehicle_deletesFromGRDBAndFileRepo() async throws {
-        let vehicleId = UUID()
+        let vehicleId = String()
         givenRepository()
         try await whenDeletingVehicle(vehicleId)
         thenGRDBDeleteShouldBeCalled(with: vehicleId)
@@ -158,7 +158,7 @@ final class VehicleRepository_Spec: XCTestCase {
         try await repository.updateVehicle(vehicle)
     }
 
-    private func whenSettingPrimaryVehicle(_ id: UUID) async throws {
+    private func whenSettingPrimaryVehicle(_ id: String) async throws {
         try await repository.setPrimaryVehicle(id)
     }
 
@@ -166,11 +166,11 @@ final class VehicleRepository_Spec: XCTestCase {
         fetchedVehicles = try await repository.getAllVehicles()
     }
 
-    private func whenGettingVehicle(_ id: UUID) async throws {
+    private func whenGettingVehicle(_ id: String) async throws {
         fetchedVehicle = try await repository.getVehicle(id)
     }
 
-    private func whenDeletingVehicle(_ id: UUID) async throws {
+    private func whenDeletingVehicle(_ id: String) async throws {
         try await repository.deleteVehicle(id)
     }
 
@@ -188,22 +188,22 @@ final class VehicleRepository_Spec: XCTestCase {
         XCTAssertEqual(databaseRepoUpdateVehicle?.model, expected.model, "Model should match")
     }
 
-    private func thenGRDBSetPrimaryShouldBeCalled(with expectedId: UUID) {
+    private func thenGRDBSetPrimaryShouldBeCalled(with expectedId: String) {
         XCTAssertTrue(databaseRepoSetPrimaryCalled, "GRDB setPrimary should be called")
         XCTAssertEqual(databaseRepoSetPrimaryId, expectedId, "GRDB should receive correct vehicle ID")
     }
 
-    private func thenGRDBFetchShouldBeCalled(with expectedId: UUID) {
+    private func thenGRDBFetchShouldBeCalled(with expectedId: String) {
         XCTAssertTrue(databaseRepoFetchCalled, "GRDB fetch should be called")
         XCTAssertEqual(databaseRepoFetchId, expectedId, "GRDB should receive correct vehicle ID")
     }
 
-    private func thenGRDBDeleteShouldBeCalled(with expectedId: UUID) {
+    private func thenGRDBDeleteShouldBeCalled(with expectedId: String) {
         XCTAssertTrue(databaseRepoDeleteCalled, "GRDB delete should be called")
         XCTAssertEqual(databaseRepoDeleteId, expectedId, "GRDB should receive correct vehicle ID")
     }
 
-    private func thenSyncManagerShouldBeCalled(with expectedId: UUID) {
+    private func thenSyncManagerShouldBeCalled(with expectedId: String) {
         XCTAssertEqual(syncManagerCallCount, 1, "Sync manager should be called once")
         XCTAssertTrue(syncManagerVehicleIds.contains(expectedId), "Sync manager should receive correct vehicle ID")
     }
@@ -222,7 +222,7 @@ final class VehicleRepository_Spec: XCTestCase {
         XCTAssertNotNil(fileRepoUpdateVehicle, "File repository should receive vehicle")
     }
 
-    private func thenFileRepoDeleteShouldBeCalled(with expectedId: UUID) {
+    private func thenFileRepoDeleteShouldBeCalled(with expectedId: String) {
         XCTAssertTrue(fileRepoDeleteCalled, "File repository delete should be called")
         XCTAssertEqual(fileRepoDeleteId, expectedId, "File repository should receive correct vehicle ID")
     }
@@ -259,23 +259,23 @@ final class VehicleRepository_Spec: XCTestCase {
     private var databaseRepoUpdateCalled: Bool = false
     private var databaseRepoUpdateVehicle: Vehicle?
     private var databaseRepoSetPrimaryCalled: Bool = false
-    private var databaseRepoSetPrimaryId: UUID?
+    private var databaseRepoSetPrimaryId: String?
     private var databaseRepoFetchAllCalled: Bool = false
     private var databaseRepoFetchCalled: Bool = false
-    private var databaseRepoFetchId: UUID?
+    private var databaseRepoFetchId: String?
     private var databaseRepoDeleteCalled: Bool = false
-    private var databaseRepoDeleteId: UUID?
+    private var databaseRepoDeleteId: String?
     private var fileRepoSaveCalled: Bool = false
     private var fileRepoSaveVehicle: Vehicle?
     private var fileRepoUpdateCalled: Bool = false
     private var fileRepoUpdateVehicle: Vehicle?
     private var fileRepoDeleteCalled: Bool = false
-    private var fileRepoDeleteId: UUID?
+    private var fileRepoDeleteId: String?
     private var fileRepoLoadAllCalled: Bool = false
     private var storageManagerCreateFolderCalled: Bool = false
     private var storageManagerCreateFolderName: String?
     private var syncManagerCallCount: Int = 0
-    private var syncManagerVehicleIds: [UUID] = []
+    private var syncManagerVehicleIds: [String] = []
     private var fetchedVehicle: Vehicle?
     private var fetchedVehicles: [Vehicle] = []
 }

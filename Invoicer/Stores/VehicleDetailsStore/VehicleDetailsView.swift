@@ -25,21 +25,21 @@ struct VehicleDetailsView: View {
                                     .fill(.black)
                                     .frame(width: 80, height: 80)
                                 
-                                Image(systemName: store.selectedVehicle?.type.iconName ?? "")
+                                Image(systemName: store.selectedVehicle.type.iconName ?? "")
                                     .font(.system(size: 36))
                                     .foregroundColor(.white)
                             }
                             
                             VStack(alignment: .leading, spacing: 4) {
-                                Text(store.selectedVehicle?.brand ?? "brand")
+                                Text(store.selectedVehicle.brand ?? "brand")
                                     .font(.system(size: 15))
                                     .foregroundColor(.secondary)
                                 
-                                Text(store.selectedVehicle?.model ?? "model")
+                                Text(store.selectedVehicle.model ?? "model")
                                     .font(.system(size: 28, weight: .bold))
                                     .foregroundColor(.primary)
                                 
-                                Text(store.selectedVehicle?.isPrimary == true ? "Véhicule principal" : "Véhicule secondaire")
+                                Text(store.selectedVehicle.isPrimary == true ? "Véhicule principal" : "Véhicule secondaire")
                                     .font(.system(size: 15))
                                     .foregroundColor(.secondary)
                             }
@@ -57,7 +57,7 @@ struct VehicleDetailsView: View {
                                         .font(.subheadline)
                                         .foregroundStyle(ColorTokens.textSecondary)
                                     Spacer()
-                                    Text(store.selectedVehicle?.plate ?? "plate")
+                                    Text(store.selectedVehicle.plate ?? "plate")
                                         .font(.subheadline)
                                         .fontWeight(.bold)
                                         .foregroundStyle(ColorTokens.textPrimary)
@@ -68,7 +68,7 @@ struct VehicleDetailsView: View {
                                         .font(.subheadline)
                                         .foregroundStyle(ColorTokens.textSecondary)
                                     Spacer()
-                                    Text(store.selectedVehicle?.mileage ?? "Kilométrage")
+                                    Text(store.selectedVehicle.mileage ?? "Kilométrage")
                                         .font(.subheadline)
                                         .fontWeight(.bold)
                                         .foregroundStyle(ColorTokens.textPrimary)
@@ -79,7 +79,7 @@ struct VehicleDetailsView: View {
                                         .font(.subheadline)
                                         .foregroundStyle(ColorTokens.textSecondary)
                                     Spacer()
-                                    Text(formattedDate(store.selectedVehicle?.registrationDate ?? Date.now))
+                                    Text(formattedDate(store.selectedVehicle.registrationDate ?? Date.now))
                                         .font(.subheadline)
                                         .fontWeight(.bold)
                                         .foregroundStyle(ColorTokens.textPrimary)
@@ -90,7 +90,7 @@ struct VehicleDetailsView: View {
                                         .font(.subheadline)
                                         .foregroundStyle(ColorTokens.textSecondary)
                                     Spacer()
-                                    Text(vehicleAge(from: store.selectedVehicle?.registrationDate ?? Date.now))
+                                    Text(vehicleAge(from: store.selectedVehicle.registrationDate ?? Date.now))
                                         .font(.subheadline)
                                         .fontWeight(.bold)
                                         .foregroundStyle(ColorTokens.textPrimary)
@@ -101,7 +101,7 @@ struct VehicleDetailsView: View {
                                         .font(.subheadline)
                                         .foregroundStyle(ColorTokens.textSecondary)
                                     Spacer()
-                                    Text("\(String(describing: store.selectedVehicle?.documents.count))")
+                                    Text("\(String(describing: store.selectedVehicle.documents.count))")
                                         .font(.subheadline)
                                         .fontWeight(.bold)
                                         .foregroundStyle(ColorTokens.textPrimary)
@@ -166,12 +166,11 @@ struct VehicleDetailsView: View {
 }
 
 #Preview {
-    @Dependency(\.uuid) var uuid
     NavigationView {
         VehicleDetailsView(store:
                         Store(initialState:
                                 VehicleDetailsStore.State(selectedVehicle: Shared(value: Vehicle(
-                                    id: uuid(),
+                                    id: "uuid",
                                     type: .car,
                                     brand: "Lexus",
                                     model: "CT200h",

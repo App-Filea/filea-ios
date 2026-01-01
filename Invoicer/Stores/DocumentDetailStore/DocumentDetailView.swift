@@ -137,8 +137,8 @@ struct DocumentDetailView: View {
         DocumentDetailView(store: Store(
             initialState: DocumentDetailStore.State(
                 viewState: .loading,
-                vehicleId: UUID(),
-                documentId: UUID()
+                vehicleId: String(),
+                documentId: String()
             )
         ) {
             DocumentDetailStore()
@@ -148,7 +148,7 @@ struct DocumentDetailView: View {
 
 #Preview("Document") {
     let previewDocument = Document(
-        id: UUID(),
+        id: String(),
         fileURL: "/fake/path/receipt.jpg",
         name: "Révision complète",
         date: Date(),
@@ -161,7 +161,7 @@ struct DocumentDetailView: View {
         DocumentDetailView(store: Store(
             initialState: DocumentDetailStore.State(
                 viewState: .document(previewDocument),
-                vehicleId: UUID(),
+                vehicleId: String(),
                 documentId: previewDocument.id
             )
         ) {

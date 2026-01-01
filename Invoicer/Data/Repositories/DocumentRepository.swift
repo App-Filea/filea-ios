@@ -14,11 +14,11 @@ import os.log
 // MARK: - Protocol
 
 protocol DocumentRepositoryProtocol: Sendable {
-    func save(image: UIImage, for vehicleId: UUID, metadata: DocumentMetadata) async throws -> Document
-    func save(fileURL: URL, for vehicleId: UUID, metadata: DocumentMetadata) async throws -> Document
-    func update(_ document: Document, for vehicleId: UUID) async throws
-    func delete(_ documentId: UUID, for vehicleId: UUID) async throws
-    func replacePhoto(_ documentId: UUID, for vehicleId: UUID, with newImage: UIImage) async throws
+    func save(image: UIImage, for vehicleId: String, metadata: DocumentMetadata) async throws -> Document
+    func save(fileURL: URL, for vehicleId: String, metadata: DocumentMetadata) async throws -> Document
+    func update(_ document: Document, for vehicleId: String) async throws
+    func delete(_ documentId: String, for vehicleId: String) async throws
+    func replacePhoto(_ documentId: String, for vehicleId: String, with newImage: UIImage) async throws
 }
 
 // MARK: - Document Metadata
@@ -64,7 +64,7 @@ final class DocumentRepository: DocumentRepositoryProtocol, @unchecked Sendable 
 
     // MARK: - Public Methods
 
-    func save(image: UIImage, for vehicleId: UUID, metadata: DocumentMetadata) async throws -> Document {
+    func save(image: UIImage, for vehicleId: String, metadata: DocumentMetadata) async throws -> Document {
         logger.info("💾 Sauvegarde d'un document image pour le véhicule: \(vehicleId)")
 
         guard let vehicle = try await vehicleRepository.getVehicle(vehicleId) else {
@@ -110,7 +110,7 @@ final class DocumentRepository: DocumentRepositoryProtocol, @unchecked Sendable 
         return document
     }
 
-    func save(fileURL: URL, for vehicleId: UUID, metadata: DocumentMetadata) async throws -> Document {
+    func save(fileURL: URL, for vehicleId: String, metadata: DocumentMetadata) async throws -> Document {
         logger.info("💾 Sauvegarde d'un fichier document pour le véhicule: \(vehicleId)")
         logger.info("📄 Fichier source: \(fileURL.lastPathComponent)")
 
@@ -162,7 +162,7 @@ final class DocumentRepository: DocumentRepositoryProtocol, @unchecked Sendable 
         return document
     }
 
-    func update(_ document: Document, for vehicleId: UUID) async throws {
+    func update(_ document: Document, for vehicleId: String) async throws {
         logger.info("📝 Mise à jour du document \(document.id)")
 
         // ✅ Mise à jour DIRECTE en BDD (pas besoin de passer par Vehicle)
@@ -171,7 +171,7 @@ final class DocumentRepository: DocumentRepositoryProtocol, @unchecked Sendable 
         logger.info("✅ Document mis à jour avec succès")
     }
 
-    func delete(_ documentId: UUID, for vehicleId: UUID) async throws {
+    func delete(_ documentId: String, for vehicleId: String) async throws {
         logger.info("🗑️ Suppression du document: \(documentId)")
 
         guard let vehicle = try await vehicleRepository.getVehicle(vehicleId) else {
@@ -204,7 +204,7 @@ final class DocumentRepository: DocumentRepositoryProtocol, @unchecked Sendable 
         logger.info("✅ Document supprimé avec succès")
     }
 
-    func replacePhoto(_ documentId: UUID, for vehicleId: UUID, with newImage: UIImage) async throws {
+    func replacePhoto(_ documentId: String, for vehicleId: String, with newImage: UIImage) async throws {
         logger.info("📸 Remplacement de la photo du document: \(documentId)")
 
         guard let vehicle = try await vehicleRepository.getVehicle(vehicleId) else {

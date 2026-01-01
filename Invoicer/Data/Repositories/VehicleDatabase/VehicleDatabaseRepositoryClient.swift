@@ -12,12 +12,12 @@ import Dependencies
 struct VehicleDatabaseRepositoryClient {
     var create: @Sendable (Vehicle, String) async throws -> Void
     var fetchAll: @Sendable () async throws -> [Vehicle]
-    var fetch: @Sendable (UUID) async throws -> Vehicle?
+    var fetch: @Sendable (String) async throws -> Vehicle?
     var fetchPrimary: @Sendable () async throws -> Vehicle?
-    var fetchWithDocuments: @Sendable (UUID) async throws -> Vehicle?
+    var fetchWithDocuments: @Sendable (String) async throws -> Vehicle?
     var update: @Sendable (Vehicle, String) async throws -> Void
-    var setPrimary: @Sendable (UUID) async throws -> Void
-    var delete: @Sendable (UUID) async throws -> Void
+    var setPrimary: @Sendable (String) async throws -> Void
+    var delete: @Sendable (String) async throws -> Void
     var count: @Sendable () async throws -> Int
 }
 

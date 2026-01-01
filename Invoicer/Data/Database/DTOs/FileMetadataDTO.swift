@@ -12,7 +12,7 @@ import Foundation
 struct FileMetadataDTO: Codable {
     // MARK: - Properties
 
-    var id: UUID
+    var id: String
     var fileName: String
     var relativePath: String
     var documentType: String

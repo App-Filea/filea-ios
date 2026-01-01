@@ -229,7 +229,7 @@ final class VehicleDatabaseRepository_Spec: XCTestCase {
     }
 
     func test_fetch_returnsNilWhenNotFound() async throws {
-        let nonExistentId = UUID()
+        let nonExistentId = String()
 
         try await whenFetchingVehicle(id: nonExistentId)
         thenVehicleShouldBeNil()
@@ -283,7 +283,7 @@ final class VehicleDatabaseRepository_Spec: XCTestCase {
     }
 
     func test_fetchWithDocuments_returnsNilWhenVehicleNotFound() async throws {
-        let nonExistentId = UUID()
+        let nonExistentId = String()
 
         try await whenFetchingVehicleWithDocuments(id: nonExistentId)
         thenVehicleShouldBeNil()
@@ -363,11 +363,11 @@ final class VehicleDatabaseRepository_Spec: XCTestCase {
         _ vehicle: Vehicle,
         at folderPath: String? = nil
     ) async throws {
-        let path = folderPath ?? "/test/vehicles/\(vehicle.id.uuidString)"
+        let path = folderPath ?? "/test/vehicles/\(vehicle.id)"
         try await repository.create(vehicle: vehicle, folderPath: path)
     }
 
-    private func whenFetchingVehicle(id: UUID) async throws {
+    private func whenFetchingVehicle(id: String) async throws {
         fetchedVehicle = try await repository.fetch(id: id)
     }
 
@@ -379,7 +379,7 @@ final class VehicleDatabaseRepository_Spec: XCTestCase {
         _ vehicle: Vehicle,
         at folderPath: String? = nil
     ) async throws {
-        let path = folderPath ?? "/test/vehicles/\(vehicle.id.uuidString)"
+        let path = folderPath ?? "/test/vehicles/\(vehicle.id)"
         try await repository.update(vehicle: vehicle, folderPath: path)
     }
 
@@ -387,11 +387,11 @@ final class VehicleDatabaseRepository_Spec: XCTestCase {
         fetchedVehicle = try await repository.fetchPrimary()
     }
 
-    private func whenSettingPrimaryVehicle(id: UUID) async throws {
+    private func whenSettingPrimaryVehicle(id: String) async throws {
         try await repository.setPrimary(id: id)
     }
 
-    private func whenDeletingVehicle(id: UUID) async throws {
+    private func whenDeletingVehicle(id: String) async throws {
         try await repository.delete(id: id)
     }
 
@@ -399,7 +399,7 @@ final class VehicleDatabaseRepository_Spec: XCTestCase {
         vehicleCount = try await repository.count()
     }
 
-    private func whenFetchingVehicleWithDocuments(id: UUID) async throws {
+    private func whenFetchingVehicleWithDocuments(id: String) async throws {
         fetchedVehicle = try await repository.fetchWithDocuments(id: id)
     }
 
@@ -447,7 +447,7 @@ final class VehicleDatabaseRepository_Spec: XCTestCase {
         XCTAssertLessThan(timeDifference, 1.0, "Registration date should be saved correctly")
     }
 
-    private func thenVehicleIdShouldBe(_ expected: UUID) {
+    private func thenVehicleIdShouldBe(_ expected: String) {
         XCTAssertEqual(fetchedVehicle?.id, expected, "Vehicle ID should remain unchanged")
     }
 

@@ -38,7 +38,7 @@ actor VehicleMetadataSyncManager {
     /// Exporte les métadonnées d'un véhicule depuis GRDB vers un fichier JSON
     /// - Parameter vehicleId: Identifiant du véhicule à exporter
     /// - Throws: Erreur si l'export échoue
-    func exportVehicleToJSON(vehicleId: UUID) async throws {
+    func exportVehicleToJSON(vehicleId: String) async throws {
         print("💾 [SyncManager] Export vers JSON : \(vehicleId)")
 
         // 1. Récupérer le véhicule depuis la BDD
@@ -101,7 +101,7 @@ actor VehicleMetadataSyncManager {
     /// - Parameter folderPath: Chemin du dossier contenant le fichier .vehicle_metadata.json
     /// - Returns: L'identifiant du véhicule importé
     /// - Throws: Erreur si l'import échoue
-    func importVehicleFromJSON(folderPath: String) async throws -> UUID {
+    func importVehicleFromJSON(folderPath: String) async throws -> String {
         print("📥 [SyncManager] Import depuis JSON")
         print("   └─ Dossier : \(folderPath)")
 
@@ -149,7 +149,7 @@ actor VehicleMetadataSyncManager {
     /// - Parameter rootFolderPath: Chemin du dossier racine contenant les sous-dossiers de véhicules
     /// - Returns: Liste des identifiants de véhicules importés
     /// - Throws: Erreur si le scan échoue
-    func scanAndRebuildDatabase(rootFolderPath: String) async throws -> [UUID] {
+    func scanAndRebuildDatabase(rootFolderPath: String) async throws -> [String] {
         print("🔄 [SyncManager] Scan et reconstruction de la BDD")
         print("   └─ Dossier racine : \(rootFolderPath)\n")
 
@@ -165,7 +165,7 @@ actor VehicleMetadataSyncManager {
 
         print("📁 [SyncManager] \(contents.count) dossier(s) trouvé(s)")
 
-        var importedVehicleIds: [UUID] = []
+        var importedVehicleIds: [String] = []
 
         // Parcourir chaque dossier
         for folderURL in contents {
@@ -197,7 +197,7 @@ actor VehicleMetadataSyncManager {
     /// Met à jour le JSON après une modification dans la BDD
     /// - Parameter vehicleId: Identifiant du véhicule modifié
     /// - Throws: Erreur si la synchronisation échoue
-    func syncAfterChange(vehicleId: UUID) async throws {
+    func syncAfterChange(vehicleId: String) async throws {
         try await exportVehicleToJSON(vehicleId: vehicleId)
     }
 

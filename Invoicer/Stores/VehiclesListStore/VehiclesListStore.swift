@@ -13,8 +13,8 @@ struct VehiclesListStore {
     @ObservableState
     struct State: Equatable {
         @Shared(.vehicles) var vehicles: [Vehicle] = []
-        @Shared(.selectedVehicle) var selectedVehicle: Vehicle?
-        @Shared(.lastOpenedVehicleId) var lastOpenedVehicleId: UUID?
+        @Shared(.selectedVehicle) var selectedVehicle: Vehicle
+        @Shared(.lastOpenedVehicleId) var lastOpenedVehicleId: String?
         @Presents var addVehicle: AddVehicleStore.State?
         var isLoading = false
     }

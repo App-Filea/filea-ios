@@ -12,8 +12,8 @@ struct FileVehicleRepositoryClient {
     var loadAll: @Sendable () async throws -> [Vehicle]
     var save: @Sendable (Vehicle) async throws -> Void
     var update: @Sendable (Vehicle) async throws -> Void
-    var delete: @Sendable (UUID) async throws -> Void
-    var find: @Sendable (UUID) async throws -> Vehicle?
+    var delete: @Sendable (String) async throws -> Void
+    var find: @Sendable (String) async throws -> Vehicle?
 }
 
 extension FileVehicleRepositoryClient: DependencyKey {

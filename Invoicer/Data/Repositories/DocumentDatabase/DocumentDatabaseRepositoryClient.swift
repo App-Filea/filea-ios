@@ -13,14 +13,14 @@ import Dependencies
 /// Client interface for document database repository operations
 /// Delegates to DocumentDatabaseRepository actor for actual implementation
 struct DocumentDatabaseRepositoryClient: Sendable {
-    var create: @Sendable (Document, UUID) async throws -> Void
-    var createBatch: @Sendable ([Document], UUID) async throws -> Void
-    var fetchAll: @Sendable (UUID, String) async throws -> [Document]
-    var fetch: @Sendable (UUID, String) async throws -> Document?
-    var count: @Sendable (UUID) async throws -> Int
-    var update: @Sendable (Document, UUID) async throws -> Void
-    var delete: @Sendable (UUID) async throws -> Void
-    var deleteAll: @Sendable (UUID) async throws -> Void
+    var create: @Sendable (Document, String) async throws -> Void
+    var createBatch: @Sendable ([Document], String) async throws -> Void
+    var fetchAll: @Sendable (String, String) async throws -> [Document]
+    var fetch: @Sendable (String, String) async throws -> Document?
+    var count: @Sendable (String) async throws -> Int
+    var update: @Sendable (Document, String) async throws -> Void
+    var delete: @Sendable (String) async throws -> Void
+    var deleteAll: @Sendable (String) async throws -> Void
 }
 
 // MARK: - Dependency Key

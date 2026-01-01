@@ -13,7 +13,7 @@ struct MainStore {
     @ObservableState
     struct State: Equatable {
         @Shared(.vehicles) var vehicles: [Vehicle] = []
-        @Shared(.selectedVehicle) var selectedVehicle: Vehicle?
+        @Shared(.selectedVehicle) var selectedVehicle: Vehicle
         @Shared(.isStorageConfigured) var isStorageConfigured = false
         @Presents var vehicleDetail: VehicleDetailsStore.State?
         @Presents var deleteAlert: AlertState<Action.Alert>?
@@ -26,14 +26,6 @@ struct MainStore {
         var vehicleMonthlyExpenses: VehicleMonthlyExpensesStore.State = VehicleMonthlyExpensesStore.State()
 
         var showEmptyState: Bool = false
-
-        var currentVehicle: Vehicle? {
-            selectedVehicle
-        }
-
-        var currentVehicleDocuments: [Document] {
-            currentVehicle?.documents ?? []
-        }
     }
 
     enum Action: Equatable {
@@ -92,7 +84,7 @@ struct MainStore {
                 if state.vehicles.isEmpty {
                     state.showEmptyState = true
                     return .none
-                } else if state.selectedVehicle == nil {
+                } else if state.selectedVehicle.isNull {
                     return .send(.presentVehiclesListView)
                 }
                 return .send(.setupVehicleStatistics)
@@ -126,10 +118,7 @@ struct MainStore {
 //                return .none
 //
             case .showAddDocument:
-                guard let currentVehicle = state.currentVehicle else {
-                    return .none
-                }
-                state.addDocument = AddDocumentStore.State.initialState(vehicleId: currentVehicle.id)
+                state.addDocument = AddDocumentStore.State.initialState(vehicleId: state.selectedVehicle.id)
                 return .none
 
             case .showDocumentDetail:
@@ -145,10 +134,7 @@ struct MainStore {
                 return .none
 
             case .deleteAlert(.presented(.confirmDelete)):
-                guard let vehicleId = state.currentVehicle?.id else {
-                    return .none
-                }
-                return .run { send in
+                return .run { [vehicleId = state.selectedVehicle.id] send in
                     do {
                         try await vehicleRepository.deleteVehicle(vehicleId)
                         let newVehiclesList = try await vehicleRepository.getAllVehicles()
@@ -158,7 +144,7 @@ struct MainStore {
 
             case .updateAllVehicles(let newVehiclesList):
                     state.$vehicles.withLock { $0 = newVehiclesList }
-                    state.$selectedVehicle.withLock { $0 = nil }
+                    state.$selectedVehicle.withLock { $0 = .null() }
                 return .none
 
             case .addDocument(.dismiss):

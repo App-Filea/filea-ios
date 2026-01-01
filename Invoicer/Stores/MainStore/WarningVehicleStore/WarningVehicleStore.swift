@@ -12,7 +12,7 @@ struct WarningVehicleStore {
     
     @ObservableState
     struct State: Equatable {
-        @Shared(.selectedVehicle) var selectedVehicle: Vehicle?
+        @Shared(.selectedVehicle) var selectedVehicle: Vehicle
         var currentVehicleIncompleteDocumentsCount: Int = 0
     }
     
@@ -27,11 +27,8 @@ struct WarningVehicleStore {
         Reduce { state, action in
             switch action {
             case .computeVehicleWarnings:
-                guard let selectedVehicle = state.selectedVehicle else { return .none }
-                return .run { send in
-                    let incompleteDocumentCount = self.statisticsRepository.countIncompleteDocuments(selectedVehicle.documents)
-                    await send(.computedWarnings(incompleteDocumentCount))
-                }
+                let incompleteDocumentCount = self.statisticsRepository.countIncompleteDocuments(state.selectedVehicle.documents)
+                return .send(.computedWarnings(incompleteDocumentCount))
                 
             case .computedWarnings(let count):
                 state.currentVehicleIncompleteDocumentsCount = count

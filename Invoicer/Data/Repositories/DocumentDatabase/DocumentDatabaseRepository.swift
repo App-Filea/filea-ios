@@ -23,7 +23,7 @@ actor DocumentDatabaseRepository {
     /// - Parameters:
     ///   - document: Le document à sauvegarder
     ///   - vehicleId: L'identifiant du véhicule associé
-    func create(document: Document, vehicleId: UUID) async throws {
+    func create(document: Document, vehicleId: String) async throws {
         print("➕ [DocumentDatabaseRepository] Création d'un document en BDD")
         print("   ├─ Document ID : \(document.id)")
         print("   ├─ Nom : \(document.name)")
@@ -42,7 +42,7 @@ actor DocumentDatabaseRepository {
     /// - Parameters:
     ///   - documents: Les documents à sauvegarder
     ///   - vehicleId: L'identifiant du véhicule associé
-    func createBatch(documents: [Document], vehicleId: UUID) async throws {
+    func createBatch(documents: [Document], vehicleId: String) async throws {
         print("➕ [DocumentDatabaseRepository] Création de \(documents.count) documents en BDD")
         print("   └─ Véhicule ID : \(vehicleId)")
 
@@ -64,7 +64,7 @@ actor DocumentDatabaseRepository {
     ///   - vehicleId: L'identifiant du véhicule
     ///   - vehicleFolderPath: Le chemin du dossier du véhicule (pour reconstruire les paths complets)
     /// - Returns: Liste des documents triés par date décroissante
-    func fetchAll(vehicleId: UUID, vehicleFolderPath: String) async throws -> [Document] {
+    func fetchAll(vehicleId: String, vehicleFolderPath: String) async throws -> [Document] {
         print("📖 [DocumentDatabaseRepository] Récupération des documents")
         print("   └─ Véhicule ID : \(vehicleId)")
 
@@ -86,7 +86,7 @@ actor DocumentDatabaseRepository {
     ///   - id: L'identifiant du document
     ///   - vehicleFolderPath: Le chemin du dossier du véhicule
     /// - Returns: Le document ou nil s'il n'existe pas
-    func fetch(id: UUID, vehicleFolderPath: String) async throws -> Document? {
+    func fetch(id: String, vehicleFolderPath: String) async throws -> Document? {
         print("📖 [DocumentDatabaseRepository] Récupération d'un document")
         print("   └─ Document ID : \(id)")
 
@@ -110,7 +110,7 @@ actor DocumentDatabaseRepository {
     /// Compte le nombre de documents d'un véhicule
     /// - Parameter vehicleId: L'identifiant du véhicule
     /// - Returns: Le nombre de documents
-    func count(vehicleId: UUID) async throws -> Int {
+    func count(vehicleId: String) async throws -> Int {
         try await database.read { db in
             try FileMetadataRecord
                 .where { $0.vehicleId.in([vehicleId]) }
@@ -124,7 +124,7 @@ actor DocumentDatabaseRepository {
     /// - Parameters:
     ///   - document: Le document avec les nouvelles valeurs
     ///   - vehicleId: L'identifiant du véhicule associé
-    func update(document: Document, vehicleId: UUID) async throws {
+    func update(document: Document, vehicleId: String) async throws {
         print("✏️ [DocumentDatabaseRepository] Mise à jour d'un document")
         print("   ├─ Document ID : \(document.id)")
         print("   └─ Nom : \(document.name)")
@@ -143,7 +143,7 @@ actor DocumentDatabaseRepository {
 
     /// Supprime un document spécifique
     /// - Parameter id: L'identifiant du document à supprimer
-    func delete(id: UUID) async throws {
+    func delete(id: String) async throws {
         print("🗑️ [DocumentDatabaseRepository] Suppression d'un document")
         print("   └─ Document ID : \(id)")
 
@@ -156,7 +156,7 @@ actor DocumentDatabaseRepository {
 
     /// Supprime tous les documents d'un véhicule (cascade delete)
     /// - Parameter vehicleId: L'identifiant du véhicule
-    func deleteAll(vehicleId: UUID) async throws {
+    func deleteAll(vehicleId: String) async throws {
         print("🗑️ [DocumentDatabaseRepository] Suppression de tous les documents d'un véhicule")
         print("   └─ Véhicule ID : \(vehicleId)")
 

@@ -45,7 +45,7 @@ actor VehicleDatabaseRepository {
         }
     }
 
-    func fetch(id: UUID) async throws -> Vehicle? {
+    func fetch(id: String) async throws -> Vehicle? {
         try await database.read { db in
             let record = try VehicleRecord.where { $0.id.in([id]) }.fetchOne(db)
             return record?.toDomain()
@@ -59,7 +59,7 @@ actor VehicleDatabaseRepository {
         }
     }
 
-    func fetchWithDocuments(id: UUID) async throws -> Vehicle? {
+    func fetchWithDocuments(id: String) async throws -> Vehicle? {
         try await database.read { db -> Vehicle? in
             guard let vehicleRecord = try VehicleRecord.where { $0.id.in([id]) }.fetchOne(db) else {
                 return nil
@@ -86,7 +86,7 @@ actor VehicleDatabaseRepository {
         }
     }
 
-    func setPrimary(id: UUID) async throws {
+    func setPrimary(id: String) async throws {
         try await database.write { db in
             let records = try VehicleRecord.all.fetchAll(db)
 
@@ -101,7 +101,7 @@ actor VehicleDatabaseRepository {
         }
     }
 
-    func delete(id: UUID) async throws {
+    func delete(id: String) async throws {
         try await database.write { db in
             // 1. Delete all associated documents (cascade delete)
             try FileMetadataRecord

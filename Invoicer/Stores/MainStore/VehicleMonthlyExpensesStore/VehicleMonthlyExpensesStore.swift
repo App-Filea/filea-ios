@@ -13,7 +13,7 @@ struct VehicleMonthlyExpensesStore {
     
     @ObservableState
     struct State: Equatable {
-        @Shared(.selectedVehicle) var selectedVehicle: Vehicle?
+        @Shared(.selectedVehicle) var selectedVehicle: Vehicle
         var currentVehicleMonthlyExpenses: [MonthlyExpense] = []
     }
     
@@ -28,13 +28,10 @@ struct VehicleMonthlyExpensesStore {
         Reduce { state, action in
             switch action {
             case .computeVehicleMontlyExpenses:
-                guard let selectedVehicle = state.selectedVehicle else { return .none }
-                    return .run { send in
-                        let calendar = Calendar.current
-                        let currentYear = calendar.component(.year, from: Date())
-                        let monthlyExpenses = self.statisticsRepository.calculateMonthlyExpenses(selectedVehicle.documents, currentYear)
-                        await send(.vehicleMonthlyExpensesCalculated(monthlyExpenses))
-                    }
+                let calendar = Calendar.current
+                let currentYear = calendar.component(.year, from: Date())
+                let monthlyExpenses = self.statisticsRepository.calculateMonthlyExpenses(state.selectedVehicle.documents, currentYear)
+                return .send(.vehicleMonthlyExpensesCalculated(monthlyExpenses))
             case .vehicleMonthlyExpensesCalculated(let monthlyExpenses):
                 state.currentVehicleMonthlyExpenses = monthlyExpenses
                 return .none

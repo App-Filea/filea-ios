@@ -12,7 +12,7 @@ import Foundation
 struct VehicleDTO: Codable {
     // MARK: - Properties
 
-    var id: UUID
+    var id: String
     var type: String
     var brand: String
     var model: String

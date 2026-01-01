@@ -12,7 +12,7 @@ struct TotalCostVehicleStore {
     
     @ObservableState
     struct State: Equatable {
-        @Shared(.selectedVehicle) var selectedVehicle: Vehicle?
+        @Shared(.selectedVehicle) var selectedVehicle: Vehicle
         var currentVehicleTotalCost: Double = 0
     }
     
@@ -27,11 +27,8 @@ struct TotalCostVehicleStore {
         Reduce { state, action in
             switch action {
             case .computeVehicleTotalCost:
-                guard let selectedVehicle = state.selectedVehicle else { return .none }
-                    return .run { send in
-                        let total = statisticsRepository.calculateTotalCost(selectedVehicle.documents)
-                        await send(.vehicleTotalCostCalculated(total))
-                    }
+                let total = statisticsRepository.calculateTotalCost(state.selectedVehicle.documents)
+                return .send(.vehicleTotalCostCalculated(total))
             case .vehicleTotalCostCalculated(let totalCost):
                 state.currentVehicleTotalCost = totalCost
                 return .none

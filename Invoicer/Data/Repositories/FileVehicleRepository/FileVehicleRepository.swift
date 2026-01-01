@@ -124,7 +124,7 @@ actor FileVehicleRepository {
         logger.info("✅ Véhicule mis à jour avec succès")
     }
 
-    func delete(_ vehicleId: UUID) async throws {
+    func delete(_ vehicleId: String) async throws {
         logger.info("🗑️ Suppression du véhicule: \(vehicleId)")
 
         try await ensureStorageInitialized()
@@ -147,7 +147,7 @@ actor FileVehicleRepository {
         logger.info("✅ Véhicule supprimé avec succès")
     }
 
-    func find(by id: UUID) async throws -> Vehicle? {
+    func find(by id: String) async throws -> Vehicle? {
         let vehicles = try await loadAll()
         return vehicles.first(where: { $0.id == id })
     }

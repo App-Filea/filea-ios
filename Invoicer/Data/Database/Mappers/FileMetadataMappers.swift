@@ -11,7 +11,7 @@ import Foundation
 
 extension Document {
     /// Convertit un Document (domain) vers un FileMetadataRecord (database)
-    func toRecord(vehicleId: UUID) -> FileMetadataRecord {
+    func toRecord(vehicleId: String) -> FileMetadataRecord {
         let url = URL(fileURLWithPath: fileURL)
         let fileName = url.lastPathComponent
         let relativePath = fileName // Pour l'instant, relatif au dossier véhicule
@@ -151,7 +151,7 @@ extension FileMetadataRecord {
 
 extension FileMetadataDTO {
     /// Convertit un FileMetadataDTO (transfer) vers un FileMetadataRecord (database)
-    func toRecord(vehicleId: UUID) -> FileMetadataRecord {
+    func toRecord(vehicleId: String) -> FileMetadataRecord {
         return FileMetadataRecord(
             id: id,
             vehicleId: vehicleId,

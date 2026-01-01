@@ -15,7 +15,7 @@ import PDFKit
 struct AddDocumentStore {
     @ObservableState
     struct State: Equatable {
-        let vehicleId: UUID
+        let vehicleId: String
         var viewState: ViewState
         var isLoading = false
         var showDocumentScanView = false
@@ -26,9 +26,9 @@ struct AddDocumentStore {
         var selectedFileName: String?
         var showValidationError = false
         @Shared(.vehicles) var vehicles: [Vehicle] = []
-        @Shared(.selectedVehicle) var selectedVehicle: Vehicle?
+        @Shared(.selectedVehicle) var selectedVehicle: Vehicle
         
-        static func initialState(vehicleId: UUID, viewState: ViewState = .modeChoice) -> Self {
+        static func initialState(vehicleId: String, viewState: ViewState = .modeChoice) -> Self {
             .init(vehicleId: vehicleId, viewState: viewState)
         }
 
@@ -227,7 +227,7 @@ struct AddDocumentStore {
 
                             // Also update selectedVehicle if it's the same vehicle
                             await selectedVehicle.withLock { selected in
-                                if selected?.id == vehicleId {
+                                if selected.id == vehicleId {
                                     selected = updatedVehicle
                                 }
                             }

@@ -16,7 +16,7 @@ struct VehicleRecord {
     // MARK: - Properties
 
     /// Identifiant unique du véhicule
-    let id: UUID
+    let id: String
 
     /// Type du véhicule (car, motorcycle, truck, etc.)
     var type: String

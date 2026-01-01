@@ -32,7 +32,7 @@ enum DocumentType: String, Codable, CaseIterable, Identifiable, Hashable, Custom
 }
 
 struct Document: Codable, Equatable, Identifiable {
-    let id: UUID
+    let id: String
     var fileURL: String
     var name: String
     var date: Date
@@ -40,8 +40,8 @@ struct Document: Codable, Equatable, Identifiable {
     var type: DocumentType
     var amount: Double?
 
-    init(id: UUID? = nil, fileURL: String, name: String, date: Date, mileage: String, type: DocumentType, amount: Double? = nil) {
-        self.id = id ?? UUID()
+    init(id: String? = nil, fileURL: String, name: String, date: Date, mileage: String, type: DocumentType, amount: Double? = nil) {
+        self.id = id ?? String()
         self.fileURL = fileURL
         self.name = name
         self.date = date

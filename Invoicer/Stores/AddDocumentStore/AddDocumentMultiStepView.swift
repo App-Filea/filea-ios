@@ -284,11 +284,11 @@ struct AddDocumentMultiStepView: View {
 }
 
 #Preview("ModeChoice") {
-    AddDocumentMultiStepView(store: Store(initialState: AddDocumentStore.State.initialState(vehicleId: UUID())) {
+    AddDocumentMultiStepView(store: Store(initialState: AddDocumentStore.State.initialState(vehicleId: String())) {
             AddDocumentStore()
         })
 }
 
 #Preview("Metadata") {
-    AddDocumentMultiStepView(store: Store(initialState: AddDocumentStore.State.initialState(vehicleId: UUID(), viewState: .metadataForm), reducer: { AddDocumentStore() }))
+    AddDocumentMultiStepView(store: Store(initialState: AddDocumentStore.State.initialState(vehicleId: String(), viewState: .metadataForm), reducer: { AddDocumentStore() }))
 }

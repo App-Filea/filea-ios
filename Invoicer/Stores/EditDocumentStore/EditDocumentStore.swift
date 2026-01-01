@@ -13,12 +13,12 @@ import SwiftUI
 struct EditDocumentStore {
     @ObservableState
     struct State: Equatable {
-        let vehicleId: UUID
-        let documentId: UUID
+        let vehicleId: String
+        let documentId: String
         var originalDocument: Document
         var isLoading = false
         @Shared(.vehicles) var vehicles: [Vehicle] = []
-        @Shared(.selectedVehicle) var selectedVehicle: Vehicle?
+        @Shared(.selectedVehicle) var selectedVehicle: Vehicle
         
         // Editing fields
         var name: String
@@ -27,7 +27,7 @@ struct EditDocumentStore {
         var type: DocumentType
         var amount: String
 
-        init(vehicleId: UUID, document: Document) {
+        init(vehicleId: String, document: Document) {
             self.vehicleId = vehicleId
             self.documentId = document.id
             self.originalDocument = document

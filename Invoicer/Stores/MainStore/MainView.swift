@@ -79,13 +79,13 @@ struct MainView: View {
                                 .font(Typography.title3)
                                 .foregroundColor(ColorTokens.textPrimary)
 
-                            Text("\(store.currentVehicleDocuments.count) documents")
+                            Text("\(store.selectedVehicle.documents.count) documents")
                                 .font(Typography.title2.weight(.bold))
                                 .foregroundColor(ColorTokens.textPrimary)
                         }
 
                         // Documents list
-                        if store.currentVehicleDocuments.isEmpty {
+                        if store.selectedVehicle.documents.isEmpty {
                             emptyDocumentsView
                         } else {
                             documentsListView
@@ -134,7 +134,7 @@ struct MainView: View {
     // MARK: - Documents List View
     private var documentsListView: some View {
         LazyVStack(spacing: Spacing.sm) {
-            ForEach(store.currentVehicleDocuments.groupedByMonth(), id: \.title) { section in
+            ForEach(store.selectedVehicle.documents.groupedByMonth(), id: \.title) { section in
                 VStack(alignment: .leading, spacing: Spacing.sm) {
                     Text(section.title)
                         .titleGroup()
@@ -160,9 +160,7 @@ struct MainView: View {
                               systemImage: "arrow.triangle.2.circlepath")
                     }
                     Button(action: {
-                        if let vehicle = store.currentVehicle {
-                            store.send(.showVehicleDetail(vehicle))
-                        }
+                        store.send(.showVehicleDetail(store.selectedVehicle))
                     }) {
                         Label("Voir les détails",
                               systemImage: "eye")
@@ -175,26 +173,24 @@ struct MainView: View {
                 } label: {
                     VStack(alignment: .leading, spacing: Spacing.xxs) {
                         HStack(spacing: Spacing.xxs) {
-                            Text(store.currentVehicle?.isPrimary == true ? "Véhicule principal" : "Véhicule secondaire")
+                            Text(store.selectedVehicle.isPrimary == true ? "Véhicule principal" : "Véhicule secondaire")
                             Image(systemName: "arrow.triangle.2.circlepath")
                                 .rotationEffect(.degrees(90))
                         }
                         .font(Typography.footnote)
                         .foregroundColor(ColorTokens.textSecondary)
 
-                        if let vehicle = store.currentVehicle {
                             HStack(alignment: .firstTextBaseline, spacing: Spacing.xs) {
-                                Text(vehicle.brand.uppercased())
+                                Text(store.selectedVehicle.brand.uppercased())
                                     .font(Typography.largeTitle)
                                     .fontWeight(.black)
                                     .kerning(-1)
                                     .foregroundColor(ColorTokens.textPrimary)
 
-                                Text(vehicle.model)
+                                Text(store.selectedVehicle.model)
                                     .font(Typography.title3)
                                     .foregroundColor(ColorTokens.textPrimary)
                             }
-                        }
                     }
                 }
                 .menuActionDismissBehavior(.automatic)
@@ -215,13 +211,12 @@ struct MainView: View {
 }
 
 #Preview() {
-    @Dependency(\.uuid) var uuid
     NavigationView {
         MainView(
             store: Store(
                 initialState: MainStore.State(
                     selectedVehicle: Shared(value: .init(
-                        id: uuid(),
+                        id: "String",
                         brand: "Lexus",
                         model: "CT200H",
                         mileage: "120000",

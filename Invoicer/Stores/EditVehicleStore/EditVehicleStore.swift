@@ -12,7 +12,6 @@ import Foundation
 struct EditVehicleStore {
     @ObservableState
     struct State: Equatable {
-        let originalVehicle: Vehicle
         var type: VehicleType
         var brand: String
         var model: String
@@ -20,43 +19,34 @@ struct EditVehicleStore {
         var registrationDate: Date
         var plate: String
         var isPrimary: Bool
-        var isLoading = false
+        
         @Shared(.vehicles) var vehicles: [Vehicle] = []
-        @Shared(.selectedVehicle) var selectedVehicle: Vehicle?
-        var updatedVehicle: Vehicle?
+        @Shared(.selectedVehicle) var selectedVehicle: Vehicle
 
-        init(vehicle: Vehicle) {
-            self.originalVehicle = vehicle
-            self.type = vehicle.type
-            self.brand = vehicle.brand
-            self.model = vehicle.model
-            self.mileage = vehicle.mileage ?? ""
-            self.registrationDate = vehicle.registrationDate
-            self.plate = vehicle.plate
-            self.isPrimary = vehicle.isPrimary
-        }
-
-        // Computed property pour avoir le véhicule avec les changements actuels
-        var vehicle: Vehicle {
-            updatedVehicle ?? Vehicle(
-                id: originalVehicle.id,
-                type: type,
-                brand: brand,
-                model: model,
-                mileage: mileage.isEmpty ? nil : mileage,
-                registrationDate: registrationDate,
-                plate: plate,
-                isPrimary: isPrimary,
-                documents: originalVehicle.documents
-            )
+        init() {
+            @Shared(.selectedVehicle) var selectedVehicle: Vehicle
+            self.type = selectedVehicle.type
+            self.brand = selectedVehicle.brand
+            self.model = selectedVehicle.model
+            self.mileage = selectedVehicle.mileage ?? ""
+            self.registrationDate = selectedVehicle.registrationDate
+            self.plate = selectedVehicle.plate
+            self.isPrimary = selectedVehicle.isPrimary
         }
     }
     
     enum Action: Equatable, BindableAction {
         case binding(BindingAction<State>)
+        case view(ActionView)
         case updateVehicle
-        case vehicleUpdated
-        case goBack
+        case updateShareds(selectedVehicle: Vehicle, vehiclesList: [Vehicle])
+        case dismiss
+        
+        enum ActionView: Equatable {
+            case saveButtonTapped
+            case cancelButtonTapped
+            case backButtonTapped
+        }
     }
     
     @Dependency(\.vehicleRepository) var vehicleRepository
@@ -67,25 +57,18 @@ struct EditVehicleStore {
         
         Reduce { state, action in
             switch action {
-            case .binding:
-                return .none
+            case .binding: return .none
+                
+            case .view(let actionView):
+                switch actionView {
+                case .saveButtonTapped: return .send(.updateVehicle)
+                    case .cancelButtonTapped, .backButtonTapped: return .send(.dismiss)
+                }
                 
             case .updateVehicle:
-                state.isLoading = true
-
-                // Si le véhicule devient principal, mettre tous les autres en secondaire
-                if state.isPrimary && !state.originalVehicle.isPrimary {
-                    state.$vehicles.withLock { vehicles in
-                        for index in vehicles.indices {
-                            if vehicles[index].id != state.originalVehicle.id {
-                                vehicles[index].isPrimary = false
-                            }
-                        }
-                    }
-                }
-
+                var updatedVehiclesList: [Vehicle] = state.vehicles
                 let updatedVehicle = Vehicle(
-                    id: state.originalVehicle.id,
+                    id: state.selectedVehicle.id,
                     type: state.type,
                     brand: state.brand,
                     model: state.model,
@@ -93,61 +76,33 @@ struct EditVehicleStore {
                     registrationDate: state.registrationDate,
                     plate: state.plate,
                     isPrimary: state.isPrimary,
-                    documents: state.originalVehicle.documents
+                    documents: state.selectedVehicle.documents
                 )
+                
+                for index in updatedVehiclesList.indices {
+                    if updatedVehiclesList[index].id == state.selectedVehicle.id {
+                        updatedVehiclesList[index] = updatedVehicle
+                    } else {
+                        updatedVehiclesList[index].isPrimary = !state.isPrimary
+                    }
+                }
 
-                return .run { [vehicles = state.vehicles, originalVehicleId = state.originalVehicle.id] send in
+                return .run { [updatedVehiclesList = updatedVehiclesList] send in
                     do {
-                        // Sauvegarder tous les véhicules mis à jour
-                        for existingVehicle in vehicles {
-                            if existingVehicle.id != originalVehicleId {
-                                try await vehicleRepository.updateVehicle(existingVehicle)
-                            }
+                        for vehicle in updatedVehiclesList {
+                            try await vehicleRepository.updateVehicle(vehicle)
                         }
-                        // Mettre à jour le véhicule actuel
-                        try await vehicleRepository.updateVehicle(updatedVehicle)
-                        await send(.vehicleUpdated)
-                    } catch {
-                        print("❌ [EditVehicleStore] Erreur lors de la mise à jour: \(error.localizedDescription)")
-                        // Continue anyway to update UI
-                        await send(.vehicleUpdated)
-                    }
+                        await send(.updateShareds(selectedVehicle: updatedVehicle, vehiclesList: updatedVehiclesList))
+                    } catch {}
                 }
 
-            case .vehicleUpdated:
-                state.isLoading = false
-                // Créer le véhicule mis à jour et le stocker
-                let updatedVehicle = Vehicle(
-                    id: state.originalVehicle.id,
-                    type: state.type,
-                    brand: state.brand,
-                    model: state.model,
-                    mileage: state.mileage.isEmpty ? nil : state.mileage,
-                    registrationDate: state.registrationDate,
-                    plate: state.plate,
-                    isPrimary: state.isPrimary,
-                    documents: state.originalVehicle.documents
-                )
-                state.updatedVehicle = updatedVehicle
-
-                // Mettre à jour la liste partagée
-                state.$vehicles.withLock { vehicles in
-                    if let index = vehicles.firstIndex(where: { $0.id == state.originalVehicle.id }) {
-                        vehicles[index] = updatedVehicle
-                    }
-                }
-
-                // CRUCIAL: Mettre à jour selectedVehicle directement
+            case .updateShareds(let updatedVehicle, let updatedVehiclesList):
+                state.$vehicles.withLock { $0 = updatedVehiclesList }
                 state.$selectedVehicle.withLock { $0 = updatedVehicle }
 
-                return .run { _ in
-                    await dismiss()
-                }
+                return .send(.dismiss)
                 
-            case .goBack:
-                return .run { _ in
-                    await dismiss()
-                }
+            case .dismiss: return .run { _ in await dismiss() }
             }
         }
     }

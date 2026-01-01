@@ -133,7 +133,7 @@ struct EditDocumentView: View {
 #Preview {
     NavigationView {
         EditDocumentView(store: Store(initialState: EditDocumentStore.State(
-            vehicleId: UUID(),
+            vehicleId: String(),
             document: Document(
                 fileURL: "/path/to/document.jpg",
                 name: "Test Document",

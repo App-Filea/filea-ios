@@ -601,7 +601,7 @@ final class FileStorageService: @unchecked Sendable {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd_HH-mm-ss-SSS"
         let timestamp = dateFormatter.string(from: Date())
-        let uniqueId = UUID().uuidString.prefix(8) // Add 8 chars from String for extra uniqueness
+        let uniqueId = UUID().uuidString.lowercased().prefix(8) // Add 8 chars from String for extra uniqueness
         let filename = "document_\(timestamp)_\(uniqueId).jpg"
         
         let vehicleDirectoryURL = vehiclesDirectory.appendingPathComponent("\(vehicle.brand)\(vehicle.model)")

@@ -252,7 +252,7 @@ struct AddDocumentStore {
 
                 return .run { send in
                     let pdfURL = FileManager.default.temporaryDirectory
-                        .appendingPathComponent(UUID().uuidString)
+                        .appendingPathComponent(UUID().uuidString.lowercased())
                         .appendingPathExtension("pdf")
 
                     // Create PDF from images

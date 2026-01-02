@@ -266,7 +266,7 @@ final class DocumentRepository: DocumentRepositoryProtocol, @unchecked Sendable 
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd_HH-mm-ss-SSS"
         let timestamp = dateFormatter.string(from: Date())
-        let uniqueId = UUID().uuidString.prefix(8)
+        let uniqueId = UUID().uuidString.lowercased().prefix(8)
 
         if fileExtension.isEmpty {
             return "document_\(timestamp)_\(uniqueId)"

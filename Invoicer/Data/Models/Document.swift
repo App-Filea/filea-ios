@@ -41,7 +41,7 @@ struct Document: Codable, Equatable, Identifiable {
     var amount: Double?
 
     init(id: String? = nil, fileURL: String, name: String, date: Date, mileage: String, type: DocumentType, amount: Double? = nil) {
-        self.id = id ?? String()
+        self.id = id ?? UUID().uuidString.lowercased()
         self.fileURL = fileURL
         self.name = name
         self.date = date

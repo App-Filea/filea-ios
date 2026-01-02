@@ -14,7 +14,7 @@
 //    override func setUp() async throws {
 //        try await super.setUp()
 //
-//        testDirectory = URL(fileURLWithPath: "/tmp/test-vehicles-\(UUID().uuidString)")
+//        testDirectory = URL(fileURLWithPath: "/tmp/test-vehicles-\(UUID().uuidString.lowercased())")
 //        try FileManager.default.createDirectory(at: testDirectory, withIntermediateDirectories: true)
 //
 //        let vehiclesFileURL = testDirectory.appendingPathComponent(AppConstants.vehiclesFileName)
@@ -175,7 +175,7 @@
 //
 //    func test_find_returnsNilWhenNotFound() async throws {
 //        givenRepository()
-//        let nonExistentId = UUID().uuidString
+//        let nonExistentId = UUID().uuidString.lowercased()
 //        try await whenFindingVehicle(id: nonExistentId)
 //
 //        thenVehicleShouldBeNil()
@@ -190,7 +190,7 @@
 //        var vehicleWithOrphan = vehicle
 //        vehicleWithOrphan.documents = [
 //            Document(
-//                id: UUID().uuidString,
+//                id: UUID().uuidString.lowercased(),
 //                fileURL: orphanedDocumentURL,
 //                name: "Orphaned Doc",
 //                date: Date(),

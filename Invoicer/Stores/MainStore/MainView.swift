@@ -37,12 +37,12 @@ struct MainView: View {
             VehiclesListView(store: store)
                 .presentationDetents([.large])
         }  
-        .fullScreenCover(item: $store.scope(state: \.addVehicle, action: \.addVehicle)) { store in
-            AddVehicleView(store: store)
+        .fullScreenCover(item: $store.scope(state: \.addFirstVehicle, action: \.addFirstVehicle)) { store in
+            AddFirstVehicleView(store: store)
                 .presentationDetents([.large])
         }
         .fullScreenCover(item: $store.scope(state: \.addDocument, action: \.addDocument)) { store in
-            AddDocumentMultiStepView(store: store)
+            AddDocumentView(store: store)
                 .presentationDetents([.large])
         }
     }

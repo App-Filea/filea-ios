@@ -18,7 +18,7 @@ struct MainStore {
         @Presents var vehicleDetail: VehicleDetailsStore.State?
         @Presents var deleteAlert: AlertState<Action.Alert>?
         @Presents var vehiclesList: VehiclesListStore.State?
-        @Presents var addVehicle: AddVehicleStore.State?
+        @Presents var addFirstVehicle: AddFirstVehicleStore.State?
         @Presents var addDocument: AddDocumentStore.State?
 
         var warningVehicle: WarningVehicleStore.State = WarningVehicleStore.State()
@@ -38,15 +38,14 @@ struct MainStore {
         case onAppear
         case vehicleDetail(PresentationAction<VehicleDetailsStore.Action>)
         case vehiclesList(PresentationAction<VehiclesListStore.Action>)
-        case addVehicle(PresentationAction<AddVehicleStore.Action>)
+        case addFirstVehicle(PresentationAction<AddFirstVehicleStore.Action>)
         case addDocument(PresentationAction<AddDocumentStore.Action>)
-        case presentAddVehicleView
+        case presentAddFirstVehicleView
         case showVehicleDetail(Vehicle)
         case presentVehiclesListView
         case showSettings
         case showAddDocument
         case showDocumentDetail(Document)
-        case showEditVehicle
         case deleteCurrentVehicle
         case deleteAlert(PresentationAction<Alert>)
         case updateAllVehicles([Vehicle])
@@ -75,7 +74,7 @@ struct MainStore {
             case .view(let actionView):
                 switch actionView {
                 case .openCreateVehicleButtonTapped:
-                    return .send(.presentAddVehicleView)
+                    return .send(.presentAddFirstVehicleView)
                 case .deleteVehicleButtonTapped:
                     return .send(.deleteCurrentVehicle)
                 }
@@ -102,15 +101,18 @@ struct MainStore {
                 state.vehiclesList = VehiclesListStore.State()
                 return .none
 
-            case .presentAddVehicleView:
-                // Bloquer si le storage n'est pas configuré
+            case .presentAddFirstVehicleView:
                 guard state.isStorageConfigured else {
                     return .none
                 }
-                state.addVehicle = AddVehicleStore.State()
+                state.addFirstVehicle = AddFirstVehicleStore.State()
                 return .none
                 
-            case .addVehicle(.presented(.newVehicleAdded)):
+            case .addFirstVehicle(.presented(.firstVehicleAdded)):
+                guard let firstVehicle = state.vehicles.first else {
+                    return .none
+                }
+                state.$selectedVehicle.withLock { $0 = firstVehicle }
                 return .send(.setupVehicleStatistics)
 
 //            case .showSettings:
@@ -124,11 +126,7 @@ struct MainStore {
             case .showDocumentDetail:
                 // Navigation handled by AppStore+Path
                 return .none
-//
-//            case .showEditVehicle:
-//                // Navigation handled by AppStore+Path
-//                return .none
-//
+
             case .deleteCurrentVehicle:
                 state.deleteAlert = AlertState.deleteCurrentVehicleAlert()
                 return .none
@@ -164,8 +162,8 @@ struct MainStore {
         .ifLet(\.$vehiclesList, action: \.vehiclesList) {
             VehiclesListStore()
         }
-        .ifLet(\.$addVehicle, action: \.addVehicle) {
-            AddVehicleStore()
+        .ifLet(\.$addFirstVehicle, action: \.addFirstVehicle) {
+            AddFirstVehicleStore()
         }
         .ifLet(\.$addDocument, action: \.addDocument) {
             AddDocumentStore()

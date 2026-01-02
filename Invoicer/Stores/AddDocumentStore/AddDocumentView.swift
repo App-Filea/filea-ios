@@ -10,7 +10,7 @@ import ComposableArchitecture
 import PhotosUI
 import QuickLook
 
-struct AddDocumentMultiStepView: View {
+struct AddDocumentView: View {
     @Bindable var store: StoreOf<AddDocumentStore>
     @State private var previewURL: URL?
 
@@ -283,11 +283,11 @@ struct AddDocumentMultiStepView: View {
 }
 
 #Preview("ModeChoice") {
-    AddDocumentMultiStepView(store: Store(initialState: AddDocumentStore.State.initialState(vehicleId: String())) {
+    AddDocumentView(store: Store(initialState: AddDocumentStore.State.initialState(vehicleId: String())) {
             AddDocumentStore()
         })
 }
 
 #Preview("Metadata") {
-    AddDocumentMultiStepView(store: Store(initialState: AddDocumentStore.State.initialState(vehicleId: String(), viewState: .metadataForm), reducer: { AddDocumentStore() }))
+    AddDocumentView(store: Store(initialState: AddDocumentStore.State.initialState(vehicleId: String(), viewState: .metadataForm), reducer: { AddDocumentStore() }))
 }

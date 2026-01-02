@@ -1,33 +1,16 @@
 //
-//  AddVehicleStore.swift
+//  AddFirstVehicleStore.swift
 //  Invoicer
 //
-//  Created by Nicolas Barbosa on 06/09/2025.
+//  Created by Nicolas Barbosa on 02/01/2026.
 //
 
 import ComposableArchitecture
 import Foundation
 import UIKit
 
-struct VehicleFieldsValidationErrors: OptionSet, Sendable, Equatable {
-    let rawValue: Int
-
-    static let brandEmpty = VehicleFieldsValidationErrors(rawValue: 1 << 0)
-    static let modelEmpty = VehicleFieldsValidationErrors(rawValue: 1 << 1)
-    static let plateEmpty = VehicleFieldsValidationErrors(rawValue: 1 << 2)
-
-    func message(for error: VehicleFieldsValidationErrors) -> String {
-        switch error {
-        case .brandEmpty: return "La marque est requise"
-        case .modelEmpty: return "Le modèle est requis"
-        case .plateEmpty: return "La plaque d'immatriculation est requise"
-        default: return ""
-        }
-    }
-}
-
 @Reducer
-struct AddVehicleStore {
+struct AddFirstVehicleStore {
 
     @ObservableState
     struct State: Equatable {
@@ -43,7 +26,6 @@ struct AddVehicleStore {
         
         @Shared(.vehicles) var vehicles: [Vehicle] = []
 //        @Presents var scanStore: VehicleCardDocumentScanStore.State?
-        @Presents var alert: AlertState<Action.Alert>?
 
         init(
             type: VehicleType = .car,
@@ -69,17 +51,13 @@ struct AddVehicleStore {
     enum Action: Equatable, BindableAction {
         case view(ActionView)
         case binding(BindingAction<State>)
-
-        case verifyPrimaryVehicleExistance
-        case showIsPrimaryAlert
         case saveVehicle
         case saveVehicleFailed(String)
         case updateVehiclesList(vehicles: [Vehicle])
 //        case openScanStore
 //        case scanStore(PresentationAction<VehicleCardDocumentScanStore.Action>)
 //        case applyScanData(ScannedVehicleData)
-        case alert(PresentationAction<Alert>)
-        case newVehicleAdded
+        case firstVehicleAdded
         case dismiss
 
         enum ActionView: Equatable {
@@ -110,7 +88,7 @@ struct AddVehicleStore {
                     guard state.validationErrors.isEmpty else {
                         return .none
                     }
-                    return .send(.verifyPrimaryVehicleExistance)
+                    return .send(.saveVehicle)
                     
 ////                case .scanButtonTapped:
 ////                    return .send(.openScanStore)
@@ -142,27 +120,6 @@ struct AddVehicleStore {
 ////                    state.registrationDate = date
 ////                }
 ////                return .none
-            case .verifyPrimaryVehicleExistance:
-                return .run { [isPrimary = state.isPrimary] send in
-                    if await vehicleRepository.hasPrimaryVehicle() && isPrimary {
-                        await send(.showIsPrimaryAlert)
-                    } else {
-                        await send(.saveVehicle)
-                    }
-                }
-                
-            case .showIsPrimaryAlert:
-                state.alert = AlertState.saveNewPrimaryVehicleAlert()
-                return .none
-                
-            case .alert(.presented(.yes)):
-                state.alert = nil
-                return .send(.saveVehicle)
-                
-            case .alert(.presented(.no)):
-                state.alert = nil
-                return .none
-                
             case .saveVehicle:
                 let newVehicle = Vehicle(
                     id: self.uuid().uuidString.lowercased(),
@@ -195,7 +152,7 @@ struct AddVehicleStore {
                 
             case .updateVehiclesList(let vehicles):
                 state.$vehicles.withLock { $0 = vehicles }
-                return .merge([.send(.newVehicleAdded), // TODO: test newVehicleAdded
+                return .merge([.send(.firstVehicleAdded),
                                .send(.dismiss)])
 
             case .saveVehicleFailed:

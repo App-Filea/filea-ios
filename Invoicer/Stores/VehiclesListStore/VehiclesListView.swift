@@ -46,8 +46,8 @@ struct VehiclesListView: View {
                 }
         }
         .navigationBarBackButtonHidden()
-        .sheet(item: $store.scope(state: \.addVehicle, action: \.addVehicle)) { store in
-                AddVehicleMultiStepView(store: store)
+        .fullScreenCover(item: $store.scope(state: \.addVehicle, action: \.addVehicle)) { store in
+            AddVehicleView(store: store)
                     .presentationDetents([.large])
         }
     }

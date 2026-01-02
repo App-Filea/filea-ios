@@ -243,14 +243,22 @@ extension View {
     }
 }
 
-extension View {
-    func fieldCard() -> some View {
-        self
+struct FieldCardModifier: ViewModifier {
+    let isError: Bool
+
+    func body(content: Content) -> some View {
+        content
             .background(Color(.systemBackground))
             .cornerRadius(16)
             .overlay(
                 RoundedRectangle(cornerRadius: 16)
-                    .stroke(Color(.separator), lineWidth: 1)
+                    .stroke(isError ? Color.red : Color(.separator), lineWidth: 1)
             )
+    }
+}
+
+extension View {
+    func fieldCard(isError: Bool = false) -> some View {
+        modifier(FieldCardModifier(isError: isError))
     }
 }

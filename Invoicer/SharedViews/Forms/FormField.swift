@@ -10,15 +10,18 @@ import SwiftUI
 struct FormField<Content: View>: View {
     var titleLabel: String?
     var infoLabel: String?
+    var isError: Bool
     var content: Content
     
     init(
         titleLabel: String? = nil,
         infoLabel: String? = nil,
+        isError: Bool = false,
         @ViewBuilder content: () -> Content
     ) {
         self.titleLabel = titleLabel
         self.infoLabel = infoLabel
+        self.isError = isError
         self.content = content()
     }
     
@@ -32,9 +35,12 @@ struct FormField<Content: View>: View {
             }
             
             VStack(spacing: 0) {
-                content
-                    .frame(minHeight: 35, maxHeight: 35)
-                    .padding(16)
+                VStack(spacing: 4) {
+                    content
+                        .frame(minHeight: 35, maxHeight: 35)
+                        .padding(.horizontal, 16)
+                }
+                .padding(.vertical, 8)
                 
                 if let infoLabel = infoLabel {
                     HStack(alignment: .top, spacing: 8) {
@@ -49,12 +55,22 @@ struct FormField<Content: View>: View {
                         
                         Spacer()
                     }
-                    .padding(12)
-                    .padding(.horizontal, 4)
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 16)
                     .background(Color(.systemGray6))
                 }
             }
-            .fieldCard()
+            .fieldCard(isError: isError)
+            
+            if isError {
+                Text("Le champ ne doit pas être vide.")
+                    .font(.caption)
+                    .italic()
+                    .lineLimit(1)
+                    .foregroundStyle(Color.red)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 16)
+            }
         }
     }
 }
@@ -77,6 +93,18 @@ struct FormField<Content: View>: View {
             .pickerStyle(.menu)
             .labelsHidden()
         }
+    })
+    .padding()
+}
+
+#Preview("Error Textfield") {
+    FormField(titleLabel: "TitleLabel",
+              infoLabel: "InfoLabel",
+              isError: true,
+              content: {
+        TextField("placeholder", text: .constant("test"))
+            .font(.system(size: 17))
+            .multilineTextAlignment(.leading)
     })
     .padding()
 }

@@ -115,6 +115,32 @@ class EditVehicleStore_Spec: XCTestCase {
         }
     }
     
+    func test_assert_that_validation_error_is_show_according_wrong_fields() async {
+        await assertThatFields(brand: "", model: "", plate: "", makesError: [.brandEmpty, .modelEmpty, .plateEmpty])
+        await assertThatFields(brand: "", model: "", plate: "Plate", makesError: [.brandEmpty, .modelEmpty])
+        await assertThatFields(brand: "", model: "Model", plate: "", makesError: [.brandEmpty, .plateEmpty])
+        await assertThatFields(brand: "", model: "Model", plate: "Plate", makesError: [.brandEmpty])
+        await assertThatFields(brand: "Brand", model: "", plate: "", makesError: [.modelEmpty, .plateEmpty])
+        await assertThatFields(brand: "Brand", model: "", plate: "Plate", makesError: [.modelEmpty])
+        await assertThatFields(brand: "Brand", model: "Model", plate: "", makesError: [.plateEmpty])
+    }
+    
+    func test_Removes_error_when_saving_a_second_time() async {
+        @Shared(.selectedVehicle) var selectedVehicle: Vehicle = .make(brand: "", model: "Model", plate: "Plate")
+        givenStore()
+        store.exhaustivity = .off
+        await store.send(.view(.saveButtonTapped)) {
+            $0.validationErrors = [.brandEmpty]
+        }
+        await store.send(.binding(.set(\.brand, "Brand"))) {
+            $0.brand = "Brand"
+        }
+        await store.send(.view(.saveButtonTapped)) {
+            $0.validationErrors = []
+        }
+        await store.receive(.updateVehicle)
+    }
+    
     private func givenStore() {
         store = TestStore(initialState: EditVehicleStore.State(),
                           reducer: { EditVehicleStore() },
@@ -122,5 +148,19 @@ class EditVehicleStore_Spec: XCTestCase {
             $0.vehicleRepository.updateVehicle = { _ in }
         })
     }
+    
+    private func assertThatFields(brand: String, model: String, plate: String, makesError errors: VehicleFieldsValidationErrors) async {
+        @Shared(.selectedVehicle) var selectedVehicle: Vehicle
+        
+        $selectedVehicle.withLock {
+            $0 = .make(brand: brand, model: model, plate: plate)
+        }
+        
+        givenStore()
+        await store.send(.view(.saveButtonTapped)) {
+            $0.validationErrors = errors
+        }
+    }
+    
     private var store: TestStoreOf<EditVehicleStore>!
 }

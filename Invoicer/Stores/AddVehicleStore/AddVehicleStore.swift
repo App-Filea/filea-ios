@@ -9,61 +9,60 @@ import ComposableArchitecture
 import Foundation
 import UIKit
 
+struct VehicleFieldsValidationErrors: OptionSet, Sendable, Equatable {
+    let rawValue: Int
+
+    static let brandEmpty = VehicleFieldsValidationErrors(rawValue: 1 << 0)
+    static let modelEmpty = VehicleFieldsValidationErrors(rawValue: 1 << 1)
+    static let plateEmpty = VehicleFieldsValidationErrors(rawValue: 1 << 2)
+
+    func message(for error: VehicleFieldsValidationErrors) -> String {
+        switch error {
+        case .brandEmpty: return "La marque est requise"
+        case .modelEmpty: return "Le modèle est requis"
+        case .plateEmpty: return "La plaque d'immatriculation est requise"
+        default: return ""
+        }
+    }
+}
+
 @Reducer
 struct AddVehicleStore {
 
     @ObservableState
     struct State: Equatable {
-        var vehicleType: VehicleType? = nil
-        var brand: String = ""
-        var model: String = ""
-        var plate: String = ""
+        var type: VehicleType
+        var brand: String
+        var model: String
+        var plate: String
         var registrationDate: Date
-        var mileage: String = ""
-        var isPrimary: Bool = false
-        var isLoading = false
-        var showErrorAlert: Bool = false
-        var errorMessage: String? = nil
+        var mileage: String
+        var isPrimary: Bool
+        
+        var validationErrors: VehicleFieldsValidationErrors = []
+        
         @Shared(.vehicles) var vehicles: [Vehicle] = []
-        @Shared(.selectedVehicle) var selectedVehicle: Vehicle
-        @Presents var scanStore: VehicleCardDocumentScanStore.State?
+//        @Presents var scanStore: VehicleCardDocumentScanStore.State?
         @Presents var alert: AlertState<Action.Alert>?
 
         init(
-            vehicleType: VehicleType? = nil,
+            type: VehicleType = .car,
             brand: String = "",
             model: String = "",
             plate: String = "",
             registrationDate: Date? = nil,
             mileage: String = "",
-            isPrimary: Bool = false
+            isPrimary: Bool = true
         ) {
             @Dependency(\.date) var date
 
-            self.vehicleType = vehicleType
+            self.type = type
             self.brand = brand
             self.model = model
             self.plate = plate
             self.registrationDate = registrationDate ?? date.now
             self.mileage = mileage
             self.isPrimary = isPrimary
-            self._vehicles = Shared(.vehicles)
-        }
-
-        // MARK: - Computed Properties
-
-        var existingPrimaryVehicle: Vehicle? {
-            vehicles.first(where: { $0.isPrimary })
-        }
-
-        var isFormValid: Bool {
-            !brand.isEmpty &&
-            !model.isEmpty &&
-            !plate.isEmpty
-        }
-
-        var shouldShowPrimaryWarning: Bool {
-            isPrimary && existingPrimaryVehicle != nil
         }
     }
 
@@ -75,18 +74,19 @@ struct AddVehicleStore {
         case showIsPrimaryAlert
         case saveVehicle
         case saveVehicleFailed(String)
-        case updateVehiclesListAndSetNewVehicleAsSelected(vehicles: [Vehicle], newVehicle: Vehicle)
+        case updateVehiclesList(vehicles: [Vehicle])
         case cancelCreation
-        case openScanStore
-        case scanStore(PresentationAction<VehicleCardDocumentScanStore.Action>)
-        case applyScanData(ScannedVehicleData)
+//        case openScanStore
+//        case scanStore(PresentationAction<VehicleCardDocumentScanStore.Action>)
+//        case applyScanData(ScannedVehicleData)
         case alert(PresentationAction<Alert>)
         case newVehicleAdded
         case dismiss
 
         enum ActionView: Equatable {
-            case saveVehicleButtonTapped
-            case scanButtonTapped
+            case cancelButtonTapped
+            case saveButtonTapped
+//            case scanButtonTapped
         }
 
         enum Alert: Equatable {
@@ -105,39 +105,44 @@ struct AddVehicleStore {
             switch action {
             case .view(let actionView):
                 switch actionView {
-                case .saveVehicleButtonTapped:
+                case .cancelButtonTapped: return .send(.dismiss)
+                case .saveButtonTapped:
+                    state.validationErrors = validateFields(state)
+                    guard state.validationErrors.isEmpty else {
+                        return .none
+                    }
                     return .send(.verifyPrimaryVehicleExistance)
                     
-                case .scanButtonTapped:
-                    return .send(.openScanStore)
+////                case .scanButtonTapped:
+////                    return .send(.openScanStore)
                 }
 
-            case .openScanStore:
-                state.scanStore = VehicleCardDocumentScanStore.State()
-                return .none
-
-            case .scanStore(.presented(.confirmData)):
-                if let extractedData = state.scanStore?.extractedData {
-                    return .send(.applyScanData(extractedData))
-                }
-                return .none
-
-            case .applyScanData(let data):
-                state.scanStore = nil
-
-                if let brand = data.brand {
-                    state.brand = brand
-                }
-                if let model = data.model {
-                    state.model = model
-                }
-                if let plate = data.plate {
-                    state.plate = plate
-                }
-                if let date = data.registrationDate {
-                    state.registrationDate = date
-                }
-                return .none
+////            case .openScanStore:
+////                state.scanStore = VehicleCardDocumentScanStore.State()
+////                return .none
+//
+////            case .scanStore(.presented(.confirmData)):
+////                if let extractedData = state.scanStore?.extractedData {
+////                    return .send(.applyScanData(extractedData))
+////                }
+////                return .none
+////
+////            case .applyScanData(let data):
+////                state.scanStore = nil
+////
+////                if let brand = data.brand {
+////                    state.brand = brand
+////                }
+////                if let model = data.model {
+////                    state.model = model
+////                }
+////                if let plate = data.plate {
+////                    state.plate = plate
+////                }
+////                if let date = data.registrationDate {
+////                    state.registrationDate = date
+////                }
+////                return .none
             case .verifyPrimaryVehicleExistance:
                 return .run { [isPrimary = state.isPrimary] send in
                     if await vehicleRepository.hasPrimaryVehicle() && isPrimary {
@@ -160,10 +165,9 @@ struct AddVehicleStore {
                 return .none
                 
             case .saveVehicle:
-                state.isLoading = true
-                let vehicle = Vehicle(
+                let newVehicle = Vehicle(
                     id: self.uuid().uuidString,
-                    type: state.vehicleType ?? .car,
+                    type: state.type,
                     brand: state.brand,
                     model: state.model,
                     mileage: state.mileage.isEmpty ? nil : state.mileage,
@@ -174,12 +178,12 @@ struct AddVehicleStore {
 
                 return .run { send in
                     do {
-                        try await vehicleRepository.createVehicle(vehicle)
-                        if vehicle.isPrimary {
-                            try await vehicleRepository.setPrimaryVehicle(vehicle.id)
+                        try await vehicleRepository.createVehicle(newVehicle)
+                        if newVehicle.isPrimary {
+                            try await vehicleRepository.setPrimaryVehicle(newVehicle.id)
                         }
                         let updatedVehicles = try await vehicleRepository.getAllVehicles()
-                        await send(.updateVehiclesListAndSetNewVehicleAsSelected(vehicles: updatedVehicles, newVehicle: vehicle))
+                        await send(.updateVehiclesList(vehicles: updatedVehicles))
                     } catch {
                         await send(.saveVehicleFailed(error.localizedDescription))
                     }
@@ -190,16 +194,12 @@ struct AddVehicleStore {
                     await dismiss()
                 }
                 
-            case .updateVehiclesListAndSetNewVehicleAsSelected(let vehicles, let newVehicle):
+            case .updateVehiclesList(let vehicles):
                 state.$vehicles.withLock { $0 = vehicles }
-                state.$selectedVehicle.withLock { $0 = newVehicle }
                 return .merge([.send(.newVehicleAdded), // TODO: test newVehicleAdded
                                .send(.dismiss)])
 
-            case .saveVehicleFailed(let errorMessage):
-                state.isLoading = false
-                state.errorMessage = errorMessage
-                state.showErrorAlert = true
+            case .saveVehicleFailed:
                 return .none
 
             case .cancelCreation:
@@ -210,8 +210,24 @@ struct AddVehicleStore {
             default: return .none
             }
         }
-        .ifLet(\.$scanStore, action: \.scanStore) {
-            VehicleCardDocumentScanStore()
+//        .ifLet(\.$scanStore, action: \.scanStore) {
+//            VehicleCardDocumentScanStore()
+//        }
+    }
+    
+    private func validateFields(_ state: State) -> VehicleFieldsValidationErrors {
+        var errors: VehicleFieldsValidationErrors = []
+
+        if state.brand.trimmingCharacters(in: .whitespaces).isEmpty {
+            errors.insert(.brandEmpty)
         }
+        if state.model.trimmingCharacters(in: .whitespaces).isEmpty {
+            errors.insert(.modelEmpty)
+        }
+        if state.plate.trimmingCharacters(in: .whitespaces).isEmpty {
+            errors.insert(.plateEmpty)
+        }
+
+        return errors
     }
 }

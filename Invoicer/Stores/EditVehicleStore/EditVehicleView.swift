@@ -46,34 +46,42 @@ struct EditVehicleView: View {
                             Spacer()
 
                             Picker("Statut", selection: $store.isPrimary) {
-                                Text("Principal")
-                                Text("Secondaire")
+                                Text("Principal").tag(true)
+                                Text("Secondaire").tag(false)
                             }
                             .pickerStyle(.menu)
                             .labelsHidden()
                         }
                     }
 
-                    FormField(titleLabel: "Marque", infoLabel: "Champ D.1 de la carte grise") {
+                    FormField(titleLabel: "Marque",
+                              infoLabel: "Champ D.1 de la carte grise",
+                              isError: store.validationErrors.contains(.brandEmpty)) {
                         TextField("TOYOTA, BMW, MERCEDES...", text: $store.brand)
                             .font(.system(size: 17))
                             .multilineTextAlignment(.leading)
                             .autocapitalization(.allCharacters)
-                            .submitLabel(.next)
+                            .submitLabel(.done)
                     }
 
-                    FormField(titleLabel: "Modèle", infoLabel: "Champ D.2 de la carte grise") {
+                    FormField(titleLabel: "Modèle",
+                              infoLabel: "Champ D.2 de la carte grise",
+                              isError: store.validationErrors.contains(.modelEmpty)) {
                         TextField("COROLLA, X3, CLASSE A...", text: $store.model)
                             .font(.system(size: 17))
                             .multilineTextAlignment(.leading)
                             .autocapitalization(.allCharacters)
+                            .submitLabel(.done)
                     }
 
-                    FormField(titleLabel: "Immatriculation", infoLabel: "Champ A de la carte grise") {
+                    FormField(titleLabel: "Immatriculation",
+                              infoLabel: "Champ A de la carte grise",
+                              isError: store.validationErrors.contains(.plateEmpty)) {
                         TextField("AB-123-CD", text: $store.plate)
                             .font(.system(size: 17))
                             .multilineTextAlignment(.leading)
                             .autocapitalization(.allCharacters)
+                            .submitLabel(.done)
                     }
 
                     FormField(titleLabel: "Kilométrage", infoLabel: "Consultez votre compteur") {
@@ -86,8 +94,9 @@ struct EditVehicleView: View {
 
                             TextField("120000", text: $store.mileage)
                                 .font(.system(size: 17))
-                                .keyboardType(.numberPad)
+                                .keyboardType(.numbersAndPunctuation)
                                 .multilineTextAlignment(.trailing)
+                                .submitLabel(.done)
 
                             Text("KM")
                                 .font(.system(size: 17))
@@ -113,7 +122,7 @@ struct EditVehicleView: View {
                 .padding(.horizontal, Spacing.screenMargin)
             }
             .scrollBounceBehavior(.basedOnSize)
-            .safeAreaInset(edge: .bottom, spacing: 24) {
+            .safeAreaInset(edge: .bottom, spacing: 80) {
                 VStack(spacing: 0) {
                     Divider()
 

@@ -33,12 +33,12 @@ struct MainView: View {
 //        }
         .navigationBarBackButtonHidden()
         .alert($store.scope(state: \.deleteAlert, action: \.deleteAlert))
-        .sheet(item: $store.scope(state: \.vehiclesList, action: \.vehiclesList)) { store in
+        .fullScreenCover(item: $store.scope(state: \.vehiclesList, action: \.vehiclesList)) { store in
             VehiclesListView(store: store)
                 .presentationDetents([.large])
         }  
-        .sheet(item: $store.scope(state: \.addVehicle, action: \.addVehicle)) { store in
-            AddVehicleMultiStepView(store: store)
+        .fullScreenCover(item: $store.scope(state: \.addVehicle, action: \.addVehicle)) { store in
+            AddVehicleView(store: store)
                 .presentationDetents([.large])
         }
         .fullScreenCover(item: $store.scope(state: \.addDocument, action: \.addDocument)) { store in

@@ -12,7 +12,6 @@ import QuickLook
 
 struct AddDocumentMultiStepView: View {
     @Bindable var store: StoreOf<AddDocumentStore>
-    @State private var currentStep: AddDocumentStep = .selectSource
     @State private var previewURL: URL?
 
     private var isFormValid: Bool {

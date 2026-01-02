@@ -19,7 +19,9 @@ struct EditVehicleStore {
         var registrationDate: Date
         var plate: String
         var isPrimary: Bool
-        
+
+        var validationErrors: VehicleFieldsValidationErrors = []
+
         @Shared(.vehicles) var vehicles: [Vehicle] = []
         @Shared(.selectedVehicle) var selectedVehicle: Vehicle
 
@@ -61,8 +63,13 @@ struct EditVehicleStore {
                 
             case .view(let actionView):
                 switch actionView {
-                case .saveButtonTapped: return .send(.updateVehicle)
-                    case .cancelButtonTapped, .backButtonTapped: return .send(.dismiss)
+                case .saveButtonTapped:
+                    state.validationErrors = validateFields(state)
+                    guard state.validationErrors.isEmpty else {
+                        return .none
+                    }
+                    return .send(.updateVehicle)
+                case .cancelButtonTapped, .backButtonTapped: return .send(.dismiss)
                 }
                 
             case .updateVehicle:
@@ -105,5 +112,21 @@ struct EditVehicleStore {
             case .dismiss: return .run { _ in await dismiss() }
             }
         }
+    }
+    
+    private func validateFields(_ state: State) -> VehicleFieldsValidationErrors {
+        var errors: VehicleFieldsValidationErrors = []
+
+        if state.brand.trimmingCharacters(in: .whitespaces).isEmpty {
+            errors.insert(.brandEmpty)
+        }
+        if state.model.trimmingCharacters(in: .whitespaces).isEmpty {
+            errors.insert(.modelEmpty)
+        }
+        if state.plate.trimmingCharacters(in: .whitespaces).isEmpty {
+            errors.insert(.plateEmpty)
+        }
+
+        return errors
     }
 }

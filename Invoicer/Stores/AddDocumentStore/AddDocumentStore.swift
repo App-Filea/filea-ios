@@ -11,20 +11,26 @@ import SwiftUI
 import PhotosUI
 import PDFKit
 
+struct DocumentFieldsValidationErrors: OptionSet, Sendable, Equatable {
+    let rawValue: Int
+
+    static let nameEmpty = DocumentFieldsValidationErrors(rawValue: 1 << 0)
+}
+
 @Reducer
 struct AddDocumentStore {
     @ObservableState
     struct State: Equatable {
         let vehicleId: String
         var viewState: ViewState
-        var isLoading = false
         var showDocumentScanView = false
         var showPhotoPickerView = false
         var photoPickerItems: [PhotosPickerItem] = []
         var showFileManagerView = false
         var selectedFileURL: URL?
         var selectedFileName: String?
-        var showValidationError = false
+        var validationErrors: DocumentFieldsValidationErrors = []
+
         @Shared(.vehicles) var vehicles: [Vehicle] = []
         @Shared(.selectedVehicle) var selectedVehicle: Vehicle
         
@@ -62,7 +68,6 @@ struct AddDocumentStore {
         case saveDocument
         case documentSaved
         case cancelCreation
-        case setShowValidationError(Bool)
         case transformToPdf([UIImage])
 
         enum ActionView: Equatable {
@@ -75,6 +80,7 @@ struct AddDocumentStore {
             case documentScanned([UIImage])
             case backFromMetadataFormButtonTapped
             case closeButtonTapped
+            case saveButtonTapped
         }
     }
 
@@ -107,13 +113,6 @@ struct AddDocumentStore {
 
         Reduce { state, action in
             switch action {
-            case .binding:
-                // Clear validation error when user types
-                if state.showValidationError {
-                    state.showValidationError = false
-                }
-                return .none
-
             case .view(let actionView):
                 switch actionView {
                 case .openCameraViewButtonTapped:
@@ -138,6 +137,12 @@ struct AddDocumentStore {
                     return .none
                 case .closeButtonTapped:
                     return .send(.cancelCreation)
+                case .saveButtonTapped:
+                    state.validationErrors = validateFields(state)
+                    guard state.validationErrors.isEmpty else {
+                        return .none
+                    }
+                    return .send(.saveDocument)
                 }
 
             case .openCameraScan:
@@ -187,12 +192,9 @@ struct AddDocumentStore {
                 return .none
 
             case .saveDocument:
-                state.isLoading = true
-
                 let amount = Double(state.documentAmount.replacingOccurrences(of: ",", with: "."))
 
                 guard let fileURL = state.selectedFileURL else {
-                    state.isLoading = false
                     return .none
                 }
 
@@ -214,7 +216,6 @@ struct AddDocumentStore {
                 }
 
             case .documentSaved:
-                state.isLoading = false
                 // Recharger le véhicule pour mettre à jour la liste des documents
                 return .run { [vehicleId = state.vehicleId, vehicles = state.$vehicles, selectedVehicle = state.$selectedVehicle] send in
                     do {
@@ -243,10 +244,6 @@ struct AddDocumentStore {
                     await dismiss()
                 }
 
-            case .setShowValidationError(let show):
-                state.showValidationError = show
-                return .none
-
             case .transformToPdf(let images):
                 guard !images.isEmpty else { return .none }
 
@@ -268,8 +265,20 @@ struct AddDocumentStore {
 
                     await send(.fileSelected(pdfURL))
                 }
+                
+            default: return .none
             }
         }
+    }
+    
+    private func validateFields(_ state: State) -> DocumentFieldsValidationErrors {
+        var errors: DocumentFieldsValidationErrors = []
+
+        if state.documentName.trimmingCharacters(in: .whitespaces).isEmpty {
+            errors.insert(.nameEmpty)
+        }
+
+        return errors
     }
 }
 

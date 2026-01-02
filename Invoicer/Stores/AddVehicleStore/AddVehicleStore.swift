@@ -15,15 +15,6 @@ struct VehicleFieldsValidationErrors: OptionSet, Sendable, Equatable {
     static let brandEmpty = VehicleFieldsValidationErrors(rawValue: 1 << 0)
     static let modelEmpty = VehicleFieldsValidationErrors(rawValue: 1 << 1)
     static let plateEmpty = VehicleFieldsValidationErrors(rawValue: 1 << 2)
-
-    func message(for error: VehicleFieldsValidationErrors) -> String {
-        switch error {
-        case .brandEmpty: return "La marque est requise"
-        case .modelEmpty: return "Le modèle est requis"
-        case .plateEmpty: return "La plaque d'immatriculation est requise"
-        default: return ""
-        }
-    }
 }
 
 @Reducer

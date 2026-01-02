@@ -185,7 +185,7 @@ platform :ios do
     # Use default message if commit body is empty
     if changelog.empty?
       changelog = "Corrections de bugs et améliorations des performances"
-      UI.warning("⚠️  Aucune description de commit trouvée, utilisation du changelog par défaut")
+      UI.important("⚠️  Aucune description de commit trouvée, utilisation du changelog par défaut")
     end
 
     # Upload to TestFlight

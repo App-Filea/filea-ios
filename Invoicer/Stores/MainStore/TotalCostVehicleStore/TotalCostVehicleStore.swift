@@ -17,8 +17,14 @@ struct TotalCostVehicleStore {
     }
     
     enum Action: Equatable {
+        case view(ActionView)
         case computeVehicleTotalCost
+        case recomputeVehicleTotalCost(Vehicle)
         case vehicleTotalCostCalculated(Double)
+        
+        enum ActionView: Equatable {
+            case initiate
+        }
     }
     
     @Dependency(\.statisticsRepository) var statisticsRepository
@@ -26,9 +32,15 @@ struct TotalCostVehicleStore {
     var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
-            case .computeVehicleTotalCost:
+            case .view(.initiate):
+                return .publisher {
+                    state.$selectedVehicle.publisher
+                        .map(Action.recomputeVehicleTotalCost)
+                }
+            case .computeVehicleTotalCost, .recomputeVehicleTotalCost:
                 let total = statisticsRepository.calculateTotalCost(state.selectedVehicle.documents)
                 return .send(.vehicleTotalCostCalculated(total))
+                
             case .vehicleTotalCostCalculated(let totalCost):
                 state.currentVehicleTotalCost = totalCost
                 return .none

@@ -20,6 +20,9 @@ struct TotalCostVehicleView: View {
             accentColor: ColorTokens.actionPrimary,
             action: nil
         )
+        .onAppear {
+            store.send(.view(.initiate))
+        }
     }
 }
 

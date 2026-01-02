@@ -26,6 +26,9 @@ struct WarningVehicleView: View {
                 : ColorTokens.warning,
             action: nil
         )
+        .onAppear {
+            store.send(.view(.initiate))
+        }
     }
 }
 

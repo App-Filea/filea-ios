@@ -17,8 +17,14 @@ struct WarningVehicleStore {
     }
     
     enum Action: Equatable {
+        case view(ActionView)
         case computeVehicleWarnings
+        case recomputeVehicleWarnings(Vehicle)
         case computedWarnings(Int)
+        
+        enum ActionView: Equatable {
+            case initiate
+        }
     }
     
     @Dependency(\.statisticsRepository) var statisticsRepository
@@ -26,7 +32,12 @@ struct WarningVehicleStore {
     var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
-            case .computeVehicleWarnings:
+            case .view(.initiate):
+                return .publisher {
+                    state.$selectedVehicle.publisher
+                        .map(Action.recomputeVehicleWarnings)
+                }
+            case .computeVehicleWarnings, .recomputeVehicleWarnings:
                 let incompleteDocumentCount = self.statisticsRepository.countIncompleteDocuments(state.selectedVehicle.documents)
                 return .send(.computedWarnings(incompleteDocumentCount))
                 

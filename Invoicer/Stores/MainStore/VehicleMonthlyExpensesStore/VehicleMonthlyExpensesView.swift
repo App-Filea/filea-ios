@@ -17,6 +17,9 @@ struct VehicleMonthlyExpensesView: View {
             year: Calendar.current.component(.year, from: Date()),
             accentColor: ColorTokens.actionPrimary
         )
+        .onAppear {
+            store.send(.view(.initiate))
+        }
     }
 }
 

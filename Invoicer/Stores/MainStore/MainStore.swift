@@ -29,12 +29,10 @@ struct MainStore {
     }
 
     enum Action: Equatable {
+        case view(ActionView)
         case warningVehicle(WarningVehicleStore.Action)
         case totalCostVehicle(TotalCostVehicleStore.Action)
         case vehicleMonthlyExpenses(VehicleMonthlyExpensesStore.Action)
-
-        case view(ActionView)
-
         case onAppear
         case vehicleDetail(PresentationAction<VehicleDetailsStore.Action>)
         case vehiclesList(PresentationAction<VehiclesListStore.Action>)
@@ -49,7 +47,6 @@ struct MainStore {
         case deleteCurrentVehicle
         case deleteAlert(PresentationAction<Alert>)
         case updateAllVehicles([Vehicle])
-        case setupVehicleStatistics
 
         enum ActionView: Equatable {
             case openCreateVehicleButtonTapped
@@ -86,12 +83,7 @@ struct MainStore {
                 } else if state.selectedVehicle.isNull {
                     return .send(.presentVehiclesListView)
                 }
-                return .send(.setupVehicleStatistics)
-                
-            case .setupVehicleStatistics:
-                return .concatenate(.send(.warningVehicle(.computeVehicleWarnings)),
-                                    .send(.totalCostVehicle(.computeVehicleTotalCost)),
-                                    .send(.vehicleMonthlyExpenses(.computeVehicleMontlyExpenses)))
+                return .none
                 
             case \.showVehicleDetail:
                 state.vehicleDetail = VehicleDetailsStore.State()
@@ -113,7 +105,7 @@ struct MainStore {
                     return .none
                 }
                 state.$selectedVehicle.withLock { $0 = firstVehicle }
-                return .send(.setupVehicleStatistics)
+                return .none
 
 //            case .showSettings:
 //                // Navigation handled by AppStore+Path (to be implemented)
@@ -143,13 +135,6 @@ struct MainStore {
             case .updateAllVehicles(let newVehiclesList):
                     state.$vehicles.withLock { $0 = newVehiclesList }
                     state.$selectedVehicle.withLock { $0 = .null() }
-                return .none
-
-            case .addDocument(.dismiss):
-                // Recalculer le coût total après la fermeture du modal d'ajout de document
-                return .send(.setupVehicleStatistics)
-
-            case .addDocument:
                 return .none
                 
             default: return .none

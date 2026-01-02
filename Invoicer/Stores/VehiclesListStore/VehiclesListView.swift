@@ -16,14 +16,6 @@ struct VehiclesListView: View {
             Color(ColorTokens.background)
                 .ignoresSafeArea()
                 VStack {
-                    HStack {
-                        Button("Fermer") {
-                            store.send(.view(.dimissSheetButtonTapped))
-                        }
-                        Spacer()
-                    }
-                    .padding(.horizontal, Spacing.screenMargin)
-                    .padding(.vertical, Spacing.xs)
                     ScrollView {
                         Text("Mon garage")
                             .font(Typography.largeTitle)
@@ -39,10 +31,28 @@ struct VehiclesListView: View {
                     }
                 }
                 .safeAreaInset(edge: .bottom) {
-                    Button(action: { store.send(.view(.openCreateVehicleButtonTapped)) }) {
-                        Text("Ajouter un nouveau véhicule")
+                    VStack(spacing: Spacing.buttonGroupSpacing) {
+                        Button(action: { store.send(.view(.openCreateVehicleButtonTapped)) }) {
+                            Text("Ajouter un nouveau véhicule")
+                                .font(.system(size: 17, weight: .semibold))
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 16)
+                                .background(.black)
+                                .cornerRadius(14)
+                        }
+                        
+                        Button(action: { store.send(.view(.dimissSheetButtonTapped)) }) {
+                            Text("Fermer")
+                                .font(.system(size: 17, weight: .semibold))
+                                .foregroundColor(.black)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 16)
+                                .background(.white)
+                                .cornerRadius(14)
+                        }
                     }
-                    .buttonStyle(.primaryTextOnly())
+                    .padding(Spacing.screenMargin)
                 }
         }
         .navigationBarBackButtonHidden()
@@ -65,7 +75,6 @@ struct VehiclesListView: View {
                             Text(vehicle.brand.uppercased())
                                 .font(.largeTitle)
                                 .fontWeight(.black)
-                                .kerning(-1)
                                 .foregroundStyle(ColorTokens.label)
 
                             Text(vehicle.model)

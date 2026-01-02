@@ -129,12 +129,14 @@ struct MainStore {
                         try await vehicleRepository.deleteVehicle(vehicleId)
                         let newVehiclesList = try await vehicleRepository.getAllVehicles()
                         await send(.updateAllVehicles(newVehiclesList))
+                        if !newVehiclesList.isEmpty {
+                            await send(.presentVehiclesListView)
+                        }
                     } catch {}
                 }
 
             case .updateAllVehicles(let newVehiclesList):
                     state.$vehicles.withLock { $0 = newVehiclesList }
-                    state.$selectedVehicle.withLock { $0 = .null() }
                 return .none
                 
             default: return .none

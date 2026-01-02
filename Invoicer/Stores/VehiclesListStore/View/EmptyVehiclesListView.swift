@@ -50,8 +50,13 @@ struct EmptyVehiclesListView: View {
             // Floating action button
             Button(action: onButtonTapped) {
                 Text("Ajouter votre premier véhicule")
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(.black)
+                    .cornerRadius(14)
             }
-            .buttonStyle(.primaryTextOnly())
             Spacer()
         }
         .padding(16)

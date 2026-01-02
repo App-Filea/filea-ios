@@ -22,20 +22,20 @@ struct VehicleDetailsView: View {
                         HStack(alignment: .top, spacing: 12) {
                             ZStack {
                                 RoundedRectangle(cornerRadius: 16)
-                                    .fill(.black)
+                                    .fill(.white)
                                     .frame(width: 80, height: 80)
                                 
-                                Image(systemName: store.selectedVehicle.type.iconName ?? "")
+                                Image(systemName: store.selectedVehicle.type.iconName)
                                     .font(.system(size: 36))
-                                    .foregroundColor(.white)
+                                    .foregroundColor(.black)
                             }
                             
                             VStack(alignment: .leading, spacing: 4) {
-                                Text(store.selectedVehicle.brand ?? "brand")
+                                Text(store.selectedVehicle.brand)
                                     .font(.system(size: 15))
                                     .foregroundColor(.secondary)
                                 
-                                Text(store.selectedVehicle.model ?? "model")
+                                Text(store.selectedVehicle.model)
                                     .font(.system(size: 28, weight: .bold))
                                     .foregroundColor(.primary)
                                 
@@ -57,7 +57,7 @@ struct VehicleDetailsView: View {
                                         .font(.subheadline)
                                         .foregroundStyle(ColorTokens.textSecondary)
                                     Spacer()
-                                    Text(store.selectedVehicle.plate ?? "plate")
+                                    Text(store.selectedVehicle.plate)
                                         .font(.subheadline)
                                         .fontWeight(.bold)
                                         .foregroundStyle(ColorTokens.textPrimary)
@@ -68,7 +68,7 @@ struct VehicleDetailsView: View {
                                         .font(.subheadline)
                                         .foregroundStyle(ColorTokens.textSecondary)
                                     Spacer()
-                                    Text(store.selectedVehicle.mileage ?? "Kilométrage")
+                                    Text(store.selectedVehicle.mileage ?? "-- €")
                                         .font(.subheadline)
                                         .fontWeight(.bold)
                                         .foregroundStyle(ColorTokens.textPrimary)
@@ -79,7 +79,7 @@ struct VehicleDetailsView: View {
                                         .font(.subheadline)
                                         .foregroundStyle(ColorTokens.textSecondary)
                                     Spacer()
-                                    Text(formattedDate(store.selectedVehicle.registrationDate ?? Date.now))
+                                    Text(formattedDate(store.selectedVehicle.registrationDate))
                                         .font(.subheadline)
                                         .fontWeight(.bold)
                                         .foregroundStyle(ColorTokens.textPrimary)
@@ -90,7 +90,7 @@ struct VehicleDetailsView: View {
                                         .font(.subheadline)
                                         .foregroundStyle(ColorTokens.textSecondary)
                                     Spacer()
-                                    Text(vehicleAge(from: store.selectedVehicle.registrationDate ?? Date.now))
+                                    Text(vehicleAge(from: store.selectedVehicle.registrationDate))
                                         .font(.subheadline)
                                         .fontWeight(.bold)
                                         .foregroundStyle(ColorTokens.textPrimary)

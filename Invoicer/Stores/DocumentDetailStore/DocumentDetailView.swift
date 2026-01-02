@@ -54,12 +54,12 @@ struct DocumentDetailView: View {
             HStack(alignment: .top, spacing: 12) {
                 ZStack {
                     RoundedRectangle(cornerRadius: 16)
-                        .fill(.black)
+                        .fill(.white)
                         .frame(width: 80, height: 80)
                     
                     Image(systemName: document.type.imageName)
                         .font(.system(size: 36))
-                        .foregroundColor(.white)
+                        .foregroundColor(.black)
                 }
                 
                 VStack(alignment: .leading, spacing: 4) {
@@ -102,24 +102,22 @@ struct DocumentDetailView: View {
                 }) {
                     HStack(spacing: 8) {
                         Image(systemName: "text.document")
-                            .font(.system(size: 18, weight: .semibold))
                         Text("Afficher")
-                            .font(.system(size: 17, weight: .semibold))
                     }
-                    .foregroundColor(.black)
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
-                    .background(.white)
+                    .background(.black)
                     .cornerRadius(14)
                 }
                 
                 Button(action: { store.send(.editDocumentButtonTapped) }) {
                     HStack(spacing: 8) {
                         Image(systemName: "square.and.pencil")
-                            .font(.system(size: 18, weight: .semibold))
                         Text("Modifier")
-                            .font(.system(size: 17, weight: .semibold))
                     }
+                    .font(.system(size: 17, weight: .semibold))
                     .foregroundColor(.black)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)

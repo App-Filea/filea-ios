@@ -15,7 +15,7 @@ struct MainView: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            Color(.secondarySystemBackground)
+            Color(.systemBackground)
                 .ignoresSafeArea()
 
             if store.vehicles.isEmpty {
@@ -62,37 +62,15 @@ struct MainView: View {
 
                     HStack {
                         Image(systemName: "folder.fill")
-                            .font(Typography.title3)
-                            .foregroundColor(ColorTokens.textPrimary)
+                            .title()
 
                         Text("\(store.selectedVehicle.documents.count) documents")
-                            .font(Typography.title2.weight(.bold))
-                            .foregroundColor(ColorTokens.textPrimary)
+                            .title()
                         
                         Spacer()
                         
-                        Button {
+                        PrimaryCircleButton(systemImage: "plus") {
                             store.send(.showAddDocument)
-                        } label: {
-                            
-                            ZStack {
-                                Circle()
-                                    .fill(.black)
-                                    .frame(width: 40, height: 40)
-
-                                Image(systemName: "plus")
-                                    .font(.system(size: 16).weight(.bold))
-                                    .foregroundColor(.white)
-                            }
-                            
-//                            Image(systemName: "plus")
-//                                .font(Typography.title2.weight(.semibold))
-//                                .foregroundColor(ColorTokens.onActionPrimary)
-//                                .frame(width: 60, height: 60)
-//                                .background(
-//                                    Circle()
-//                                        .fill(ColorTokens.actionPrimary)
-//                                )
                         }
                     }
 
@@ -112,13 +90,13 @@ struct MainView: View {
         VStack(spacing: Spacing.md) {
             Image(systemName: "doc.fill")
                 .imageScale(.large)
-                .foregroundStyle(ColorTokens.textSecondary)
+                .foregroundStyle(Color.secondary)
             Text("Aucun document")
-                .font(Typography.headline)
-                .foregroundStyle(ColorTokens.textPrimary)
+                .font(.headline)
+                .foregroundStyle(Color.primary)
             Text("Ajoutez des documents en prenant des photos")
-                .font(Typography.subheadline)
-                .foregroundStyle(ColorTokens.textSecondary)
+                .font(.subheadline)
+                .foregroundStyle(Color.secondary)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, Spacing.xxl)
@@ -129,8 +107,7 @@ struct MainView: View {
             ForEach(store.selectedVehicle.documents.groupedByMonth(), id: \.title) { section in
                 VStack(alignment: .leading, spacing: Spacing.sm) {
                     Text(section.title)
-                        .titleGroup()
-                        .foregroundStyle(ColorTokens.textSecondary)
+                        .secondarySubheadline()
 
                     ForEach(section.items) { document in
                         eventElement(of: document)
@@ -166,41 +143,42 @@ struct MainView: View {
                         HStack(alignment: .center, spacing: 12) {
                             ZStack {
                                 RoundedRectangle(cornerRadius: 12)
-                                    .fill(.white)
+                                    .fill(Color(.tertiarySystemGroupedBackground))
                                     .frame(width: 48, height: 48)
                                 
                                 Image(systemName: store.selectedVehicle.type.iconName)
                                     .font(.system(size: 20))
-                                    .foregroundColor(.black)
+                                    .foregroundColor(Color.primary)
                             }
                             .overlay(
                                 RoundedRectangle(cornerRadius: 12)
-                                    .stroke(Color(.separator), lineWidth: 1)
+                                    .stroke(Color.primary.tertiary, lineWidth: 1)
                             )
                             
                             HStack(alignment: .lastTextBaseline, spacing: 8) {
                                 VStack(alignment: .leading, spacing: 0) {
                                     Text(store.selectedVehicle.brand)
-                                        .font(.system(size: 15))
-                                        .foregroundColor(.secondary)
+                                        .secondaryBody()
 
                                     Text(store.selectedVehicle.model)
-                                        .font(.system(size: 24, weight: .bold))
-                                        .foregroundColor(.primary)
+                                        .title()
+//                                        .font(.system(size: 24, weight: .bold))
+//                                        .foregroundColor(.primary)
                                 }
 
                                 ZStack {
                                     Circle()
-                                        .fill(.gray.tertiary)
-                                        .frame(width: 18, height: 18)
+                                        .fill(.gray.quaternary)
+                                        .frame(width: 20, height: 20)
 
                                     Image(systemName: "chevron.down")
                                         .font(.system(size: 10).weight(.bold))
-                                        .foregroundColor(.black)
+                                        .foregroundColor(Color.primary)
                                 }
                                 .alignmentGuide(.lastTextBaseline) { d in
                                     d[.bottom]
                                 }
+                                .offset(y: 2)
                             }
 
                             

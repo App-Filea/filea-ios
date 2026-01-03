@@ -11,92 +11,29 @@ import SwiftUI
 /// Corner radius tokens for consistent rounded corners
 /// Following Apple HIG recommendations for iOS components
 enum Radius {
-    /// No rounding - 0pt
-    static let none: CGFloat = 0
-
-    /// Extra small - 4pt
-    /// Use for small buttons, tags
-    static let xs: CGFloat = 4
-
     /// Small - 8pt
-    /// Use for buttons, small cards
+    /// Use for small cards, containers
     static let sm: CGFloat = 8
-
-    /// Medium - 12pt
-    /// Use for cards, sheets
-    static let md: CGFloat = 12
 
     /// Large - 16pt
     /// Use for large cards, containers
     static let lg: CGFloat = 16
 
-    /// Extra large - 20pt
-    /// Use for prominent containers
-    static let xl: CGFloat = 20
-
-    /// Extra extra large - 24pt
-    /// Use for full-screen modals
-    static let xxl: CGFloat = 24
-
     /// Full rounding (pill shape)
-    /// Use for circular buttons, avatars
+    /// Use for circular buttons, badges
     static let full: CGFloat = 9999
-}
 
-// MARK: - Specific Use Cases
+    // MARK: - Specific Use Cases
 
-extension Radius {
-    /// Standard card corner radius
-    static let card: CGFloat = md
+    /// Standard card corner radius (12pt)
+    static let card: CGFloat = 12
 
-    /// Button corner radius
-    static let button: CGFloat = sm
+    /// Text field corner radius (8pt)
+    static let textField: CGFloat = 8
 
-    /// Text field corner radius
-    static let textField: CGFloat = sm
+    /// Thumbnail image radius (4pt)
+    static let thumbnail: CGFloat = 4
 
-    /// Sheet/Modal corner radius
-    static let sheet: CGFloat = lg
-
-    /// Floating Action Button radius
-    static let fab: CGFloat = full
-
-    /// Badge corner radius
+    /// Badge corner radius (circular)
     static let badge: CGFloat = full
-
-    /// Tag corner radius
-    static let tag: CGFloat = xs
-
-    /// Thumbnail image radius
-    static let thumbnail: CGFloat = xs
-
-    /// Avatar radius (circular)
-    static let avatar: CGFloat = full
-
-    /// Section container radius
-    static let section: CGFloat = lg
-}
-
-// MARK: - SwiftUI Shape Extensions
-
-extension Radius {
-    /// Creates a RoundedRectangle shape with the specified radius
-    static func shape(_ radius: CGFloat) -> RoundedRectangle {
-        RoundedRectangle(cornerRadius: radius, style: .continuous)
-    }
-
-    /// Creates a RoundedRectangle with card radius
-    static var cardShape: RoundedRectangle {
-        shape(card)
-    }
-
-    /// Creates a RoundedRectangle with button radius
-    static var buttonShape: RoundedRectangle {
-        shape(button)
-    }
-
-    /// Creates a RoundedRectangle with sheet radius
-    static var sheetShape: RoundedRectangle {
-        shape(sheet)
-    }
 }

@@ -29,8 +29,7 @@ struct FormField<Content: View>: View {
         VStack(alignment: .leading, spacing: 8) {
             if let titleLabel = titleLabel {
                 Text(titleLabel)
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(.secondary)
+                    .formFieldTitle()
                     .padding(.horizontal, 4)
             }
             
@@ -43,21 +42,16 @@ struct FormField<Content: View>: View {
                 .padding(.vertical, 8)
                 
                 if let infoLabel = infoLabel {
-                    HStack(alignment: .top, spacing: 8) {
+                    HStack(spacing: 8) {
                         Image(systemName: "info.circle")
-                            .font(.system(size: 14))
-                            .foregroundColor(.secondary)
-                        
                         Text(infoLabel)
-                            .font(.system(size: 13))
-                            .foregroundColor(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
                         
                         Spacer()
                     }
+                    .formFieldInfoLabel()
                     .padding(.vertical, 12)
                     .padding(.horizontal, 16)
-                    .background(Color(.systemGray6))
+                    .background(Color.gray.quinary)
                 }
             }
             .fieldCard(isError: isError)

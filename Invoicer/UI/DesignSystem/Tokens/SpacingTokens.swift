@@ -11,9 +11,6 @@ import SwiftUI
 /// Spacing tokens following Apple HIG 8-point grid system
 /// Use these constants for consistent spacing throughout the app
 enum Spacing {
-    /// 2pt - Minimal spacing for very tight layouts
-    static let xxxs: CGFloat = 2
-
     /// 4pt - Extra extra small spacing
     static let xxs: CGFloat = 4
 
@@ -35,28 +32,11 @@ enum Spacing {
     /// 48pt - Extra extra large spacing
     static let xxl: CGFloat = 48
 
-    /// 64pt - Maximum spacing for major sections
-    static let xxxl: CGFloat = 64
-}
+    // MARK: - Specific Use Cases
 
-// MARK: - Specific Use Cases
-
-extension Spacing {
-    /// Standard padding for cards and containers
+    /// Standard padding for cards and containers (16pt)
     static let cardPadding: CGFloat = md
 
-    /// Padding between sections
-    static let sectionSpacing: CGFloat = lg
-
-    /// Spacing between list items
-    static let listItemSpacing: CGFloat = xs
-
-    /// Horizontal screen margins
+    /// Horizontal screen margins (16pt)
     static let screenMargin: CGFloat = md
-
-    /// Spacing between form fields
-    static let formFieldSpacing: CGFloat = md
-
-    /// Spacing for buttons in button groups
-    static let buttonGroupSpacing: CGFloat = sm
 }

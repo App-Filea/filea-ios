@@ -13,16 +13,15 @@ struct VehiclesListView: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            Color(ColorTokens.background)
+            Color(.systemBackground)
                 .ignoresSafeArea()
                 VStack {
                     ScrollView {
                         Text("Mon garage")
-                            .font(Typography.largeTitle)
-                            .fontWeight(.semibold)
-                            .frame(maxWidth: .infinity, alignment: .center)
+                            .largeTitle()
+                            .frame(maxWidth: .infinity)
                             .padding(.horizontal, Spacing.screenMargin)
-                        VStack(spacing: Spacing.listItemSpacing) {
+                        VStack(spacing: Spacing.md) {
                             ForEach(store.vehicles.sorted { $0.isPrimary && !$1.isPrimary }) { vehicle in
                                 vehicleCard(vehicle)
                             }
@@ -31,26 +30,15 @@ struct VehiclesListView: View {
                     }
                 }
                 .safeAreaInset(edge: .bottom) {
-                    VStack(spacing: Spacing.buttonGroupSpacing) {
-                        Button(action: { store.send(.view(.openCreateVehicleButtonTapped)) }) {
-                            Text("Ajouter un nouveau véhicule")
-                                .font(.system(size: 17, weight: .semibold))
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 16)
-                                .background(.black)
-                                .cornerRadius(14)
-                        }
+                    VStack(spacing: Spacing.md) {
                         
-                        Button(action: { store.send(.view(.dimissSheetButtonTapped)) }) {
-                            Text("Fermer")
-                                .font(.system(size: 17, weight: .semibold))
-                                .foregroundColor(.black)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 16)
-                                .background(.white)
-                                .cornerRadius(14)
-                        }
+                        PrimaryButton("Ajouter un nouveau véhicule", action: {
+                            store.send(.view(.openCreateVehicleButtonTapped))
+                        })
+                        
+                        TertiaryButton("Fermer", action: {
+                            store.send(.view(.dimissSheetButtonTapped))
+                        })
                     }
                     .padding(Spacing.screenMargin)
                 }
@@ -62,7 +50,6 @@ struct VehiclesListView: View {
         }
     }
     
-    // MARK: - Vehicle Card
     private func vehicleCard(_ vehicle: Vehicle) -> some View {
         Button {
             store.send(.view(.selectedVehicleButtonTapped(vehicle)))
@@ -73,22 +60,22 @@ struct VehiclesListView: View {
                     HStack(alignment: .top, spacing: 0) {
                         VStack(alignment: .leading, spacing: -5) {
                             Text(vehicle.brand.uppercased())
-                                .font(.largeTitle)
-                                .fontWeight(.black)
-                                .foregroundStyle(ColorTokens.label)
+                                .font(.headline)
+                                .foregroundStyle(Color.primary)
 
                             Text(vehicle.model)
-                                .font(.headline)
-                                .foregroundStyle(ColorTokens.label)
+                                .font(.largeTitle)
+                                .fontWeight(.bold)
+                                .foregroundStyle(Color.primary)
+                            
                         }
                         Spacer()
-                        // Vehicle type icon
                             Image(systemName: vehicle.type.iconName)
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
                                 .fontWeight(.bold)
-                                .foregroundStyle(ColorTokens.label)
-                                .frame(/*maxWidth: 128, */width: 120, height: 80)
+                                .foregroundStyle(Color.primary)
+                                .frame(width: 120, height: 80)
                                 .scaleEffect(x: vehicle.type.shouldFlipIcon ? -1 : 1, y: 1)
                                 .offset(x: 60, y: -10)
                     }
@@ -100,14 +87,13 @@ struct VehiclesListView: View {
                         Spacer()
                         Text("\(vehicle.registrationDate.shortDateString)")
                     }
-                    .font(.footnote)
-                    .foregroundStyle(Color(.secondaryLabel))
+                    .caption()
                 }
             }
             .padding(Spacing.screenMargin)
-            .background(Color(.systemBackground))
+            .background(Color(.tertiarySystemGroupedBackground))
             .cornerRadius(16)
-            .shadow(color: ColorTokens.shadow, radius: Spacing.xs, x: 0, y: 4)
+            .shadow(color: Color.primary.opacity(0.15), radius: Spacing.xs, x: 0, y: 4)
         }
         .buttonStyle(.plain)
     }

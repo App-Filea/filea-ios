@@ -21,9 +21,9 @@ struct WarningVehicleView: View {
             icon: store.currentVehicleIncompleteDocumentsCount == 0
                 ? "checkmark.circle.fill"
                 : "exclamationmark.triangle.fill",
-            accentColor: store.currentVehicleIncompleteDocumentsCount == 0
-                ? ColorTokens.success
-                : ColorTokens.warning,
+            iconColor: store.currentVehicleIncompleteDocumentsCount == 0
+            ? Color.green
+            : Color.orange,
             action: nil
         )
         .onAppear {

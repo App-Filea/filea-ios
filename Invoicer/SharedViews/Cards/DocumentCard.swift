@@ -8,7 +8,6 @@
 
 import SwiftUI
 
-/// Reusable document card component for list display
 struct DocumentCard: View {
     let document: Document
     let action: () -> Void
@@ -28,66 +27,55 @@ struct DocumentCard: View {
                     height: 80
                 )
 
-                // Document info
                 VStack(alignment: .leading, spacing: Spacing.xxs) {
-                    // Title with date
                     HStack(spacing: Spacing.xxs) {
                         Text(document.name)
-                            .font(Typography.body.weight(.semibold))
-                            .foregroundStyle(ColorTokens.textPrimary)
+                            .primaryBody()
+                            .fontWeight(.semibold)
 
                         Circle()
-                            .fill(ColorTokens.textTertiary)
+                            .fill(Color.secondary)
                             .frame(width: 4, height: 4)
 
                         Text(document.date.shortDateString)
-                            .font(Typography.body.weight(.semibold))
-                            .foregroundStyle(ColorTokens.textSecondary)
+                            .secondaryBody()
+                            .fontWeight(.semibold)
                     }
                     .lineLimit(1)
 
-                    // Amount and type
                     HStack(spacing: Spacing.xxs) {
                         if let amount = document.amount {
                             Text(amount.asCurrencyStringNoDecimals)
-                                .font(Typography.callout)
-                                .foregroundStyle(ColorTokens.textSecondary)
+                                .callout()
                         } else {
                             Text("-- €")
-                                .font(Typography.callout)
-                                .foregroundStyle(ColorTokens.textTertiary)
+                                .callout()
                         }
 
                         Circle()
-                            .fill(ColorTokens.textTertiary)
+                            .fill(Color.secondary)
                             .frame(width: 4, height: 4)
 
                         Text(document.type.displayName)
-                            .font(Typography.callout)
-                            .foregroundStyle(ColorTokens.textSecondary)
+                            .callout()
                     }
 
-                    // Mileage
                     HStack(spacing: Spacing.xxs) {
                         Image(systemName: "gauge.open.with.lines.needle.33percent")
-                            .font(.caption)
                         Text(document.mileage.asFormattedMileage)
-                            .font(Typography.callout)
                     }
-                    .foregroundStyle(ColorTokens.textSecondary)
+                    .callout()
 
-                    // Incomplete badge - positioned below mileage
                     if document.amount == nil {
                         HStack(spacing: Spacing.xxs) {
                             Image(systemName: "exclamationmark.triangle.fill")
-                                .font(.caption2)
                             Text("Incomplet")
-                                .font(Typography.caption2.weight(.medium))
                         }
-                        .foregroundStyle(ColorTokens.warning)
+                        .foregroundStyle(Color.orange)
+                        .caption()
                         .padding(.horizontal, Spacing.xs)
                         .padding(.vertical, Spacing.xxs)
-                        .background(ColorTokens.warningContainer)
+                        .background(Color.orange.tertiary)
                         .cornerRadius(Radius.badge)
                     }
                 }
@@ -96,13 +84,13 @@ struct DocumentCard: View {
 
                 // Chevron
                 Image(systemName: "chevron.right")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(ColorTokens.textTertiary)
+                    .caption()
+                    .fontWeight(.semibold)
             }
             .padding(Spacing.cardPadding)
         }
         .buttonStyle(.plain)
-        .background(ColorTokens.surface)
+        .background(Color(.tertiarySystemGroupedBackground))
         .cornerRadius(Radius.card)
     }
 }

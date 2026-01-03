@@ -14,7 +14,7 @@ struct StatCard: View {
     let value: String
     let subtitle: String?
     let icon: String?
-    let accentColor: Color
+    let iconColor: Color
     let action: (() -> Void)?
 
     init(
@@ -22,14 +22,14 @@ struct StatCard: View {
         value: String,
         subtitle: String? = nil,
         icon: String? = nil,
-        accentColor: Color = ColorTokens.actionPrimary,
+        iconColor: Color = Color.orange,
         action: (() -> Void)? = nil
     ) {
         self.title = title
         self.value = value
         self.subtitle = subtitle
         self.icon = icon
-        self.accentColor = accentColor
+        self.iconColor = iconColor
         self.action = action
     }
 
@@ -41,13 +41,12 @@ struct StatCard: View {
                 // Header
                 HStack {
                     Text(title)
-                        .font(Typography.subheadline)
-                        .foregroundStyle(ColorTokens.textPrimary)
+                        .secondarySubheadline()
+                    
                     Spacer()
                     if action != nil {
                         Image(systemName: "chevron.right")
-                            .font(.caption)
-                            .foregroundStyle(ColorTokens.textSecondary)
+                            .secondarySubheadline()
                     }
                 }
 
@@ -57,14 +56,16 @@ struct StatCard: View {
                 HStack(alignment: .firstTextBaseline, spacing: Spacing.xxs) {
                     if let icon = icon {
                         Image(systemName: icon)
-                            .font(.title2.weight(.semibold))
-                            .foregroundStyle(accentColor)
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                            .foregroundStyle(iconColor)
                             .frame(width: 28, height: 28)
                     }
 
                     Text(value)
-                        .font(Typography.currencyLarge.weight(.bold))
-                        .foregroundStyle(ColorTokens.textPrimary)
+                        .font(.title)
+                        .fontWeight(.bold)
+                        .foregroundStyle(Color.primary)
                         .minimumScaleFactor(0.7)
                         .lineLimit(1)
                 }
@@ -72,8 +73,7 @@ struct StatCard: View {
                 // Subtitle
                 if let subtitle = subtitle {
                     Text(subtitle)
-                        .font(Typography.caption1)
-                        .foregroundStyle(ColorTokens.textSecondary)
+                        .caption()
                 }
             }
             .padding(Spacing.cardPadding)
@@ -81,7 +81,7 @@ struct StatCard: View {
         .buttonStyle(.plain)
         .frame(maxWidth: .infinity, alignment: .leading)
         .frame(height: 140)
-        .background(ColorTokens.surface)
+        .background(Color(.tertiarySystemGroupedBackground))
         .cornerRadius(Radius.card)
     }
 }
@@ -93,7 +93,7 @@ struct StatCard: View {
                 title: "Coût total",
                 value: "1 234 €",
                 subtitle: "Sur l'année en cours",
-                accentColor: .purple
+                iconColor: .purple
             )
 
             StatCard(
@@ -101,11 +101,11 @@ struct StatCard: View {
                 value: "3",
                 subtitle: "Nécessite votre attention",
                 icon: "exclamationmark.triangle.fill",
-                accentColor: .yellow,
+                iconColor: .yellow,
                 action: { print("Alerts tapped") }
             )
         }
     }
     .padding()
-    .background(Color(.secondarySystemBackground))
+    .background(Color(.systemBackground))
 }

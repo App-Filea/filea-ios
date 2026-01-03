@@ -14,102 +14,83 @@ struct VehicleDetailsView: View {
     var body: some View {
         GeometryReader { geometry in
             ZStack(alignment: .top) {
-                ColorTokens.background
+                Color(.systemBackground)
                     .ignoresSafeArea()
                 
                 ScrollView {
                     VStack(alignment: .leading, spacing: Spacing.xxl) {
-                        HStack(alignment: .top, spacing: 12) {
+                        HStack(alignment: .center, spacing: 12) {
                             ZStack {
                                 RoundedRectangle(cornerRadius: 16)
-                                    .fill(.white)
+                                    .fill(Color(.tertiarySystemGroupedBackground))
                                     .frame(width: 80, height: 80)
                                 
                                 Image(systemName: store.selectedVehicle.type.iconName)
                                     .font(.system(size: 36))
-                                    .foregroundColor(.black)
+                                    .foregroundColor(Color.primary)
                             }
                             
-                            VStack(alignment: .leading, spacing: 4) {
+                            VStack(alignment: .leading, spacing: 0) {
                                 Text(store.selectedVehicle.brand)
-                                    .font(.system(size: 15))
-                                    .foregroundColor(.secondary)
+                                    .subLargeTitle()
                                 
                                 Text(store.selectedVehicle.model)
-                                    .font(.system(size: 28, weight: .bold))
-                                    .foregroundColor(.primary)
+                                    .largeTitle()
                                 
                                 Text(store.selectedVehicle.isPrimary == true ? "Véhicule principal" : "Véhicule secondaire")
-                                    .font(.system(size: 15))
-                                    .foregroundColor(.secondary)
+                                    .subLargeTitle()
                             }
                             Spacer()
                         }
                         
-                        VStack(alignment: .leading, spacing: Spacing.formFieldSpacing) {
+                        VStack(alignment: .leading, spacing: Spacing.md) {
                             Text("Informations")
-                                .font(Typography.title2.weight(.bold))
-                                .foregroundColor(ColorTokens.textPrimary)
-                            
-                            VStack(spacing: Spacing.formFieldSpacing) {
+                                .title()
+
+                            VStack(spacing: Spacing.md) {
                                 HStack {
                                     Text("Immatriculation")
-                                        .font(.subheadline)
-                                        .foregroundStyle(ColorTokens.textSecondary)
+                                        .secondarySubheadline()
                                     Spacer()
                                     Text(store.selectedVehicle.plate)
-                                        .font(.subheadline)
-                                        .fontWeight(.bold)
-                                        .foregroundStyle(ColorTokens.textPrimary)
+                                        .primarySubheadline()
                                 }
                                 Divider()
                                 HStack {
                                     Text("Kilométrage")
-                                        .font(.subheadline)
-                                        .foregroundStyle(ColorTokens.textSecondary)
+                                        .secondarySubheadline()
                                     Spacer()
                                     Text(store.selectedVehicle.mileage ?? "-- €")
-                                        .font(.subheadline)
-                                        .fontWeight(.bold)
-                                        .foregroundStyle(ColorTokens.textPrimary)
+                                        .primarySubheadline()
                                 }
                                 Divider()
                                 HStack {
                                     Text("Mise en circulation")
-                                        .font(.subheadline)
-                                        .foregroundStyle(ColorTokens.textSecondary)
+                                        .secondarySubheadline()
                                     Spacer()
                                     Text(formattedDate(store.selectedVehicle.registrationDate))
-                                        .font(.subheadline)
-                                        .fontWeight(.bold)
-                                        .foregroundStyle(ColorTokens.textPrimary)
+                                        .primarySubheadline()
                                 }
                                 Divider()
                                 HStack {
                                     Text("Age du véhicule")
-                                        .font(.subheadline)
-                                        .foregroundStyle(ColorTokens.textSecondary)
+                                        .secondarySubheadline()
                                     Spacer()
                                     Text(vehicleAge(from: store.selectedVehicle.registrationDate))
-                                        .font(.subheadline)
-                                        .fontWeight(.bold)
-                                        .foregroundStyle(ColorTokens.textPrimary)
+                                        .primarySubheadline()
                                 }
                                 Divider()
                                 HStack {
                                     Text("Documents associés")
-                                        .font(.subheadline)
-                                        .foregroundStyle(ColorTokens.textSecondary)
+                                        .secondarySubheadline()
                                     Spacer()
                                     Text("\(String(describing: store.selectedVehicle.documents.count))")
-                                        .font(.subheadline)
-                                        .fontWeight(.bold)
-                                        .foregroundStyle(ColorTokens.textPrimary)
+                                        .primarySubheadline()
                                 }
                             }
                             .padding(.horizontal, 16)
                             .padding(.vertical, 24)
-                            .background(Color(.systemBackground))
+                            .background(Color(.systemGroupedBackground))
                             .cornerRadius(16)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 16)
@@ -120,20 +101,9 @@ struct VehicleDetailsView: View {
                         Spacer()
                         
                         VStack {
-                            
-                            Button(action: { store.send(.editVehicleButtonTapped) }) {
-                                HStack(spacing: 8) {
-                                    Image(systemName: "square.and.pencil")
-                                        .font(.system(size: 18, weight: .semibold))
-                                    Text("Modifier")
-                                        .font(.system(size: 17, weight: .semibold))
-                                }
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 16)
-                                .background(.black)
-                                .cornerRadius(14)
-                            }
+                            PrimaryButton("Modifier", systemImage: "square.and.pencil", action: {
+                                store.send(.editVehicleButtonTapped)
+                            })
                         }
                     }
                     .padding([.horizontal, .bottom], 16)

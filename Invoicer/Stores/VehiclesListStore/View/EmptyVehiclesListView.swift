@@ -36,30 +36,20 @@ struct EmptyVehiclesListView: View {
                     .offset(y: !initialAnimation ? -(proxy.size.height + 200) : 0)
             }
             
-            VStack(spacing: Spacing.listItemSpacing) {
+            VStack(spacing: Spacing.lg) {
                 Text("Votre garage est vide")
-                    .font(.headline)
-                    .foregroundStyle(Color(.label))
+                    .largeTitle()
                 Text("Ajoutez votre premier véhicule pour suivre son historique, ses factures et ses documents au même endroit.")
-                    .font(.subheadline)
-                    .foregroundStyle(Color(.secondaryLabel))
-                    .multilineTextAlignment(.center)
+                    .subLargeTitle()
             }
-            .padding(.top, 100)
+            .padding(.top, 60)
             .padding(.bottom, 40)
-            // Floating action button
-            Button(action: onButtonTapped) {
-                Text("Ajouter votre premier véhicule")
-                    .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(.black)
-                    .cornerRadius(14)
-            }
+            
+            PrimaryButton("Ajouter votre premier véhicule", action: onButtonTapped)
+            
             Spacer()
         }
-        .padding(16)
+        .padding(Spacing.screenMargin)
         .onReceive(timer) { _ in
             if let scrollView = scrollView {
                 scrollView.contentOffset.x += 0.35
@@ -89,10 +79,11 @@ struct EmptyVehiclesListView: View {
             .aspectRatio(contentMode: .fit)
             .frame(width: 100, height: 100)
             .padding()
-            .background(ColorTokens.surface)
+            .foregroundStyle(Color.primary)
+            .background(Color(.tertiarySystemGroupedBackground))
             .scaleEffect(x: card.shouldFlipIcon ? -1 : 1, y: 1)
             .clipShape(.rect(cornerRadius: Radius.lg))
-            .shadow(color: ColorTokens.shadow, radius: Spacing.xs, x: 0, y: 4)
+            .shadow(color: Color.primary.opacity(0.15), radius: Spacing.xs, x: 0, y: 4)
             .scrollTransition(.interactive.threshold(.centered), axis: .horizontal) { content, phase in
                 content
                     .offset(y: phase == .identity ? -10 : 0)

@@ -14,8 +14,7 @@ struct VehicleMonthlyExpensesView: View {
     var body: some View {
         MonthlyExpenseChart(
             expenses: store.currentVehicleMonthlyExpenses,
-            year: Calendar.current.component(.year, from: Date()),
-            accentColor: ColorTokens.actionPrimary
+            year: Calendar.current.component(.year, from: Date())
         )
         .onAppear {
             store.send(.view(.initiate))

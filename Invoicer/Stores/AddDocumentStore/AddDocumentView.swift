@@ -21,7 +21,7 @@ struct AddDocumentView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                ColorTokens.background
+                Color(.systemBackground)
                     .ignoresSafeArea()
                 
                 switch store.viewState {
@@ -30,17 +30,19 @@ struct AddDocumentView: View {
                         modeChoiceView
                     }
                     .scrollBounceBehavior(.basedOnSize)
-                    .safeAreaInset(edge: .bottom) {
-                        Button(action: { store.send(.view(.closeButtonTapped)) }) {
-                            Text("Annuler")
-                                .font(.system(size: 17, weight: .semibold))
-                                .foregroundColor(.black)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 16)
-                                .background(.white)
-                                .cornerRadius(14)
-                                .padding(Spacing.screenMargin)
+                    .safeAreaInset(edge: .bottom, spacing: 80) {
+                        VStack(spacing: 0) {
+                            Divider()
+                            
+                            VStack(spacing: Spacing.md) {
+                                TertiaryButton("Annuler", action: {
+                                    store.send(.view(.closeButtonTapped))
+                                })
+                            }
+                            .padding(16)
                         }
+                        .background(Color(.tertiarySystemBackground))
+
                     }
                 case .metadataForm:
                     ScrollView {
@@ -51,30 +53,18 @@ struct AddDocumentView: View {
                         VStack(spacing: 0) {
                             Divider()
                             
-                            VStack(spacing: 0) {
-                                Button(action: { store.send(.view(.backFromMetadataFormButtonTapped)) }) {
-                                    Text("Retour")
-                                        .font(.system(size: 17, weight: .semibold))
-                                        .foregroundColor(.red)
-                                        .frame(maxWidth: .infinity)
-                                        .padding(.vertical, 16)
-                                        .cornerRadius(14)
-                                }
+                            VStack(spacing: Spacing.md) {
+                                PrimaryButton("Enregistrer", action: {
+                                    store.send(.view(.saveButtonTapped))
+                                })
                                 
-                                Button(action: { store.send(.view(.saveButtonTapped)) }) {
-                                    Text("Enregistrer")
-                                        .font(.system(size: 17, weight: .semibold))
-                                        .foregroundColor(.white)
-                                        .frame(maxWidth: .infinity)
-                                        .padding(.vertical, 16)
-                                        .background(.black)
-                                        .cornerRadius(14)
-                                }
+                                TertiaryButton("Retour", action: {
+                                    store.send(.view(.backFromMetadataFormButtonTapped))
+                                })
                             }
-                            .padding(.horizontal, 16)
-                            .padding(.bottom, 8)
+                            .padding(16)
                         }
-                        .background(ColorTokens.background)
+                        .background(Color(.tertiarySystemBackground))
                     }
                 }
             }
@@ -156,25 +146,22 @@ struct AddDocumentView: View {
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 32, height: 32)
-                    .foregroundStyle(.black)
+                    .foregroundStyle(Color.primary)
                 
                 VStack(alignment: .leading, spacing: Spacing.xxs) {
                     Text(title)
-                        .font(Typography.title3)
-                        .foregroundStyle(ColorTokens.textPrimary)
+                        .font(.title3)
+                        .foregroundStyle(Color.primary)
                     
                     Text(subtitle)
-                        .font(Typography.caption1)
-                        .foregroundStyle(ColorTokens.textSecondary)
+                        .caption()
                 }
                 
                 Spacer()
             }
-            .font(.system(size: 17, weight: .semibold))
-            .foregroundColor(.black)
             .frame(maxWidth: .infinity)
             .padding(16)
-            .background(.white)
+            .background(Color(.tertiarySystemGroupedBackground))
             .cornerRadius(14)
         }
     }
@@ -184,8 +171,7 @@ struct AddDocumentView: View {
             FormField(titleLabel: "Type de document") {
                 HStack {
                     Text("Type")
-                        .font(.system(size: 17))
-                        .foregroundColor(.primary)
+                        .formFieldLeadingTitle()
                     
                     Spacer()
                     
@@ -204,8 +190,7 @@ struct AddDocumentView: View {
                       infoLabel: "Nom descriptif du document",
                       isError: store.validationErrors.contains(.nameEmpty)) {
                 TextField("Ex: Facture révision", text: $store.documentName)
-                    .font(.system(size: 17))
-                    .textInputAutocapitalization(.sentences)
+                    .formFieldLeadingTitle()
                     .submitLabel(.done)
                     .multilineTextAlignment(.leading)
             }
@@ -214,8 +199,7 @@ struct AddDocumentView: View {
                       infoLabel: "Date d'émission du document") {
                 HStack {
                     Text("Date")
-                        .font(.system(size: 17))
-                        .foregroundColor(.primary)
+                        .formFieldLeadingTitle()
                     
                     Spacer()
                     
@@ -229,19 +213,17 @@ struct AddDocumentView: View {
                       infoLabel: "Kilométrage au moment du document") {
                 HStack(spacing: 12) {
                     Text("Kilométrage")
-                        .font(.system(size: 17))
-                        .foregroundColor(.primary)
+                        .formFieldLeadingTitle()
                     
                     Spacer()
                     
                     TextField("120000", text: $store.documentMileage)
-                        .font(.system(size: 17))
+                        .formFieldLeadingTitle()
                         .keyboardType(.numberPad)
                         .multilineTextAlignment(.trailing)
                     
-                    Text("km")
-                        .font(.system(size: 17))
-                        .foregroundColor(.secondary)
+                    Text("KM")
+                        .formFieldLeadingTitle()
                 }
             }
             
@@ -249,19 +231,17 @@ struct AddDocumentView: View {
                       infoLabel: "Montant TTC du document") {
                 HStack(spacing: 12) {
                     Text("Montant")
-                        .font(.system(size: 17))
-                        .foregroundColor(.primary)
+                        .formFieldLeadingTitle()
                     
                     Spacer()
                     
-                    TextField("150.00", text: $store.documentAmount)
-                        .font(.system(size: 17))
-                        .keyboardType(.decimalPad)
+                    TextField("0.0", text: $store.documentAmount)
+                        .formFieldLeadingTitle()
+                        .keyboardType(.numberPad)
                         .multilineTextAlignment(.trailing)
                     
                     Text("€")
-                        .font(.system(size: 17))
-                        .foregroundColor(.secondary)
+                        .formFieldLeadingTitle()
                 }
             }
         }

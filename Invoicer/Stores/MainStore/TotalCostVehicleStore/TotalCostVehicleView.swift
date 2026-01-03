@@ -17,7 +17,6 @@ struct TotalCostVehicleView: View {
             value: store.currentVehicleTotalCost.asCurrencyStringAdaptive,
             subtitle: "Sur l'année en cours",
             icon: nil,
-            accentColor: ColorTokens.actionPrimary,
             action: nil
         )
         .onAppear {

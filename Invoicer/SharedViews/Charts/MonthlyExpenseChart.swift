@@ -9,11 +9,9 @@
 import SwiftUI
 import Charts
 
-/// Reusable monthly expense chart component
 struct MonthlyExpenseChart: View {
     let expenses: [MonthlyExpense]
     let year: Int
-    var accentColor: Color = ColorTokens.actionPrimary
     var height: CGFloat = 120
 
     private var currentMonth: Int {
@@ -28,8 +26,7 @@ struct MonthlyExpenseChart: View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
             // Title
             Text("Dépenses mensuelles")
-                .font(Typography.headline)
-                .foregroundStyle(ColorTokens.textPrimary)
+                .secondarySubheadline()
 
             // Chart
             if expenses.isEmpty || expenses.allSatisfy({ $0.amount == 0 }) {
@@ -40,11 +37,10 @@ struct MonthlyExpenseChart: View {
 
             // Subtitle
             Text("Dépenses mensuelles sur l'année \(year)")
-                .font(Typography.caption1)
-                .foregroundStyle(ColorTokens.textSecondary)
+                .caption()
         }
         .padding(Spacing.cardPadding)
-        .background(ColorTokens.surface)
+        .background(Color(.tertiarySystemGroupedBackground))
         .cornerRadius(Radius.card)
     }
 
@@ -56,7 +52,7 @@ struct MonthlyExpenseChart: View {
                     y: .value("Montant", 0),
                     height: 0.5
                 )
-                .foregroundStyle(ColorTokens.textTertiary.opacity(0.3))
+                .foregroundStyle(Color.primary.tertiary)
             }
         }
         .frame(height: height)
@@ -66,12 +62,12 @@ struct MonthlyExpenseChart: View {
                 AxisValueLabel {
                     if let monthName = value.as(String.self) {
                         Text(String(monthName.prefix(3)))
-                            .font(Typography.caption2.weight(
+                            .font(.caption2.weight(
                                 monthName == self.monthName(for: currentMonth) ? .bold : .regular
                             ))
                             .foregroundStyle(
                                 monthName == self.monthName(for: currentMonth) ?
-                                ColorTokens.textPrimary : ColorTokens.textSecondary
+                                Color.primary : Color.secondary
                             )
                     }
                 }
@@ -93,7 +89,7 @@ struct MonthlyExpenseChart: View {
                     )
                     .foregroundStyle(
                         expense.month == currentMonth ?
-                        accentColor : accentColor.opacity(0.5)
+                        Color.accentColor : Color.accentColor.opacity(0.5)
                     )
                     .clipShape(Capsule())
                 } else {
@@ -102,7 +98,7 @@ struct MonthlyExpenseChart: View {
                         y: .value("Montant", 0),
                         height: 0.5
                     )
-                    .foregroundStyle(ColorTokens.textTertiary.opacity(0.3))
+                    .foregroundStyle(Color.primary.tertiary)
                 }
             }
         }
@@ -114,10 +110,10 @@ struct MonthlyExpenseChart: View {
                     if let monthName = value.as(String.self) {
                         let isCurrentMonth = expenses.first(where: { $0.monthName == monthName })?.month == currentMonth
                         Text(String(monthName.prefix(3)))
-                            .font(Typography.caption2.weight(isCurrentMonth ? .bold : .regular))
+                            .font(.caption2.weight(isCurrentMonth ? .bold : .regular))
                             .foregroundStyle(
                                 isCurrentMonth ?
-                                ColorTokens.textPrimary : ColorTokens.textSecondary
+                                Color.primary : Color.secondary
                             )
                     }
                 }
@@ -171,8 +167,7 @@ struct MonthlyExpenseChart: View {
                 MonthlyExpense(month: 11, amount: 0),
                 MonthlyExpense(month: 12, amount: 0)
             ],
-            year: 2025,
-            accentColor: .purple
+            year: 2025
         )
 
         // Empty state

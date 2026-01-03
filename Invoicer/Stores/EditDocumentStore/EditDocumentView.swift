@@ -13,16 +13,15 @@ struct EditDocumentView: View {
     
     var body: some View {
         ZStack {
-            ColorTokens.background
+            Color(.systemBackground)
                 .ignoresSafeArea()
             
             ScrollView {
-                VStack(spacing: 24) {
+                VStack(spacing: Spacing.lg) {
                     FormField(titleLabel: "Type de document") {
                         HStack {
                             Text("Type")
-                                .font(.system(size: 17))
-                                .foregroundColor(.primary)
+                                .formFieldLeadingTitle()
                             
                             Spacer()
                             
@@ -38,14 +37,12 @@ struct EditDocumentView: View {
                     }
                     FormField(titleLabel: "Nom du document", infoLabel: "Nom descriptif du document") {
                         TextField("placeholder", text: $store.name)
-                            .font(.system(size: 17))
-                            .multilineTextAlignment(.leading)
+                            .formFieldLeadingTitle()
                     }
                     FormField(titleLabel: "Date du document", infoLabel: "Date d'émission du document") {
                         HStack {
                             Text("Date")
-                                .font(.system(size: 17))
-                                .foregroundColor(.primary)
+                                .formFieldLeadingTitle()
                             
                             Spacer()
                             
@@ -57,37 +54,33 @@ struct EditDocumentView: View {
                     FormField(titleLabel: "Informations complémentaires", infoLabel: "Kilométrage au moment du document") {
                         HStack(spacing: 12) {
                             Text("Kilométrage")
-                                .font(.system(size: 17))
-                                .foregroundColor(.primary)
+                                .formFieldLeadingTitle()
                             
                             Spacer()
                             
                             TextField("0.00", text: $store.mileage)
-                                .font(.system(size: 17))
-                                .keyboardType(.decimalPad)
+                                .formFieldLeadingTitle()
+                                .keyboardType(.numberPad)
                                 .multilineTextAlignment(.trailing)
                             
                             Text("KM")
-                                .font(.system(size: 17))
-                                .foregroundColor(.secondary)
+                                .formFieldLeadingTitle()
                         }
                     }
                     FormField(infoLabel: "Montant TTC du document") {
                         HStack(spacing: 12) {
                             Text("Montant")
-                                .font(.system(size: 17))
-                                .foregroundColor(.primary)
+                                .formFieldLeadingTitle()
                             
                             Spacer()
                             
                             TextField("0.00", text: $store.amount)
-                                .font(.system(size: 17))
-                                .keyboardType(.decimalPad)
+                                .formFieldLeadingTitle()
+                                .keyboardType(.numberPad)
                                 .multilineTextAlignment(.trailing)
                             
                             Text("€")
-                                .font(.system(size: 17))
-                                .foregroundColor(.secondary)
+                                .formFieldLeadingTitle()
                         }
                     }
                 }
@@ -99,30 +92,19 @@ struct EditDocumentView: View {
                 VStack(spacing: 0) {
                     Divider()
                     
-                    VStack(spacing: 0) {
-                        Button(action: { store.send(.cancel) }) {
-                            Text("Annuler")
-                                .font(.system(size: 17, weight: .semibold))
-                                .foregroundColor(.red)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 16)
-                                .cornerRadius(14)
-                        }
+                    VStack(spacing: Spacing.md) {
                         
-                        Button(action: { store.send(.save) }) {
-                            Text("Enregistrer")
-                                .font(.system(size: 17, weight: .semibold))
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 16)
-                                .background(.black)
-                                .cornerRadius(14)
-                        }
+                        PrimaryButton("Enregistrer", action: {
+                            store.send(.save)
+                        })
+                        
+                        TertiaryButton("Annuler", action: {
+                            store.send(.cancel)
+                        })
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 8)
+                    .padding(16)
                 }
-                .background(ColorTokens.background)
+                .background(Color(.tertiarySystemBackground))
             }
         }
         .navigationTitle("Modifier le document")

@@ -14,59 +14,52 @@ struct OnboardingView: View {
     @Bindable var store: StoreOf<OnboardingStore>
     
     var body: some View {
-        VStack(spacing: 0) {
-            
-            ScrollView {
-                AppIconView()
-                    .padding(.top, 60)
-                    .padding(.bottom, 28)
-                
-                Text("Bienvenue dans Filea")
-                    .font(.system(size: 34, weight: .bold))
-                    .foregroundStyle(Color.primary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
-                    .padding(.bottom, 40)
-                
-                VStack(alignment: .leading, spacing: 24) {
-                    OnboardingFeatureRow(
-                        icon: "doc.text.image",
-                        iconColor: .blue,
-                        title: "Gérez vos documents automobiles",
-                        description: "Regroupez cartes grises, assurances, contrôles techniques et factures en un seul endroit."
-                    )
+        ZStack {
+            Color(.systemBackground)
+                .ignoresSafeArea()
+            VStack(spacing: 0) {
+                ScrollView {
+                    AppIconView()
+                        .padding(.top, 60)
+                        .padding(.bottom, 28)
                     
-                    OnboardingFeatureRow(
-                        icon: "chart.line.uptrend.xyaxis",
-                        iconColor: .green,
-                        title: "Suivez vos dépenses",
-                        description: "Visualisez vos coûts d'entretien, de carburant et de réparations avec des graphiques détaillés."
-                    )
+                    Text("Bienvenue dans Filea")
+                        .font(.system(size: 34, weight: .bold))
+                        .foregroundStyle(Color.primary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 32)
+                        .padding(.bottom, 40)
                     
-                    OnboardingFeatureRow(
-                        icon: "lock.shield",
-                        iconColor: .orange,
-                        title: "Vos données restent privées",
-                        description: "Stockage 100% local sur votre appareil ou votre cloud personnel. Vous restez maître de vos données."
-                    )
+                    VStack(alignment: .leading, spacing: 24) {
+                        OnboardingFeatureRow(
+                            icon: "doc.text.image",
+                            iconColor: .blue,
+                            title: "Gérez vos documents automobiles",
+                            description: "Regroupez cartes grises, assurances, contrôles techniques et factures en un seul endroit."
+                        )
+                        
+                        OnboardingFeatureRow(
+                            icon: "chart.line.uptrend.xyaxis",
+                            iconColor: .green,
+                            title: "Suivez vos dépenses",
+                            description: "Visualisez vos coûts d'entretien, de carburant et de réparations avec des graphiques détaillés."
+                        )
+                        
+                        OnboardingFeatureRow(
+                            icon: "lock.shield",
+                            iconColor: .orange,
+                            title: "Vos données restent privées",
+                            description: "Stockage 100% local sur votre appareil ou votre cloud personnel. Vous restez maître de vos données."
+                        )
+                    }
+                    .padding(.horizontal, 16)
                 }
-                .padding(.horizontal, 16)
+                .scrollBounceBehavior(.basedOnSize)
+                
+                PrimaryButton("Continuer", action: { store.send(.continueTapped) })
+                .padding([.horizontal, .bottom], Spacing.screenMargin)
             }
-            .scrollBounceBehavior(.basedOnSize)
-            
-            Button(action: { store.send(.continueTapped) }) {
-                Text("Continuer")
-                    .font(.system(size: 17, weight: .semibold))
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 50)
-                    .background(Color.blue)
-                    .clipShape(RoundedRectangle(cornerRadius: 14))
-            }
-            .padding(.horizontal, 20)
-            .padding(.bottom, 34)
         }
-        .background(Color(uiColor: .systemBackground))
     }
 }
 
@@ -81,9 +74,9 @@ struct AppIconView: View {
     }
 }
 
-struct OnboardingFeatureRow: View {
+struct OnboardingFeatureRow<style: ShapeStyle>: View {
     let icon: String
-    let iconColor: Color
+    let iconColor: style
     let title: String
     let description: String
     
@@ -91,7 +84,7 @@ struct OnboardingFeatureRow: View {
         HStack(alignment: .top, spacing: 16) {
             ZStack {
                 Circle()
-                    .fill(iconColor.opacity(0.15))
+                    .fill(iconColor.tertiary)
                     .frame(width: 44, height: 44)
                 
                 Image(systemName: icon)
@@ -107,13 +100,10 @@ struct OnboardingFeatureRow: View {
                 Text(description)
                     .font(.system(size: 15))
                     .foregroundStyle(Color.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
             }
         }
     }
 }
-
-// MARK: - Preview
 
 #Preview {
     OnboardingView(

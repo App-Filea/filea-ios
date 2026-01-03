@@ -11,13 +11,13 @@ import ComposableArchitecture
 struct DocumentDetailView: View {
     @Bindable var store: StoreOf<DocumentDetailStore>
     @State private var selectedDocumentURL: URL?
-
+    
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                ColorTokens.background
-                .ignoresSafeArea()
-
+                Color(.systemBackground)
+                    .ignoresSafeArea()
+                
                 ScrollView {
                     switch store.viewState {
                     case .loading:
@@ -30,14 +30,6 @@ struct DocumentDetailView: View {
                     case .document(let document):
                         documentView(document)
                             .frame(minWidth: geometry.size.width, minHeight: geometry.size.height)
-                            .toolbar {
-                                ToolbarItem(placement: .primaryAction) {
-                                    Button(action: { store.send(.deleteDocument) }) {
-                                        Image(systemName: "trash.fill")
-                                            .foregroundStyle(.black)
-                                    }
-                                }
-                            }
                     }
                 }
                 .scrollBounceBehavior(.basedOnSize)
@@ -48,28 +40,27 @@ struct DocumentDetailView: View {
         }
         .quickLookPreview($selectedDocumentURL)
     }
-
+    
     private func documentView(_ document: Document) -> some View {
-        VStack(spacing: Spacing.sectionSpacing) {
-            HStack(alignment: .top, spacing: 12) {
+        VStack(spacing: Spacing.lg) {
+            HStack(alignment: .center, spacing: 12) {
                 ZStack {
                     RoundedRectangle(cornerRadius: 16)
-                        .fill(.white)
+                        .fill(Color(.tertiarySystemGroupedBackground))
                         .frame(width: 80, height: 80)
                     
                     Image(systemName: document.type.imageName)
                         .font(.system(size: 36))
-                        .foregroundColor(.black)
+                        .foregroundColor(Color.primary)
                 }
                 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(document.name)
-                        .font(.system(size: 28, weight: .bold))
-                        .foregroundColor(.primary)
+                        .largeTitle()
+                        .lineLimit(1)
                     
                     Text(document.type.displayName)
-                        .font(.system(size: 15))
-                        .foregroundColor(.secondary)
+                        .subLargeTitle()
                 }
                 Spacer()
             }
@@ -84,7 +75,7 @@ struct DocumentDetailView: View {
                 DetailCard(
                     icon: "gauge.open.with.lines.needle.33percent",
                     label: "Kilométrage",
-                    value: document.mileage.isEmpty ? "-- km" : document.mileage.asFormattedMileage
+                    value: document.mileage.isEmpty ? "-- KM" : document.mileage.asFormattedMileage
                 )
                 
                 DetailCard(
@@ -97,33 +88,18 @@ struct DocumentDetailView: View {
             Spacer()
             
             VStack {
-                Button(action: {
-                    selectedDocumentURL = URL(fileURLWithPath: document.fileURL)
-                }) {
-                    HStack(spacing: 8) {
-                        Image(systemName: "text.document")
-                        Text("Afficher")
-                    }
-                    .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(.black)
-                    .cornerRadius(14)
-                }
                 
-                Button(action: { store.send(.editDocumentButtonTapped) }) {
-                    HStack(spacing: 8) {
-                        Image(systemName: "square.and.pencil")
-                        Text("Modifier")
-                    }
-                    .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(.black)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(.white)
-                    .cornerRadius(14)
-                }
+                PrimaryButton("Modifier", systemImage: "square.and.pencil", action: {
+                    store.send(.editDocumentButtonTapped)
+                })
+                
+                SecondaryButton("Afficher", systemImage: "text.document", action: {
+                    selectedDocumentURL = URL(fileURLWithPath: document.fileURL)
+                })
+                
+                DestructiveButton("Supprimer", action: {
+                    store.send(.deleteDocument)
+                })
             }
         }
         .padding(.horizontal, Spacing.screenMargin)
@@ -154,7 +130,7 @@ struct DocumentDetailView: View {
         type: .maintenance,
         amount: 450.00
     )
-
+    
     NavigationView {
         DocumentDetailView(store: Store(
             initialState: DocumentDetailStore.State(

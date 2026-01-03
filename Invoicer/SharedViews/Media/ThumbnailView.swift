@@ -32,7 +32,7 @@ struct ThumbnailView: View {
             } else if isLoading {
                 ZStack {
                     Rectangle()
-                        .fill(ColorTokens.surface)
+                        .fill(Color.secondary)
                     ProgressView()
                         .scaleEffect(0.8)
                 }
@@ -49,11 +49,11 @@ struct ThumbnailView: View {
 
     private var placeholderView: some View {
         Rectangle()
-            .fill(ColorTokens.surface.opacity(0.5))
+            .fill(Color.primary.opacity(0.5))
             .overlay(
                 Image(systemName: "doc.fill")
                     .font(.title2)
-                    .foregroundStyle(ColorTokens.textTertiary)
+                    .foregroundStyle(Color.secondary)
             )
     }
 

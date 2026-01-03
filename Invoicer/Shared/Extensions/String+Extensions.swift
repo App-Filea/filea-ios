@@ -92,32 +92,13 @@ extension String {
         }
     }
 
-    // MARK: - Currency
+    // MARK: - Number Parsing
 
-    /// Formats the string as a currency amount in euros
-    var asCurrencyString: String? {
-        guard let value = Double(self) else { return nil }
-        return value.asCurrencyString
-    }
-
-    // MARK: - Mileage
-
-    /// Formats the string as a mileage display with adaptive compact format
-    /// Examples: "125000" → "125K km", "5000" → "5 000 km", "850" → "850 km"
-    var asFormattedMileage: String {
-        let trimmed = self.trimmed
-        guard !trimmed.isEmpty else { return "" }
-
-        // Remove any existing formatting
-        let cleaned = trimmed.replacingOccurrences(of: " ", with: "")
-                            .replacingOccurrences(of: "km", with: "", options: .caseInsensitive)
-
-        // Convert to Double and use adaptive kilometers format
-        if let value = Double(cleaned) {
-            return value.asKilometersAdaptive
-        }
-
-        return "\(trimmed) km"
+    /// Converts the string to a Double if possible, removing common formatting
+    var asDouble: Double? {
+        let cleaned = self.replacingOccurrences(of: " ", with: "")
+                          .replacingOccurrences(of: ",", with: ".")
+        return Double(cleaned)
     }
 }
 

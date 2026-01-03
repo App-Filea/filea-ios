@@ -7,10 +7,14 @@
 //
 
 import SwiftUI
+import ComposableArchitecture
 
 struct DocumentCard: View {
     let document: Document
     let action: () -> Void
+
+    @Shared(.selectedCurrency) var currency: Currency
+    @Shared(.selectedDistanceUnit) var distanceUnit: DistanceUnit
 
     init(document: Document, action: @escaping () -> Void) {
         self.document = document
@@ -20,7 +24,6 @@ struct DocumentCard: View {
     var body: some View {
         Button(action: action) {
             HStack(spacing: Spacing.sm) {
-                // Thumbnail
                 ThumbnailView(
                     fileURL: document.fileURL,
                     width: 60,
@@ -45,26 +48,25 @@ struct DocumentCard: View {
 
                     HStack(spacing: Spacing.xxs) {
                         if let amount = document.amount {
-                            Text(amount.asCurrencyStringNoDecimals)
+                            Text(amount.asCurrencyStringAdaptive(currency: currency))
                                 .callout()
-                        } else {
-                            Text("-- €")
-                                .callout()
+                            
+                            Circle()
+                                .fill(Color.secondary)
+                                .frame(width: 4, height: 4)
                         }
-
-                        Circle()
-                            .fill(Color.secondary)
-                            .frame(width: 4, height: 4)
 
                         Text(document.type.displayName)
                             .callout()
                     }
 
-                    HStack(spacing: Spacing.xxs) {
-                        Image(systemName: "gauge.open.with.lines.needle.33percent")
-                        Text(document.mileage.asFormattedMileage)
+                    if let mileageValue = document.mileage.asDouble {
+                        HStack(spacing: Spacing.xxs) {
+                            Image(systemName: "gauge.open.with.lines.needle.33percent")
+                            Text(mileageValue.asDistanceString(unit: distanceUnit))
+                        }
+                        .callout()
                     }
-                    .callout()
 
                     if document.amount == nil {
                         HStack(spacing: Spacing.xxs) {
@@ -82,7 +84,6 @@ struct DocumentCard: View {
 
                 Spacer()
 
-                // Chevron
                 Image(systemName: "chevron.right")
                     .caption()
                     .fontWeight(.semibold)
@@ -116,7 +117,7 @@ struct DocumentCard: View {
                 fileURL: "/path/to/document2.pdf",
                 name: "Assurance auto",
                 date: Date().addingDays(-30) ?? Date(),
-                mileage: "44500",
+                mileage: "",
                 type: .other,
                 amount: nil
             ),

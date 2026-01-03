@@ -10,11 +10,13 @@ import ComposableArchitecture
 
 struct TotalCostVehicleView: View {
     @Bindable var store: StoreOf<TotalCostVehicleStore>
-    
+
+    @Shared(.selectedCurrency) var currency: Currency
+
     var body: some View {
         StatCard(
             title: "stat_card_total_cost_title",
-            value: store.currentVehicleTotalCost.asCurrencyStringAdaptive,
+            value: store.currentVehicleTotalCost.asCurrencyStringAdaptive(currency: currency),
             subtitle: "stat_card_total_cost_subtitle",
             icon: nil,
             action: nil

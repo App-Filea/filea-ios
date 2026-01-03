@@ -229,6 +229,9 @@ struct MainView: View {
 }
 
 #Preview("Selected vehicle") {
+    @Shared(.selectedCurrency) var currency = .dollar
+    @Shared(.selectedDistanceUnit) var distanceUnit = .miles
+    
     NavigationView {
         MainView(
             store: Store(
@@ -254,7 +257,7 @@ struct MainView: View {
                         registrationDate: Date(timeIntervalSince1970: 1322784000),
                         plate: "BZ-029-YV",
                         documents: [
-                            .init(fileURL: "", name: "Vidange", date: .now, mileage: "100000", type: .maintenance)
+                            .init(fileURL: "", name: "Vidange", date: .now, mileage: "", type: .maintenance)
                         ]
                     ))
                 ),

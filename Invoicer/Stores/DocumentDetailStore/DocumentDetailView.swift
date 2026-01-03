@@ -11,7 +11,10 @@ import ComposableArchitecture
 struct DocumentDetailView: View {
     @Bindable var store: StoreOf<DocumentDetailStore>
     @State private var selectedDocumentURL: URL?
-    
+
+    @Shared(.selectedCurrency) var currency: Currency
+    @Shared(.selectedDistanceUnit) var distanceUnit: DistanceUnit
+
     var body: some View {
         GeometryReader { geometry in
             ZStack {
@@ -67,15 +70,20 @@ struct DocumentDetailView: View {
             
             VStack(spacing: 12) {
                 DetailCard(
-                    icon: "eurosign",
+                    icon: self.currency.iconName,
                     label: "document_form_amount_label",
-                    value: document.amount?.asCurrencyStringNoDecimals ?? String(localized: "document_detail_not_specified_amount")
+                    value: document.amount?.asCurrencyStringNoDecimals(currency: currency) ?? String(localized: "all_not_specified")
                 )
 
                 DetailCard(
                     icon: "gauge.open.with.lines.needle.33percent",
                     label: "document_form_mileage_label",
-                    value: document.mileage.isEmpty ? String(localized: "document_detail_not_specified_mileage") : document.mileage.asFormattedMileage
+                    value: {
+                        if let mileageValue = document.mileage.asDouble {
+                            return mileageValue.asDistanceString(unit: distanceUnit)
+                        }
+                        return String(localized: "all_not_specified")
+                    }()
                 )
 
                 DetailCard(
@@ -106,29 +114,19 @@ struct DocumentDetailView: View {
     }
 }
 
-#Preview("Loading") {
-    NavigationView {
-        DocumentDetailView(store: Store(
-            initialState: DocumentDetailStore.State(
-                viewState: .loading,
-                vehicleId: String(),
-                documentId: String()
-            )
-        ) {
-            DocumentDetailStore()
-        })
-    }
-}
-
 #Preview("Document") {
+    
+    @Shared(.selectedCurrency) var currency = .euro
+    @Shared(.selectedDistanceUnit) var distanceUnit = .kilometers
+    
     let previewDocument = Document(
         id: String(),
         fileURL: "/fake/path/receipt.jpg",
         name: "Révision complète",
         date: Date(),
-        mileage: "45000",
+        mileage: "1000000000000",
         type: .maintenance,
-        amount: 450.00
+        amount: 10000
     )
     
     NavigationView {
@@ -137,6 +135,20 @@ struct DocumentDetailView: View {
                 viewState: .document(previewDocument),
                 vehicleId: String(),
                 documentId: previewDocument.id
+            )
+        ) {
+            DocumentDetailStore()
+        })
+    }
+}
+
+#Preview("Loading") {
+    NavigationView {
+        DocumentDetailView(store: Store(
+            initialState: DocumentDetailStore.State(
+                viewState: .loading,
+                vehicleId: String(),
+                documentId: String()
             )
         ) {
             DocumentDetailStore()

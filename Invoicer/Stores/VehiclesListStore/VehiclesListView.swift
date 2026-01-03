@@ -11,6 +11,8 @@ import ComposableArchitecture
 struct VehiclesListView: View {
     @Bindable var store: StoreOf<VehiclesListStore>
 
+    @Shared(.selectedDistanceUnit) var distanceUnit: DistanceUnit
+
     var body: some View {
         ZStack(alignment: .bottom) {
             Color(.systemBackground)
@@ -83,7 +85,14 @@ struct VehiclesListView: View {
                     HStack(spacing: 0) {
                         Text(vehicle.plate)
                         Spacer()
-                        Text(vehicle.mileage?.asFormattedMileage ?? String(localized: "all_not_specified"))
+                        Text({
+                            if let mileageStr = vehicle.mileage,
+                               let mileageValue = mileageStr.asDouble {
+                                return mileageValue.asDistanceString(unit: distanceUnit)
+                            } else {
+                                return String(localized: "all_not_specified")
+                            }
+                        }())
                         Spacer()
                         Text("\(vehicle.registrationDate.shortDateString)")
                     }

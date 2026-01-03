@@ -4,9 +4,6 @@
     "" : {
 
     },
-    "-- €" : {
-
-    },
     "%@" : {
 
     },
@@ -396,12 +393,12 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mi"
+            "value" : "KM"
           }
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "KM"
           }
         }
@@ -1000,9 +997,6 @@
     "Graphique des dépenses mensuelles" : {
 
     },
-    "hello World" : {
-
-    },
     "Incomplet" : {
 
     },
@@ -1224,6 +1218,142 @@
     "Réglages" : {
 
     },
+    "settings_currency_dollar" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "US Dollar ($)"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dollar américain ($)"
+          }
+        }
+      }
+    },
+    "settings_currency_euro" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Euro (€)"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Euro (€)"
+          }
+        }
+      }
+    },
+    "settings_currency_info" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select your preferred currency"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sélectionnez votre devise préférée"
+          }
+        }
+      }
+    },
+    "settings_currency_label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Currency"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Devise"
+          }
+        }
+      }
+    },
+    "settings_distance_info" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select your distance unit"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sélectionnez votre unité de distance"
+          }
+        }
+      }
+    },
+    "settings_distance_kilometers" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kilometers (km)"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kilomètres (km)"
+          }
+        }
+      }
+    },
+    "settings_distance_label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Distance Unit"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unité de distance"
+          }
+        }
+      }
+    },
+    "settings_distance_miles" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Miles (mi)"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Miles (mi)"
+          }
+        }
+      }
+    },
     "settings_global_title" : {
       "localizations" : {
         "en" : {
@@ -1270,6 +1400,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Unités et mesures"
+          }
+        }
+      }
+    },
+    "settings_units_info_message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Changes take effect immediately throughout the app"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les modifications prennent effet immédiatement dans toute l'application"
           }
         }
       }
@@ -1711,13 +1858,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "0.00"
+            "value" : "0.0"
           }
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "0.00"
+            "state" : "needs_review",
+            "value" : "0.0"
           }
         }
       }

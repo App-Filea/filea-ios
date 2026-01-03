@@ -9,7 +9,7 @@ import SwiftUI
 
 struct DetailCard: View {
     let icon: String
-    let label: String
+    let label: LocalizedStringKey
     let value: String
     
     var body: some View {

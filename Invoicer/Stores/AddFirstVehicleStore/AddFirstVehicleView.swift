@@ -10,7 +10,9 @@ import ComposableArchitecture
 
 struct AddFirstVehicleView: View {
     @Bindable var store: StoreOf<AddFirstVehicleStore>
-    
+
+    @Shared(.selectedDistanceUnit) var distanceUnit: DistanceUnit
+
     var body: some View {
         NavigationView {
             ZStack {
@@ -96,7 +98,7 @@ struct AddFirstVehicleView: View {
                                     .multilineTextAlignment(.trailing)
                                     .submitLabel(.done)
 
-                                Text("all_mileage_unit")
+                                Text(distanceUnit.symbol)
                                     .formFieldLeadingTitle()
                             }
                         }

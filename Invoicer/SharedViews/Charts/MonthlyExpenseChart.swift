@@ -8,11 +8,14 @@
 
 import SwiftUI
 import Charts
+import ComposableArchitecture
 
 struct MonthlyExpenseChart: View {
     let expenses: [MonthlyExpense]
     let year: Int
     var height: CGFloat = 120
+
+    @Shared(.selectedCurrency) var currency: Currency
 
     private var currentMonth: Int {
         Calendar.current.component(.month, from: Date())
@@ -132,7 +135,7 @@ struct MonthlyExpenseChart: View {
             return "Aucune dépense enregistrée cette année"
         }
 
-        return "Total de \(CurrencyFormatter.shared.formatValue(totalExpenses, includeDecimals: false)) euros sur \(monthsWithExpenses) mois"
+        return "Total de \(totalExpenses.asCurrencyStringNoDecimals(currency: currency)) sur \(monthsWithExpenses) mois"
     }
 
     private func monthName(for month: Int) -> String {

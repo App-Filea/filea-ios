@@ -41,7 +41,6 @@ enum VehicleType: String, Codable, CaseIterable, Identifiable {
         switch self {
         case .car: return false
         case .motorcycle, .truck, .bicycle, .other: return true
-        case .other: return false
         }
     }
 }

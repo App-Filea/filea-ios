@@ -37,3 +37,16 @@ extension SharedReaderKey where Self == AppStorageKey<Bool>.Default {
         Self[.appStorage("isStorageConfigured"), default: false]
     }
 }
+
+// MARK: - User Preferences SharedKeys
+extension SharedReaderKey where Self == AppStorageKey<Currency>.Default {
+    static var selectedCurrency: Self {
+        Self[.appStorage("selectedCurrency"), default: .euro]
+    }
+}
+
+extension SharedReaderKey where Self == AppStorageKey<DistanceUnit>.Default {
+    static var selectedDistanceUnit: Self {
+        Self[.appStorage("selectedDistanceUnit"), default: .kilometers]
+    }
+}

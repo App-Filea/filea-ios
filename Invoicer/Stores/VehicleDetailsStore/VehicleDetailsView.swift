@@ -10,7 +10,8 @@ import ComposableArchitecture
 
 struct VehicleDetailsView: View {
     @Bindable var store: StoreOf<VehicleDetailsStore>
-
+    @Shared(.selectedDistanceUnit) var distanceUnit
+    
     var body: some View {
         GeometryReader { geometry in
             ZStack(alignment: .top) {
@@ -60,8 +61,10 @@ struct VehicleDetailsView: View {
                                     Text("vehicle_form_mileage_title")
                                         .secondarySubheadline()
                                     Spacer()
-                                    Text(store.selectedVehicle.mileage ?? "-- KM")
-                                        .primarySubheadline()
+                                    if let mileage = store.selectedVehicle.mileage?.asDouble {
+                                        Text(mileage.asDistanceString(unit: distanceUnit))
+                                            .primarySubheadline()
+                                    }
                                 }
                                 Divider()
                                 HStack {
@@ -139,6 +142,9 @@ struct VehicleDetailsView: View {
 }
 
 #Preview {
+    
+    @Shared(.selectedDistanceUnit) var distanceUnit = .kilometers
+
     NavigationView {
         VehicleDetailsView(store:
                         Store(initialState:

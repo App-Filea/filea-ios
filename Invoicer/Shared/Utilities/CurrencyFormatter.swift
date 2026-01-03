@@ -8,131 +8,100 @@
 
 import Foundation
 
-/// Utility for formatting currency values in euros
-final class CurrencyFormatter: @unchecked Sendable {
-    // MARK: - Singleton
+/// Utility for formatting currency values with dynamic currency symbol
+struct CurrencyFormatter {
+    // MARK: - Properties
 
-    static let shared = CurrencyFormatter()
+    let currency: Currency
+    private let locale = Locale(identifier: "fr_FR") // Locale fixe pour formatage cohérent
 
-    private init() {}
+    // MARK: - Initialization
 
-    // MARK: - Private Properties
-
-    private lazy var standardFormatter: NumberFormatter = {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.locale = Locale(identifier: "fr_FR")
-        formatter.currencySymbol = "€"
-        formatter.currencyDecimalSeparator = ","
-        formatter.currencyGroupingSeparator = " "
-        return formatter
-    }()
-
-    private lazy var noDecimalsFormatter: NumberFormatter = {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        formatter.locale = Locale(identifier: "fr_FR")
-        formatter.currencySymbol = "€"
-        formatter.maximumFractionDigits = 0
-        formatter.minimumFractionDigits = 0
-        formatter.currencyGroupingSeparator = " "
-        return formatter
-    }()
-
-    private lazy var decimalFormatter: NumberFormatter = {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        formatter.locale = Locale(identifier: "fr_FR")
-        formatter.decimalSeparator = ","
-        formatter.groupingSeparator = " "
-        return formatter
-    }()
-
-    // MARK: - Public Methods
-
-    /// Formats a double as a currency string (e.g., "1 234,56 €")
-    func format(_ value: Double, includeDecimals: Bool = true) -> String {
-        let formatter = includeDecimals ? standardFormatter : noDecimalsFormatter
-        return formatter.string(from: NSNumber(value: value)) ?? "0,00 €"
+    init(currency: Currency) {
+        self.currency = currency
     }
 
-    /// Formats a double as a currency string without currency symbol (e.g., "1 234,56")
-    func formatValue(_ value: Double, includeDecimals: Bool = true) -> String {
-        if includeDecimals {
-            return decimalFormatter.string(from: NSNumber(value: value)) ?? "0,00"
-        } else {
-            decimalFormatter.maximumFractionDigits = 0
-            let result = decimalFormatter.string(from: NSNumber(value: value)) ?? "0"
-            decimalFormatter.maximumFractionDigits = 2
-            return result
+    // MARK: - Formatting Methods
+
+    /// Formats a double as a currency string (e.g., "1 234,56 €" or "1 234,56 $")
+    func format(_ value: Double) -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.locale = locale
+        formatter.minimumFractionDigits = 2
+        formatter.maximumFractionDigits = 2
+
+        guard let formatted = formatter.string(from: NSNumber(value: value)) else {
+            return "\(currency.symbol)0,00"
         }
+        return "\(formatted) \(currency.symbol)"
+    }
+
+    /// Formats a double without decimals (e.g., "1 234 €" or "1 234 $")
+    func formatNoDecimals(_ value: Double) -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.locale = locale
+        formatter.minimumFractionDigits = 0
+        formatter.maximumFractionDigits = 0
+
+        guard let formatted = formatter.string(from: NSNumber(value: value)) else {
+            return "\(currency.symbol)0"
+        }
+        return "\(formatted) \(currency.symbol)"
     }
 
     /// Formats a double as a compact currency string (e.g., "1,2K €" for 1234)
-    func formatCompact(_ value: Double) -> String {
+    func formatAdaptive(_ value: Double) -> String {
         let absValue = abs(value)
         let sign = value < 0 ? "-" : ""
 
         if absValue >= 1_000_000 {
             let millions = absValue / 1_000_000
-            return String(format: "\(sign)%.1fM €", millions)
+            let formatter = NumberFormatter()
+            formatter.numberStyle = .decimal
+            formatter.locale = locale
+            formatter.minimumFractionDigits = 1
+            formatter.maximumFractionDigits = 1
+            let formatted = formatter.string(from: NSNumber(value: millions)) ?? "\(millions)"
+            return "\(sign)\(formatted)M \(currency.symbol)"
         } else if absValue >= 1_000 {
             let thousands = absValue / 1_000
-            return String(format: "\(sign)%.1fK €", thousands)
+            let formatter = NumberFormatter()
+            formatter.numberStyle = .decimal
+            formatter.locale = locale
+            formatter.minimumFractionDigits = 1
+            formatter.maximumFractionDigits = 1
+            let formatted = formatter.string(from: NSNumber(value: thousands)) ?? "\(thousands)"
+            return "\(sign)\(formatted)K \(currency.symbol)"
         } else {
             return format(value)
         }
     }
 
-    /// Parses a currency string to a double value
-    func parse(_ string: String) -> Double? {
-        // Remove currency symbol and whitespace
-        let cleaned = string
-            .replacingOccurrences(of: "€", with: "")
-            .replacingOccurrences(of: " ", with: "")
-            .replacingOccurrences(of: ",", with: ".")
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-
-        return Double(cleaned)
-    }
-
     /// Formats an optional double as a currency string
     func formatOptional(_ value: Double?) -> String {
-        guard let value = value else { return "-- €" }
+        guard let value = value else { return "-- \(currency.symbol)" }
         return format(value)
     }
 
-    /// Checks if a string is a valid currency amount
-    func isValid(_ string: String) -> Bool {
-        parse(string) != nil
-    }
-}
-
-// MARK: - Convenience Methods
-
-extension CurrencyFormatter {
     /// Formats a double with specific decimal places
     func format(_ value: Double, decimals: Int) -> String {
-        decimalFormatter.minimumFractionDigits = decimals
-        decimalFormatter.maximumFractionDigits = decimals
-        let result = decimalFormatter.string(from: NSNumber(value: value)) ?? "0"
-        decimalFormatter.minimumFractionDigits = 0
-        decimalFormatter.maximumFractionDigits = 2
-        return result + " €"
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.locale = locale
+        formatter.minimumFractionDigits = decimals
+        formatter.maximumFractionDigits = decimals
+
+        guard let formatted = formatter.string(from: NSNumber(value: value)) else {
+            return "\(currency.symbol)0"
+        }
+        return "\(formatted) \(currency.symbol)"
     }
 
     /// Formats a currency range
     func formatRange(from minValue: Double, to maxValue: Double) -> String {
-        "\(format(minValue, includeDecimals: false)) - \(format(maxValue, includeDecimals: false))"
-    }
-
-    /// Formats a currency with a prefix (e.g., "Coût: 1 234,56 €")
-    func formatWithPrefix(_ value: Double, prefix: String) -> String {
-        "\(prefix) \(format(value))"
-    }
-
-    /// Formats a currency with a suffix (e.g., "1 234,56 € / mois")
-    func formatWithSuffix(_ value: Double, suffix: String) -> String {
-        "\(format(value)) \(suffix)"
+        "\(formatNoDecimals(minValue)) - \(formatNoDecimals(maxValue))"
     }
 }
+

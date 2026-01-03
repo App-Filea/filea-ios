@@ -11,6 +11,8 @@ import ComposableArchitecture
 struct EditVehicleView: View {
     @Bindable var store: StoreOf<EditVehicleStore>
 
+    @Shared(.selectedDistanceUnit) var distanceUnit: DistanceUnit
+
     var body: some View {
         ZStack {
             Color(.systemBackground)
@@ -95,7 +97,7 @@ struct EditVehicleView: View {
                                 .multilineTextAlignment(.trailing)
                                 .submitLabel(.done)
 
-                            Text("all_mileage_unit")
+                            Text(distanceUnit.symbol)
                                 .formFieldLeadingTitle()
                         }
                     }

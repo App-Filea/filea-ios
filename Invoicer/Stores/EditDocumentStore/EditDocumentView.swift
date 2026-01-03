@@ -10,7 +10,10 @@ import SwiftUI
 
 struct EditDocumentView: View {
     @Bindable var store: StoreOf<EditDocumentStore>
-    
+
+    @Shared(.selectedCurrency) var currency: Currency
+    @Shared(.selectedDistanceUnit) var distanceUnit: DistanceUnit
+
     var body: some View {
         ZStack {
             Color(.systemBackground)
@@ -60,10 +63,10 @@ struct EditDocumentView: View {
 
                             TextField("document_form_amount_placeholder", text: $store.mileage)
                                 .formFieldLeadingTitle()
-                                .keyboardType(.numberPad)
+                                .keyboardType(.numbersAndPunctuation)
                                 .multilineTextAlignment(.trailing)
 
-                            Text("all_mileage_unit")
+                            Text(distanceUnit.symbol)
                                 .formFieldLeadingTitle()
                         }
                     }
@@ -76,10 +79,10 @@ struct EditDocumentView: View {
 
                             TextField("document_form_amount_placeholder", text: $store.amount)
                                 .formFieldLeadingTitle()
-                                .keyboardType(.numberPad)
+                                .keyboardType(.numbersAndPunctuation)
                                 .multilineTextAlignment(.trailing)
 
-                            Text("all_currency_symbol")
+                            Text(currency.symbol)
                                 .formFieldLeadingTitle()
                         }
                     }
@@ -113,6 +116,10 @@ struct EditDocumentView: View {
 }
 
 #Preview {
+    
+    @Shared(.selectedCurrency) var currency = .dollar
+    @Shared(.selectedDistanceUnit) var distanceUnit = .miles
+    
     NavigationView {
         EditDocumentView(store: Store(initialState: EditDocumentStore.State(
             vehicleId: String(),
@@ -120,7 +127,7 @@ struct EditDocumentView: View {
                 fileURL: "/path/to/document.jpg",
                 name: "Test Document",
                 date: Date(),
-                mileage: "50000",
+                mileage: "",
                 type: .maintenance
             )
         )) {

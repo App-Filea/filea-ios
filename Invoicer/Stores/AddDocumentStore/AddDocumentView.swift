@@ -13,11 +13,14 @@ import QuickLook
 struct AddDocumentView: View {
     @Bindable var store: StoreOf<AddDocumentStore>
     @State private var previewURL: URL?
-    
+
+    @Shared(.selectedCurrency) var currency: Currency
+    @Shared(.selectedDistanceUnit) var distanceUnit: DistanceUnit
+
     private var isFormValid: Bool {
         !store.documentName.isEmpty
     }
-    
+
     var body: some View {
         NavigationView {
             ZStack {
@@ -224,7 +227,7 @@ struct AddDocumentView: View {
                         .keyboardType(.numberPad)
                         .multilineTextAlignment(.trailing)
 
-                    Text("all_mileage_unit")
+                    Text(distanceUnit.symbol)
                         .formFieldLeadingTitle()
                 }
             }
@@ -242,7 +245,7 @@ struct AddDocumentView: View {
                         .keyboardType(.numberPad)
                         .multilineTextAlignment(.trailing)
 
-                    Text("all_currency_symbol")
+                    Text(currency.symbol)
                         .formFieldLeadingTitle()
                 }
             }

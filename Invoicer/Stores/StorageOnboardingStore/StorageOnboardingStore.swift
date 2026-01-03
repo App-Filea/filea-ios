@@ -65,7 +65,7 @@ enum StorageOnboardingError: Error, Equatable {
         case .folderCreationFailed:
             return .restrictedLocation(detectLocationType(from: url))
 
-        case .notConfigured, .fileSaveFailed:
+        case .notConfigured, .fileSaveFailed, .migrationFailed, .deletionFailed:
             return .storageError(storageError)
         }
     }
@@ -185,6 +185,7 @@ struct StorageOnboardingStore {
     }
 
     @Dependency(\.storageManager) var storageManager
+    @Dependency(\.syncManagerClient) var syncManager
 
     var body: some ReducerOf<Self> {
         Reduce { state, action in
@@ -209,9 +210,31 @@ struct StorageOnboardingStore {
 
                 return .run { send in
                     do {
+                        // 1. Sauvegarder le dossier (crée le bookmark + dossier Vehicles/)
                         print("💾 [StorageOnboardingStore] Saving storage folder...")
                         try await storageManager.saveStorageFolder(url)
-                        print("✅ [StorageOnboardingStore] Storage folder saved successfully\n")
+                        print("✅ [StorageOnboardingStore] Storage folder saved successfully")
+
+                        // 2. Vérifier s'il y a des données existantes à importer
+                        let vehiclesDir = url.appendingPathComponent("Vehicles")
+
+                        if FileManager.default.fileExists(atPath: vehiclesDir.path) {
+                            print("📦 [StorageOnboardingStore] Dossier Vehicles existant détecté")
+                            print("🔄 [StorageOnboardingStore] Reconstruction de la BDD depuis les JSON...")
+
+                            // 3. Scanner et reconstruire la BDD depuis tous les .vehicle_metadata.json
+                            let importedVehicles = try await syncManager.scanAndRebuildDatabase(vehiclesDir.path)
+
+                            if !importedVehicles.isEmpty {
+                                print("✅ [StorageOnboardingStore] \(importedVehicles.count) véhicule(s) importé(s)\n")
+                            } else {
+                                print("📭 [StorageOnboardingStore] Aucun véhicule trouvé dans le dossier\n")
+                            }
+                        } else {
+                            print("📁 [StorageOnboardingStore] Nouveau dossier Vehicles créé\n")
+                        }
+
+                        // 4. Marquer comme réussi
                         await send(.folderSaved)
                     } catch {
                         print("❌ [StorageOnboardingStore] Failed to save storage folder")

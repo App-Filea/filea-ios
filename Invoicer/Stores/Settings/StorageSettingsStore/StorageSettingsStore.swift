@@ -76,13 +76,47 @@ struct StorageSettingsStore {
                 state.isLoading = true
 
                 return .run { send in
-                    do {
-                        await storageManager.resetStorage()
+                    let startTime = Date()
+                    var oldAccessURL: URL? = nil
 
+                    do {
+                        // 1. Save old URL before any modification
+                        let oldURL = await storageManager.getRootURL()
+                        oldAccessURL = oldURL
+
+                        // 2. Configure the new folder (creates bookmark + Vehicles/)
                         try await storageManager.saveStorageFolder(url)
 
+                        // 3. If an old folder existed, migrate its content
+                        if let oldURL = oldURL, oldURL.path != url.path {
+                            // Move all vehicles from old to new
+                            try await storageManager.migrateContent(oldURL, url)
+
+                            // Delete the old Vehicles directory (now empty)
+                            try await storageManager.deleteOldVehiclesDirectory(oldURL)
+
+                            // CRITICAL: Release the old security-scoped access
+                            // The old URL still has an active access that needs to be released
+                            // This prevents bookmark corruption on app restart
+                            oldURL.stopAccessingSecurityScopedResource()
+                        }
+
+                        // 4. Ensure minimum 3 seconds for overlay display
+                        let elapsed = Date().timeIntervalSince(startTime)
+                        let remaining = max(0, 3.0 - elapsed)
+                        if remaining > 0 {
+                            try await Task.sleep(for: .seconds(remaining))
+                        }
+
+                        // 5. Success - reload path
                         await send(.storageFolderChanged)
                     } catch {
+                        // Rollback: try to restore access to old folder
+                        if let oldAccessURL = oldAccessURL {
+                            // Re-point to old folder
+                            try? await storageManager.saveStorageFolder(oldAccessURL)
+                        }
+
                         let friendlyMessage = Self.getFriendlyErrorMessage(from: error, url: url)
                         await send(.changeStorageFailed(friendlyMessage))
                     }

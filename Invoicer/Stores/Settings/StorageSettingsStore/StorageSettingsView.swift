@@ -50,25 +50,7 @@ struct StorageSettingsView: View {
             } header: {
                 Label("Stockage", systemImage: "externaldrive")
             } footer: {
-                Text("💡 Vos données sont stockées dans ce dossier. Vous pouvez le changer, mais vous devrez re-sélectionner le même dossier ou un nouveau pour accéder à vos données.")
-            }
-
-            Section {
-                HStack {
-                    Text("Version")
-                    Spacer()
-                    Text(AppConstants.appVersion)
-                        .foregroundStyle(.secondary)
-                }
-
-                HStack {
-                    Text("Build")
-                    Spacer()
-                    Text(AppConstants.buildNumber)
-                        .foregroundStyle(.secondary)
-                }
-            } header: {
-                Label("À propos", systemImage: "info.circle")
+                Text("💡 Vos données sont stockées dans ce dossier. Si vous changez de dossier, toutes vos données seront automatiquement déplacées vers le nouvel emplacement.")
             }
         }
         .navigationTitle("Réglages")
@@ -90,7 +72,7 @@ struct StorageSettingsView: View {
                 store.send(.confirmChangeStorage)
             }
         } message: {
-            Text("Vous allez changer de dossier de stockage.\n\n✅ Vos données actuelles restent dans l'ancien dossier.\n\n💡 Pour les retrouver, sélectionnez le même dossier. Pour un nouveau départ, choisissez un nouveau dossier.")
+            Text("Vous allez changer de dossier de stockage.\n\n📦 Toutes vos données seront automatiquement déplacées vers le nouveau dossier.\n\n🗑️ L'ancien dossier sera supprimé une fois le déplacement terminé.")
         }
         .alert(
             "Erreur",
@@ -147,8 +129,6 @@ struct StorageSettingsView: View {
         }
     }
 }
-
-// MARK: - Preview
 
 #if DEBUG
 struct SettingsView_Previews: PreviewProvider {

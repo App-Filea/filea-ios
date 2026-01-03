@@ -17,6 +17,8 @@ enum StorageError: LocalizedError, Equatable {
     case folderCreationFailed(String)
     case fileSaveFailed(String)
     case securityScopedResourceAccessFailed
+    case migrationFailed(String)
+    case deletionFailed(String)
 
     var errorDescription: String? {
         switch self {
@@ -34,6 +36,10 @@ enum StorageError: LocalizedError, Equatable {
             return "Impossible de sauvegarder le fichier: \(filename)"
         case .securityScopedResourceAccessFailed:
             return "Échec de l'accès sécurisé aux ressources."
+        case .migrationFailed(let message):
+            return "Échec de la migration des données: \(message)"
+        case .deletionFailed(let message):
+            return "Impossible de supprimer l'ancien dossier: \(message)"
         }
     }
 
@@ -49,6 +55,10 @@ enum StorageError: LocalizedError, Equatable {
             return "Vérifiez l'espace disque disponible et les permissions."
         case .securityScopedResourceAccessFailed:
             return "Redémarrez l'application et sélectionnez à nouveau le dossier."
+        case .migrationFailed:
+            return "Vos données restent dans l'ancien dossier. Vous pouvez réessayer ou copier manuellement."
+        case .deletionFailed:
+            return "La migration a réussi, mais l'ancien dossier n'a pas pu être supprimé. Vous pouvez le supprimer manuellement."
         }
     }
 }

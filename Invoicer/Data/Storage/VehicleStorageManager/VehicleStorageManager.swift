@@ -222,6 +222,98 @@ actor VehicleStorageManager {
         }
     }
 
+    /// Migrates all content from the old storage location to the new one by moving (not copying)
+    /// - Parameters:
+    ///   - oldURL: The current root URL (must be accessed with security-scoped resource)
+    ///   - newURL: The new root URL to migrate content to
+    /// - Throws: StorageError if migration fails
+    func migrateContent(from oldURL: URL, to newURL: URL) async throws {
+        logger.info("🚚 Starting content migration (MOVE mode)...")
+        logger.info("   ├─ From: \(oldURL.path)")
+        logger.info("   └─ To: \(newURL.path)")
+
+        let oldVehiclesURL = oldURL.appendingPathComponent(AppConstants.vehiclesDirectoryName)
+        let newVehiclesURL = newURL.appendingPathComponent(AppConstants.vehiclesDirectoryName)
+
+        // Check if old vehicles directory exists
+        guard fileManager.fileExists(atPath: oldVehiclesURL.path) else {
+            logger.warning("⚠️ Old vehicles directory doesn't exist, skipping migration")
+            return
+        }
+
+        // Get all vehicle folders from old location
+        let vehicleFolders = try fileManager.contentsOfDirectory(
+            at: oldVehiclesURL,
+            includingPropertiesForKeys: nil,
+            options: [.skipsHiddenFiles]
+        )
+
+        guard !vehicleFolders.isEmpty else {
+            logger.info("📭 No vehicles to migrate (empty folder)")
+            return
+        }
+
+        logger.info("📦 Found \(vehicleFolders.count) vehicle folder(s) to migrate")
+
+        var errors: [String] = []
+
+        // Move each vehicle folder
+        for (index, oldVehicleFolder) in vehicleFolders.enumerated() {
+            let vehicleName = oldVehicleFolder.lastPathComponent
+            let newVehicleFolder = newVehiclesURL.appendingPathComponent(vehicleName)
+
+            logger.info("📁 [\(index + 1)/\(vehicleFolders.count)] Moving: \(vehicleName)")
+
+            do {
+                // Move the entire vehicle folder (atomic operation)
+                try fileManager.moveItem(at: oldVehicleFolder, to: newVehicleFolder)
+                logger.info("   ✅ Moved successfully")
+            } catch {
+                let errorMsg = "Failed to move \(vehicleName): \(error.localizedDescription)"
+                logger.error("   ❌ \(errorMsg)")
+                errors.append(errorMsg)
+            }
+        }
+
+        // If ANY error occurred, throw
+        if !errors.isEmpty {
+            let errorMessage = errors.joined(separator: "\n")
+            logger.error("❌ Migration failed with errors:\n\(errorMessage)")
+            throw StorageError.migrationFailed(errorMessage)
+        }
+
+        logger.info("✅ Content migration completed successfully")
+    }
+
+    /// Deletes the old Vehicles directory after successful migration
+    /// - Parameter url: The root URL of the old storage location
+    func deleteOldVehiclesDirectory(at url: URL) async throws {
+        let vehiclesURL = url.appendingPathComponent(AppConstants.vehiclesDirectoryName)
+
+        guard fileManager.fileExists(atPath: vehiclesURL.path) else {
+            logger.info("📭 Old vehicles directory already deleted or doesn't exist")
+            return
+        }
+
+        do {
+            try fileManager.removeItem(at: vehiclesURL)
+            logger.info("🗑️ Old vehicles directory deleted successfully")
+        } catch {
+            logger.error("❌ Failed to delete old vehicles directory: \(error.localizedDescription)")
+            throw StorageError.deletionFailed(error.localizedDescription)
+        }
+    }
+
+    /// Stops accessing the current security-scoped resource without clearing the bookmark
+    /// This is useful when migrating to a new storage location
+    func stopCurrentSecurityScopedAccess() async {
+        if isAccessingSecurityScopedResource, let url = rootURL {
+            url.stopAccessingSecurityScopedResource()
+            isAccessingSecurityScopedResource = false
+            logger.info("🔓 Stopped accessing security-scoped resource for migration")
+        }
+    }
+
     /// Resets the storage configuration (removes the bookmark)
     func resetStorage() async {
         logger.info("🔄 Resetting storage configuration...")

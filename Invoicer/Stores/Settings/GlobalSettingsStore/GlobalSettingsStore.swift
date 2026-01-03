@@ -26,7 +26,7 @@ struct GlobalSettingsStore {
     struct State: Equatable {
         var settings: [Setting] = [
             Setting(label: "settings_units_and_measure_title", setting: .unitsAndMesures),
-//            Setting(label: "settings_storage_title", setting: .storage)
+            Setting(label: "settings_storage_title", setting: .storage)
         ]
     }
     

@@ -53,6 +53,7 @@ final class DocumentRepository: DocumentRepositoryProtocol, @unchecked Sendable 
     @Dependency(\.vehicleRepository) var vehicleRepository
     @Dependency(\.documentDatabaseRepository) var documentDbRepo
     @Dependency(\.storageManager) var storageManager
+    @Dependency(\.syncManagerClient) var syncManager
 
     // MARK: - Paths
 
@@ -98,6 +99,10 @@ final class DocumentRepository: DocumentRepositoryProtocol, @unchecked Sendable 
             // 2. Save to database
             try await documentDbRepo.create(document, vehicleId)
             logger.info("💾 Metadata sauvegardée en BDD")
+
+            // 3. Sync to JSON
+            try await syncManager.syncAfterChange(vehicleId)
+            logger.info("💾 Synchronisation JSON réussie")
 
         } catch {
             // Rollback : delete physical file if DB insert failed
@@ -151,6 +156,10 @@ final class DocumentRepository: DocumentRepositoryProtocol, @unchecked Sendable 
             try await documentDbRepo.create(document, vehicleId)
             logger.info("💾 Metadata sauvegardée en BDD")
 
+            // 3. Sync to JSON
+            try await syncManager.syncAfterChange(vehicleId)
+            logger.info("💾 Synchronisation JSON réussie")
+
         } catch {
             // Rollback : delete physical file if DB insert failed
             try? fileManager.safelyDelete(at: destinationFileURL)
@@ -167,6 +176,10 @@ final class DocumentRepository: DocumentRepositoryProtocol, @unchecked Sendable 
 
         // ✅ Mise à jour DIRECTE en BDD (pas besoin de passer par Vehicle)
         try await documentDbRepo.update(document, vehicleId)
+
+        // Sync to JSON
+        try await syncManager.syncAfterChange(vehicleId)
+        logger.info("💾 Synchronisation JSON réussie")
 
         logger.info("✅ Document mis à jour avec succès")
     }
@@ -195,6 +208,10 @@ final class DocumentRepository: DocumentRepositoryProtocol, @unchecked Sendable 
             // 2. Delete physical file
             try fileManager.safelyDelete(at: fileURL)
             logger.info("📄 Fichier supprimé: \(document.fileURL)")
+
+            // 3. Sync to JSON
+            try await syncManager.syncAfterChange(vehicleId)
+            logger.info("💾 Synchronisation JSON réussie")
 
         } catch {
             logger.error("❌ Erreur lors de la suppression : \(error.localizedDescription)")
@@ -244,6 +261,10 @@ final class DocumentRepository: DocumentRepositoryProtocol, @unchecked Sendable 
             // 3. Delete old file (after success)
             try fileManager.safelyDelete(at: oldFileURL)
             logger.info("🗑️ Ancienne image supprimée: \(oldFileURL.lastPathComponent)")
+
+            // 4. Sync to JSON
+            try await syncManager.syncAfterChange(vehicleId)
+            logger.info("💾 Synchronisation JSON réussie")
 
         } catch {
             // Rollback : delete new file if created

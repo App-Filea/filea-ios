@@ -23,6 +23,18 @@ extension AppStore {
             }
             return .none
             
+        case .element(id: _, action: .main(.showSettings)):
+            state.path.append(.globalSettings(GlobalSettingsStore.State()))
+            return .none
+            
+        case .element(id: _, action: .globalSettings(.navigateToStorageSettings)):
+            state.path.append(.storageSettings(StorageSettingsStore.State()))
+            return .none
+            
+        case .element(id: _, action: .globalSettings(.navigateToUnitAndMeasureSettings)):
+            state.path.append(.unitAndMeasureSettings(UnitAndMeasureSettingStore.State()))
+            return .none
+            
         case .element(id: _, action: .vehicleDetails(.editVehicle)):
             state.path.append(.editVehicle(.init()))
             return .none

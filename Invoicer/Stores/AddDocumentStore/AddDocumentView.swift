@@ -35,7 +35,7 @@ struct AddDocumentView: View {
                             Divider()
                             
                             VStack(spacing: Spacing.md) {
-                                TertiaryButton("Annuler", action: {
+                                TertiaryButton("all_cancel", action: {
                                     store.send(.view(.closeButtonTapped))
                                 })
                             }
@@ -54,11 +54,11 @@ struct AddDocumentView: View {
                             Divider()
                             
                             VStack(spacing: Spacing.md) {
-                                PrimaryButton("Enregistrer", action: {
+                                PrimaryButton("all_save", action: {
                                     store.send(.view(.saveButtonTapped))
                                 })
-                                
-                                TertiaryButton("Retour", action: {
+
+                                TertiaryButton("all_back", action: {
                                     store.send(.view(.backFromMetadataFormButtonTapped))
                                 })
                             }
@@ -68,7 +68,7 @@ struct AddDocumentView: View {
                     }
                 }
             }
-            .navigationTitle("Ajouter un document")
+            .navigationTitle("add_document_title")
             .navigationBarTitleDisplayMode(.inline)
             .quickLookPreview($previewURL)
             .fullScreenCover(isPresented: $store.showDocumentScanView) {
@@ -85,7 +85,7 @@ struct AddDocumentView: View {
             }
             .sheet(isPresented: $store.showPhotoPickerView) {
                 PhotosPicker(
-                    "Sélectionner une photo",
+                    "add_document_photo_picker_title",
                     selection: $store.photoPickerItems,
                     matching: .images,
                     photoLibrary: .shared()
@@ -110,22 +110,22 @@ struct AddDocumentView: View {
             VStack(spacing: Spacing.md) {
                 modeOptionCard(
                     icon: "camera.viewfinder",
-                    title: "Scanner avec la caméra",
-                    subtitle: "Pour un document papier",
+                    title: "add_document_mode_camera_title",
+                    subtitle: "add_document_mode_camera_subtitle",
                     action: { store.send(.view(.openCameraViewButtonTapped)) }
                 )
-                
+
                 modeOptionCard(
                     icon: "photo.on.rectangle.angled",
-                    title: "Importer une photo",
-                    subtitle: "Depuis votre bibliothèque",
+                    title: "add_document_mode_photo_title",
+                    subtitle: "add_document_mode_photo_subtitle",
                     action: { store.send(.view(.openPhotoPickerButtonTapped)) }
                 )
-                
+
                 modeOptionCard(
                     icon: "folder",
-                    title: "Importer un fichier",
-                    subtitle: "PDF, image depuis le cloud",
+                    title: "add_document_mode_file_title",
+                    subtitle: "add_document_mode_file_subtitle",
                     action: { store.send(.view(.openFileManagerButtonTapped)) }
                 )
                 
@@ -136,8 +136,8 @@ struct AddDocumentView: View {
     
     private func modeOptionCard(
         icon: String,
-        title: String,
-        subtitle: String,
+        title: LocalizedStringKey,
+        subtitle: LocalizedStringKey,
         action: @escaping () -> Void
     ) -> some View {
         Button(action: action) {
@@ -152,9 +152,11 @@ struct AddDocumentView: View {
                     Text(title)
                         .font(.title3)
                         .foregroundStyle(Color.primary)
+                        .multilineTextAlignment(.leading)
                     
                     Text(subtitle)
                         .caption()
+
                 }
                 
                 Spacer()
@@ -168,14 +170,14 @@ struct AddDocumentView: View {
     
     private var metadataFormView: some View {
         VStack(spacing: 24) {
-            FormField(titleLabel: "Type de document") {
+            FormField(titleLabel: "document_form_type_title") {
                 HStack {
-                    Text("Type")
+                    Text("document_form_type_label")
                         .formFieldLeadingTitle()
-                    
+
                     Spacer()
-                    
-                    Picker("Type", selection: $store.documentType) {
+
+                    Picker("document_form_type_label", selection: $store.documentType) {
                         ForEach(DocumentType.allCases) { type in
                             Text(type.displayName)
                                 .tag(type)
@@ -185,62 +187,62 @@ struct AddDocumentView: View {
                     .labelsHidden()
                 }
             }
-            
-            FormField(titleLabel: "Nom du document",
-                      infoLabel: "Nom descriptif du document",
+
+            FormField(titleLabel: "document_form_name_title",
+                      infoLabel: "document_form_name_info",
                       isError: store.validationErrors.contains(.nameEmpty)) {
-                TextField("Ex: Facture révision", text: $store.documentName)
+                TextField("document_form_name_placeholder", text: $store.documentName)
                     .formFieldLeadingTitle()
                     .submitLabel(.done)
                     .multilineTextAlignment(.leading)
             }
-            
-            FormField(titleLabel: "Date du document",
-                      infoLabel: "Date d'émission du document") {
+
+            FormField(titleLabel: "document_form_date_title",
+                      infoLabel: "document_form_date_info") {
                 HStack {
-                    Text("Date")
+                    Text("document_form_date_label")
                         .formFieldLeadingTitle()
-                    
+
                     Spacer()
-                    
+
                     DatePicker("", selection: $store.documentDate, in: Date.distantPast...Date(), displayedComponents: .date)
                         .labelsHidden()
                         .datePickerStyle(.compact)
                 }
             }
-            
-            FormField(titleLabel: "Kilométrage (optionnel)",
-                      infoLabel: "Kilométrage au moment du document") {
+
+            FormField(titleLabel: "document_form_mileage_title",
+                      infoLabel: "document_form_mileage_info") {
                 HStack(spacing: 12) {
-                    Text("Kilométrage")
+                    Text("document_form_mileage_label")
                         .formFieldLeadingTitle()
-                    
+
                     Spacer()
-                    
-                    TextField("120000", text: $store.documentMileage)
+
+                    TextField("document_form_mileage_placeholder", text: $store.documentMileage)
                         .formFieldLeadingTitle()
                         .keyboardType(.numberPad)
                         .multilineTextAlignment(.trailing)
-                    
-                    Text("KM")
+
+                    Text("all_mileage_unit")
                         .formFieldLeadingTitle()
                 }
             }
-            
-            FormField(titleLabel: "Montant (optionnel)",
-                      infoLabel: "Montant TTC du document") {
+
+            FormField(titleLabel: "document_form_amount_title",
+                      infoLabel: "document_form_amount_info") {
                 HStack(spacing: 12) {
-                    Text("Montant")
+                    Text("document_form_amount_label")
                         .formFieldLeadingTitle()
-                    
+
                     Spacer()
-                    
-                    TextField("0.0", text: $store.documentAmount)
+
+                    TextField("document_form_amount_placeholder", text: $store.documentAmount)
                         .formFieldLeadingTitle()
                         .keyboardType(.numberPad)
                         .multilineTextAlignment(.trailing)
-                    
-                    Text("€")
+
+                    Text("all_currency_symbol")
                         .formFieldLeadingTitle()
                 }
             }

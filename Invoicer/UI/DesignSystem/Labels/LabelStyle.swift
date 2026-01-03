@@ -33,10 +33,18 @@ extension View {
             .multilineTextAlignment(.leading)
     }
     
+    func title3() -> some View {
+        self
+            .font(.title3)
+            .foregroundStyle(Color.primary)
+            .multilineTextAlignment(.leading)
+    }
+    
     func caption() -> some View {
         self
             .font(.caption)
             .foregroundStyle(Color.secondary)
+            .multilineTextAlignment(.leading)
     }
     
     func callout() -> some View {

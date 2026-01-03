@@ -43,9 +43,17 @@ struct AppView: View {
                 if let store = store.scope(state: \.editDocument, action: \.editDocument) {
                     EditDocumentView(store: store)
                 }
-            case .settings:
-                if let store = store.scope(state: \.settings, action: \.settings) {
-                    SettingsView(store: store)
+            case .globalSettings:
+                if let store = store.scope(state: \.globalSettings, action: \.globalSettings) {
+                    GlobalSettingsView(store: store)
+                }
+            case .storageSettings:
+                if let store = store.scope(state: \.storageSettings, action: \.storageSettings) {
+                    StorageSettingsView(store: store)
+                }
+            case .unitAndMeasureSettings:
+                if let store = store.scope(state: \.unitAndMeasureSettings, action: \.unitAndMeasureSettings) {
+                    UnitAndMeasureSettingView(store: store)
                 }
             }
         }

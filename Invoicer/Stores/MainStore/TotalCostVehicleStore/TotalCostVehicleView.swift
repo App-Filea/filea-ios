@@ -13,9 +13,9 @@ struct TotalCostVehicleView: View {
     
     var body: some View {
         StatCard(
-            title: "Coût total",
+            title: "stat_card_total_cost_title",
             value: store.currentVehicleTotalCost.asCurrencyStringAdaptive,
-            subtitle: "Sur l'année en cours",
+            subtitle: "stat_card_total_cost_subtitle",
             icon: nil,
             action: nil
         )

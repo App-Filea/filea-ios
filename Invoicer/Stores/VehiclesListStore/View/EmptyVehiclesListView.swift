@@ -37,15 +37,15 @@ struct EmptyVehiclesListView: View {
             }
             
             VStack(spacing: Spacing.lg) {
-                Text("Votre garage est vide")
+                Text("empty_vehicles_title")
                     .largeTitle()
-                Text("Ajoutez votre premier véhicule pour suivre son historique, ses factures et ses documents au même endroit.")
+                Text("empty_vehicles_subtitle")
                     .subLargeTitle()
             }
             .padding(.top, 60)
             .padding(.bottom, 40)
-            
-            PrimaryButton("Ajouter votre premier véhicule", action: onButtonTapped)
+
+            PrimaryButton("empty_vehicles_add_button", action: onButtonTapped)
             
             Spacer()
         }

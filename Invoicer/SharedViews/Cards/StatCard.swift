@@ -10,17 +10,17 @@ import SwiftUI
 
 /// Reusable statistics card component
 struct StatCard: View {
-    let title: String
+    let title: LocalizedStringKey
     let value: String
-    let subtitle: String?
+    let subtitle: LocalizedStringKey?
     let icon: String?
     let iconColor: Color
     let action: (() -> Void)?
 
     init(
-        title: String,
+        title: LocalizedStringKey,
         value: String,
-        subtitle: String? = nil,
+        subtitle: LocalizedStringKey? = nil,
         icon: String? = nil,
         iconColor: Color = Color.orange,
         action: (() -> Void)? = nil

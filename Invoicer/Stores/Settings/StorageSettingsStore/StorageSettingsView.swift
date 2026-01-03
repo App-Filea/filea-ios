@@ -9,17 +9,12 @@
 import SwiftUI
 import ComposableArchitecture
 
-struct SettingsView: View {
+struct StorageSettingsView: View {
 
-    // MARK: - Properties
-
-    @Bindable var store: StoreOf<SettingsStore>
-
-    // MARK: - Body
+    @Bindable var store: StoreOf<StorageSettingsStore>
 
     var body: some View {
         List {
-            // Storage Section
             Section {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Emplacement actuel")
@@ -58,7 +53,6 @@ struct SettingsView: View {
                 Text("💡 Vos données sont stockées dans ce dossier. Vous pouvez le changer, mais vous devrez re-sélectionner le même dossier ou un nouveau pour accéder à vos données.")
             }
 
-            // App Info Section
             Section {
                 HStack {
                     Text("Version")
@@ -160,26 +154,26 @@ struct SettingsView: View {
 struct SettingsView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationStack {
-            SettingsView(
+            StorageSettingsView(
                 store: Store(
-                    initialState: SettingsStore.State(
+                    initialState: StorageSettingsStore.State(
                         currentStoragePath: "/Users/test/iCloud Drive/Invoicer"
                     )
                 ) {
-                    SettingsStore()
+                    StorageSettingsStore()
                 }
             )
         }
         .previewDisplayName("Normal")
 
         NavigationStack {
-            SettingsView(
+            StorageSettingsView(
                 store: Store(
-                    initialState: SettingsStore.State(
+                    initialState: StorageSettingsStore.State(
                         currentStoragePath: nil
                     )
                 ) {
-                    SettingsStore()
+                    StorageSettingsStore()
                 }
             )
         }

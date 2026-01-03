@@ -13,11 +13,11 @@ struct WarningVehicleView: View {
     
     var body: some View {
         StatCard(
-            title: "Alertes",
+            title: "stat_card_warnings_title",
             value: "\(store.currentVehicleIncompleteDocumentsCount)",
             subtitle: store.currentVehicleIncompleteDocumentsCount == 0
-                ? "Tout est en ordre"
-                : "Nécessite votre attention",
+                ? "stat_card_warnings_all_good"
+                : "stat_card_warnings_needs_attention",
             icon: store.currentVehicleIncompleteDocumentsCount == 0
                 ? "checkmark.circle.fill"
                 : "exclamationmark.triangle.fill",

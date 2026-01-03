@@ -11,14 +11,14 @@ extension AlertState where Action == AddVehicleStore.Action.Alert {
     static func saveNewPrimaryVehicleAlert() -> Self {
         AlertState(
             title: {
-                TextState("")
+                TextState(String(localized: "alert_create_vehicle_primary_already_exist_title"))
             },
             actions: {
-                ButtonState(action: .yes) { TextState("Oui, je le remplace") }
-                ButtonState(role: .cancel, action: .no) { TextState("Non") }
+                ButtonState(action: .yes) { TextState(String(localized: "alert_create_vehicle_primary_already_exist_yes_button")) }
+                ButtonState(role: .cancel, action: .no) { TextState(String(localized: "all_no")) }
             },
             message: {
-                TextState("")
+                TextState(String(localized: "alert_create_vehicle_primary_already_exist_message"))
             }
         )
     }
@@ -27,16 +27,16 @@ extension AlertState where Action == AddVehicleStore.Action.Alert {
 extension AlertState where Action == MainStore.Action.Alert {
     static func deleteCurrentVehicleAlert() -> Self {
         AlertState {
-            TextState("Supprimer le véhicule")
+            TextState(String(localized: "alert_delete_vehicle_title"))
         } actions: {
             ButtonState(role: .destructive, action: .confirmDelete) {
-                TextState("Supprimer")
+                TextState(String(localized: "all_delete"))
             }
             ButtonState(role: .cancel) {
-                TextState("Annuler")
+                TextState(String(localized: "all_cancel"))
             }
         } message: {
-            TextState("Êtes-vous sûr de vouloir supprimer ce véhicule ? Cette action est irréversible.")
+            TextState(String(localized: "alert_delete_vehicle_message"))
         }
     }
 }

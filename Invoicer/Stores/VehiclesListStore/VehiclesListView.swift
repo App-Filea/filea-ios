@@ -17,7 +17,7 @@ struct VehiclesListView: View {
                 .ignoresSafeArea()
                 VStack {
                     ScrollView {
-                        Text("Mon garage")
+                        Text("vehicles_list_title")
                             .largeTitle()
                             .frame(maxWidth: .infinity)
                             .padding(.horizontal, Spacing.screenMargin)
@@ -32,11 +32,11 @@ struct VehiclesListView: View {
                 .safeAreaInset(edge: .bottom) {
                     VStack(spacing: Spacing.md) {
                         
-                        PrimaryButton("Ajouter un nouveau véhicule", action: {
+                        PrimaryButton("vehicles_list_add_new_vehicle", action: {
                             store.send(.view(.openCreateVehicleButtonTapped))
                         })
                         
-                        TertiaryButton("Fermer", action: {
+                        TertiaryButton("all_close", action: {
                             store.send(.view(.dimissSheetButtonTapped))
                         })
                     }
@@ -83,7 +83,7 @@ struct VehiclesListView: View {
                     HStack(spacing: 0) {
                         Text(vehicle.plate)
                         Spacer()
-                        Text(vehicle.mileage?.asFormattedMileage ?? "Non renseigné")
+                        Text(vehicle.mileage?.asFormattedMileage ?? String(localized: "all_not_specified"))
                         Spacer()
                         Text("\(vehicle.registrationDate.shortDateString)")
                     }

@@ -6,23 +6,24 @@
 //
 
 import Foundation
+import SwiftUI
 
 enum VehicleType: String, Codable, CaseIterable, Identifiable {
-    case car = "Car"
-    case motorcycle = "Motorcycle"
-    case truck = "Truck"
-    case bicycle = "Bicycle"
-    case other = "Other"
+    case car
+    case motorcycle
+    case truck
+    case bicycle
+    case other
 
     var id: String { rawValue }
 
-    var displayName: String {
+    var displayName: LocalizedStringKey {
         switch self {
-        case .car: return "Voiture"
-        case .motorcycle: return "Moto"
-        case .truck: return "Camion"
-        case .bicycle: return "Vélo"
-        case .other: return "Autre"
+        case .car: return "all_vehicle_type_car"
+        case .motorcycle: return "all_vehicle_type_motorcycle"
+        case .truck: return "all_vehicle_type_truck"
+        case .bicycle: return "all_vehicle_type_bicycle"
+        case .other: return "all_vehicle_type_other"
         }
     }
 

@@ -199,7 +199,9 @@ struct AppStore {
             case editVehicle(EditVehicleStore.State)
             case documentDetail(DocumentDetailStore.State)
             case editDocument(EditDocumentStore.State)
-            case settings(SettingsStore.State)
+            case globalSettings(GlobalSettingsStore.State)
+            case storageSettings(StorageSettingsStore.State)
+            case unitAndMeasureSettings(UnitAndMeasureSettingStore.State)
         }
 
         enum Action: Equatable {
@@ -209,7 +211,9 @@ struct AppStore {
             case editVehicle(EditVehicleStore.Action)
             case documentDetail(DocumentDetailStore.Action)
             case editDocument(EditDocumentStore.Action)
-            case settings(SettingsStore.Action)
+            case globalSettings(GlobalSettingsStore.Action)
+            case storageSettings(StorageSettingsStore.Action)
+            case unitAndMeasureSettings(UnitAndMeasureSettingStore.Action)
         }
         var body: some ReducerOf<Self> {
             Scope(state: \.storageOnboarding, action: \.storageOnboarding) { StorageOnboardingStore() }
@@ -218,7 +222,9 @@ struct AppStore {
             Scope(state: \.editVehicle, action: \.editVehicle) { EditVehicleStore() }
             Scope(state: \.documentDetail, action: \.documentDetail) { DocumentDetailStore() }
             Scope(state: \.editDocument, action: \.editDocument) { EditDocumentStore() }
-            Scope(state: \.settings, action: \.settings) { SettingsStore() }
+            Scope(state: \.globalSettings, action: \.globalSettings) { GlobalSettingsStore() }
+            Scope(state: \.storageSettings, action: \.storageSettings) { StorageSettingsStore() }
+            Scope(state: \.unitAndMeasureSettings, action: \.unitAndMeasureSettings) { UnitAndMeasureSettingStore() }
         }
     }
 }

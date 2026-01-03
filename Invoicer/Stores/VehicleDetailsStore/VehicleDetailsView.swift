@@ -37,19 +37,19 @@ struct VehicleDetailsView: View {
                                 Text(store.selectedVehicle.model)
                                     .largeTitle()
                                 
-                                Text(store.selectedVehicle.isPrimary == true ? "Véhicule principal" : "Véhicule secondaire")
+                                Text(store.selectedVehicle.isPrimary == true ? "vehicle_form_status_primary" : "vehicle_form_status_secondary")
                                     .subLargeTitle()
                             }
                             Spacer()
                         }
                         
                         VStack(alignment: .leading, spacing: Spacing.md) {
-                            Text("Informations")
+                            Text("vehicle_details_information_title")
                                 .title()
 
                             VStack(spacing: Spacing.md) {
                                 HStack {
-                                    Text("Immatriculation")
+                                    Text("vehicle_form_plate_title")
                                         .secondarySubheadline()
                                     Spacer()
                                     Text(store.selectedVehicle.plate)
@@ -57,15 +57,15 @@ struct VehicleDetailsView: View {
                                 }
                                 Divider()
                                 HStack {
-                                    Text("Kilométrage")
+                                    Text("vehicle_form_mileage_title")
                                         .secondarySubheadline()
                                     Spacer()
-                                    Text(store.selectedVehicle.mileage ?? "-- €")
+                                    Text(store.selectedVehicle.mileage ?? "-- KM")
                                         .primarySubheadline()
                                 }
                                 Divider()
                                 HStack {
-                                    Text("Mise en circulation")
+                                    Text("vehicle_form_registration_date_title")
                                         .secondarySubheadline()
                                     Spacer()
                                     Text(formattedDate(store.selectedVehicle.registrationDate))
@@ -73,7 +73,7 @@ struct VehicleDetailsView: View {
                                 }
                                 Divider()
                                 HStack {
-                                    Text("Age du véhicule")
+                                    Text("vehicle_details_age_label")
                                         .secondarySubheadline()
                                     Spacer()
                                     Text(vehicleAge(from: store.selectedVehicle.registrationDate))
@@ -81,7 +81,7 @@ struct VehicleDetailsView: View {
                                 }
                                 Divider()
                                 HStack {
-                                    Text("Documents associés")
+                                    Text("vehicle_details_documents_label")
                                         .secondarySubheadline()
                                     Spacer()
                                     Text("\(String(describing: store.selectedVehicle.documents.count))")
@@ -101,7 +101,7 @@ struct VehicleDetailsView: View {
                         Spacer()
                         
                         VStack {
-                            PrimaryButton("Modifier", systemImage: "square.and.pencil", action: {
+                            PrimaryButton("all_edit", systemImage: "square.and.pencil", action: {
                                 store.send(.editVehicleButtonTapped)
                             })
                         }
@@ -126,11 +126,14 @@ struct VehicleDetailsView: View {
         let components = calendar.dateComponents([.year, .month], from: date, to: Date())
 
         if let years = components.year, years > 0 {
-            return "\(years) an\(years > 1 ? "s" : "")"
+            let key = years > 1 ? "vehicle_age_years_plural" : "vehicle_age_years_singular"
+            return String(localized: String.LocalizationValue(stringLiteral: key))
+                .replacingOccurrences(of: "%d", with: "\(years)")
         } else if let months = components.month, months > 0 {
-            return "\(months) mois"
+            return String(localized: String.LocalizationValue(stringLiteral: "vehicle_age_months"))
+                .replacingOccurrences(of: "%d", with: "\(months)")
         } else {
-            return "Neuf"
+            return String(localized: "vehicle_age_new")
         }
     }
 }

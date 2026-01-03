@@ -18,14 +18,14 @@ struct EditDocumentView: View {
             
             ScrollView {
                 VStack(spacing: Spacing.lg) {
-                    FormField(titleLabel: "Type de document") {
+                    FormField(titleLabel: "document_form_type_title") {
                         HStack {
-                            Text("Type")
+                            Text("document_form_type_label")
                                 .formFieldLeadingTitle()
-                            
+
                             Spacer()
-                            
-                            Picker("Type", selection: $store.type) {
+
+                            Picker("document_form_type_label", selection: $store.type) {
                                 ForEach(DocumentType.allCases) { type in
                                     Text(type.displayName)
                                         .tag(type)
@@ -35,51 +35,51 @@ struct EditDocumentView: View {
                             .labelsHidden()
                         }
                     }
-                    FormField(titleLabel: "Nom du document", infoLabel: "Nom descriptif du document") {
-                        TextField("placeholder", text: $store.name)
+                    FormField(titleLabel: "document_form_name_title", infoLabel: "document_form_name_info") {
+                        TextField("document_form_name_placeholder", text: $store.name)
                             .formFieldLeadingTitle()
                     }
-                    FormField(titleLabel: "Date du document", infoLabel: "Date d'émission du document") {
+                    FormField(titleLabel: "document_form_date_title", infoLabel: "document_form_date_info") {
                         HStack {
-                            Text("Date")
+                            Text("document_form_date_label")
                                 .formFieldLeadingTitle()
-                            
+
                             Spacer()
-                            
+
                             DatePicker("", selection: $store.date, displayedComponents: .date)
                                 .labelsHidden()
                                 .datePickerStyle(.compact)
                         }
                     }
-                    FormField(titleLabel: "Informations complémentaires", infoLabel: "Kilométrage au moment du document") {
+                    FormField(titleLabel: "document_form_additional_info", infoLabel: "document_form_mileage_info") {
                         HStack(spacing: 12) {
-                            Text("Kilométrage")
+                            Text("document_form_mileage_label")
                                 .formFieldLeadingTitle()
-                            
+
                             Spacer()
-                            
-                            TextField("0.00", text: $store.mileage)
+
+                            TextField("document_form_amount_placeholder", text: $store.mileage)
                                 .formFieldLeadingTitle()
                                 .keyboardType(.numberPad)
                                 .multilineTextAlignment(.trailing)
-                            
-                            Text("KM")
+
+                            Text("all_mileage_unit")
                                 .formFieldLeadingTitle()
                         }
                     }
-                    FormField(infoLabel: "Montant TTC du document") {
+                    FormField(infoLabel: "document_form_amount_info") {
                         HStack(spacing: 12) {
-                            Text("Montant")
+                            Text("document_form_amount_label")
                                 .formFieldLeadingTitle()
-                            
+
                             Spacer()
-                            
-                            TextField("0.00", text: $store.amount)
+
+                            TextField("document_form_amount_placeholder", text: $store.amount)
                                 .formFieldLeadingTitle()
                                 .keyboardType(.numberPad)
                                 .multilineTextAlignment(.trailing)
-                            
-                            Text("€")
+
+                            Text("all_currency_symbol")
                                 .formFieldLeadingTitle()
                         }
                     }
@@ -94,11 +94,11 @@ struct EditDocumentView: View {
                     
                     VStack(spacing: Spacing.md) {
                         
-                        PrimaryButton("Enregistrer", action: {
+                        PrimaryButton("all_save", action: {
                             store.send(.save)
                         })
-                        
-                        TertiaryButton("Annuler", action: {
+
+                        TertiaryButton("all_cancel", action: {
                             store.send(.cancel)
                         })
                     }
@@ -107,7 +107,7 @@ struct EditDocumentView: View {
                 .background(Color(.tertiarySystemBackground))
             }
         }
-        .navigationTitle("Modifier le document")
+        .navigationTitle("edit_document_title")
         .navigationBarTitleDisplayMode(.inline)
     }
 }

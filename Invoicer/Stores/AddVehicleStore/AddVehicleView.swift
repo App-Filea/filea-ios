@@ -19,14 +19,14 @@ struct AddVehicleView: View {
                 
                 ScrollView {
                     VStack(spacing: Spacing.lg) {
-                        FormField(titleLabel: "Type de véhicule") {
+                        FormField(titleLabel: "vehicle_form_type_title") {
                             HStack {
-                                Text("Type")
+                                Text("vehicle_form_type_label")
                                     .formFieldLeadingTitle()
-                                
+
                                 Spacer()
-                                
-                                Picker("Type", selection: $store.type) {
+
+                                Picker("vehicle_form_type_label", selection: $store.type) {
                                     ForEach(VehicleType.allCases) { type in
                                         Text(type.displayName)
                                             .tag(type)
@@ -37,74 +37,74 @@ struct AddVehicleView: View {
                             }
                         }
                         
-                        FormField(titleLabel: "Statut du véhicule") {
+                        FormField(titleLabel: "vehicle_form_status_title") {
                             HStack {
-                                Text("Statut")
+                                Text("vehicle_form_status_label")
                                     .formFieldLeadingTitle()
-                                
+
                                 Spacer()
-                                
-                                Picker("Statut", selection: $store.isPrimary) {
-                                    Text("Principal").tag(true)
-                                    Text("Secondaire").tag(false)
+
+                                Picker("vehicle_form_status_label", selection: $store.isPrimary) {
+                                    Text("vehicle_form_status_primary").tag(true)
+                                    Text("vehicle_form_status_secondary").tag(false)
                                 }
                                 .pickerStyle(.menu)
                                 .labelsHidden()
                             }
                         }
                         
-                        FormField(titleLabel: "Marque",
-                                  infoLabel: "Champ D.1 de la carte grise",
+                        FormField(titleLabel: "vehicle_form_brand_title",
+                                  infoLabel: "vehicle_form_brand_info",
                                   isError: store.validationErrors.contains(.brandEmpty)) {
-                            TextField("TOYOTA, BMW, MERCEDES...", text: $store.brand)
+                            TextField("vehicle_form_brand_placeholder", text: $store.brand)
                                 .formFieldLeadingTitle()
                                 .multilineTextAlignment(.leading)
                                 .autocapitalization(.allCharacters)
                                 .submitLabel(.done)
                         }
                         
-                        FormField(titleLabel: "Modèle",
-                                  infoLabel: "Champ D.2 de la carte grise",
+                        FormField(titleLabel: "vehicle_form_model_title",
+                                  infoLabel: "vehicle_form_model_info",
                                   isError: store.validationErrors.contains(.modelEmpty)) {
-                            TextField("COROLLA, X3, CLASSE A...", text: $store.model)
+                            TextField("vehicle_form_model_placeholder", text: $store.model)
                                 .formFieldLeadingTitle()
                                 .multilineTextAlignment(.leading)
                                 .autocapitalization(.allCharacters)
                                 .submitLabel(.done)
                         }
                         
-                        FormField(titleLabel: "Immatriculation",
-                                  infoLabel: "Champ A de la carte grise",
+                        FormField(titleLabel: "vehicle_form_plate_title",
+                                  infoLabel: "vehicle_form_plate_info",
                                   isError: store.validationErrors.contains(.plateEmpty)) {
-                            TextField("AB-123-CD", text: $store.plate)
+                            TextField("vehicle_form_plate_placeholder", text: $store.plate)
                                 .formFieldLeadingTitle()
                                 .multilineTextAlignment(.leading)
                                 .autocapitalization(.allCharacters)
                                 .submitLabel(.done)
                         }
                         
-                        FormField(titleLabel: "Kilométrage", infoLabel: "Consultez votre compteur") {
+                        FormField(titleLabel: "vehicle_form_mileage_title", infoLabel: "vehicle_form_mileage_info") {
                             HStack(spacing: 12) {
-                                Text("Kilométrage")
+                                Text("vehicle_form_mileage_title")
                                     .formFieldLeadingTitle()
-                                
+
                                 Spacer()
-                                
-                                TextField("0.00", text: $store.mileage)
+
+                                TextField("vehicle_form_mileage_placeholder", text: $store.mileage)
                                     .formFieldLeadingTitle()
                                     .keyboardType(.numbersAndPunctuation)
                                     .multilineTextAlignment(.trailing)
                                     .submitLabel(.done)
-                                
-                                Text("KM")
+
+                                Text("all_mileage_unit")
                                     .formFieldLeadingTitle()
                             }
                         }
                         
-                        FormField(titleLabel: "Mise en circulation",
-                                  infoLabel: "Champ B de la carte grise") {
+                        FormField(titleLabel: "vehicle_form_registration_date_title",
+                                  infoLabel: "vehicle_form_registration_date_info") {
                             HStack {
-                                Text("Date")
+                                Text("vehicle_form_date_label")
                                     .formFieldLeadingTitle()
                                 
                                 Spacer()
@@ -123,11 +123,11 @@ struct AddVehicleView: View {
                         Divider()
                         
                         VStack(spacing: Spacing.md) {
-                            PrimaryButton("Enregistrer", action: {
+                            PrimaryButton("all_save", action: {
                                 store.send(.view(.saveButtonTapped))
                             })
-                            
-                            TertiaryButton("Annuler") {
+
+                            TertiaryButton("all_cancel") {
                                 store.send(.view(.cancelButtonTapped))
                             }
                         }
@@ -136,7 +136,7 @@ struct AddVehicleView: View {
                     .background(Color(.tertiarySystemBackground))
                 }
             }
-            .navigationTitle("Ajouter un véhicule")
+            .navigationTitle("add_vehicle_title")
             .navigationBarTitleDisplayMode(.inline)
             //        .sheet(item: $store.scope(state: \.scanStore, action: \.scanStore)) { scanStore in
             //            VehicleCardDocumentScanView(store: scanStore)

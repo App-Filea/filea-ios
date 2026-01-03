@@ -8,14 +8,14 @@
 import SwiftUI
 
 struct FormField<Content: View>: View {
-    var titleLabel: String?
-    var infoLabel: String?
+    var titleLabel: LocalizedStringKey?
+    var infoLabel: LocalizedStringKey?
     var isError: Bool
     var content: Content
     
     init(
-        titleLabel: String? = nil,
-        infoLabel: String? = nil,
+        titleLabel: LocalizedStringKey? = nil,
+        infoLabel: LocalizedStringKey? = nil,
         isError: Bool = false,
         @ViewBuilder content: () -> Content
     ) {
@@ -57,7 +57,7 @@ struct FormField<Content: View>: View {
             .fieldCard(isError: isError)
             
             if isError {
-                Text("Le champ ne doit pas être vide.")
+                Text("vehicle_form_empty_field_error")
                     .font(.caption)
                     .italic()
                     .lineLimit(1)

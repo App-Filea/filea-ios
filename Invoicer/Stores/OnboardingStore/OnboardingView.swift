@@ -23,7 +23,7 @@ struct OnboardingView: View {
                         .padding(.top, 60)
                         .padding(.bottom, 28)
                     
-                    Text("Bienvenue dans Filea")
+                    Text("on_boarding_title")
                         .font(.system(size: 34, weight: .bold))
                         .foregroundStyle(Color.primary)
                         .multilineTextAlignment(.center)
@@ -34,29 +34,29 @@ struct OnboardingView: View {
                         OnboardingFeatureRow(
                             icon: "doc.text.image",
                             iconColor: .blue,
-                            title: "Gérez vos documents automobiles",
-                            description: "Regroupez cartes grises, assurances, contrôles techniques et factures en un seul endroit."
+                            title: "on_boarding_feature_1_title",
+                            description: "on_boarding_feature_1_description"
                         )
                         
                         OnboardingFeatureRow(
                             icon: "chart.line.uptrend.xyaxis",
                             iconColor: .green,
-                            title: "Suivez vos dépenses",
-                            description: "Visualisez vos coûts d'entretien, de carburant et de réparations avec des graphiques détaillés."
+                            title: "on_boarding_feature_2_title",
+                            description: "on_boarding_feature_2_description"
                         )
                         
                         OnboardingFeatureRow(
                             icon: "lock.shield",
                             iconColor: .orange,
-                            title: "Vos données restent privées",
-                            description: "Stockage 100% local sur votre appareil ou votre cloud personnel. Vous restez maître de vos données."
+                            title: "on_boarding_feature_3_title",
+                            description: "on_boarding_feature_3_description"
                         )
                     }
                     .padding(.horizontal, 16)
                 }
                 .scrollBounceBehavior(.basedOnSize)
                 
-                PrimaryButton("Continuer", action: { store.send(.continueTapped) })
+                PrimaryButton("all_continue", action: { store.send(.continueTapped) })
                 .padding([.horizontal, .bottom], Spacing.screenMargin)
             }
         }
@@ -77,8 +77,8 @@ struct AppIconView: View {
 struct OnboardingFeatureRow<style: ShapeStyle>: View {
     let icon: String
     let iconColor: style
-    let title: String
-    let description: String
+    let title: LocalizedStringKey
+    let description: LocalizedStringKey
     
     var body: some View {
         HStack(alignment: .top, spacing: 16) {

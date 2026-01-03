@@ -64,7 +64,7 @@ struct MainView: View {
                         Image(systemName: "folder.fill")
                             .title()
 
-                        Text("\(store.selectedVehicle.documents.count) documents")
+                        Text(String(format: String(localized: "main_documents_count"), store.selectedVehicle.documents.count))
                             .title()
                         
                         Spacer()
@@ -91,10 +91,10 @@ struct MainView: View {
             Image(systemName: "doc.fill")
                 .imageScale(.large)
                 .foregroundStyle(Color.secondary)
-            Text("Aucun document")
+            Text("main_empty_documents_title")
                 .font(.headline)
                 .foregroundStyle(Color.primary)
-            Text("Ajoutez des documents en prenant des photos")
+            Text("main_empty_documents_subtitle")
                 .font(.subheadline)
                 .foregroundStyle(Color.secondary)
         }
@@ -124,19 +124,19 @@ struct MainView: View {
                     Button(action: {
                         store.send(.presentVehiclesListView)
                     }) {
-                        Label("Changer de véhicule",
+                        Label("main_menu_change_vehicle",
                               systemImage: "arrow.triangle.2.circlepath")
                     }
                     Button(action: {
                         store.send(.showVehicleDetail(store.selectedVehicle))
                     }) {
-                        Label("Voir les détails",
+                        Label("main_menu_view_details",
                               systemImage: "eye")
                     }
                     Button(role: .destructive) {
                         store.send(.view(.deleteVehicleButtonTapped))
                     } label: {
-                        Label("Supprimer", systemImage: "trash")
+                        Label("all_delete", systemImage: "trash")
                     }
                 } label: {
                     VStack(alignment: .leading, spacing: Spacing.xxs) {
@@ -188,6 +188,10 @@ struct MainView: View {
                 .menuActionDismissBehavior(.automatic)
 
                 Spacer()
+                
+                SecondaryCircleButton(systemImage: "gearshape", action: {
+                    store.send(.view(.settingsButtonTapped))
+                })
             }
         }
         .padding(.top, Spacing.xs)

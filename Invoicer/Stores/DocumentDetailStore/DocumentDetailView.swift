@@ -68,19 +68,19 @@ struct DocumentDetailView: View {
             VStack(spacing: 12) {
                 DetailCard(
                     icon: "eurosign",
-                    label: "Montant",
-                    value: document.amount?.asCurrencyStringNoDecimals ?? "-- €"
+                    label: "document_form_amount_label",
+                    value: document.amount?.asCurrencyStringNoDecimals ?? String(localized: "document_detail_not_specified_amount")
                 )
-                
+
                 DetailCard(
                     icon: "gauge.open.with.lines.needle.33percent",
-                    label: "Kilométrage",
-                    value: document.mileage.isEmpty ? "-- KM" : document.mileage.asFormattedMileage
+                    label: "document_form_mileage_label",
+                    value: document.mileage.isEmpty ? String(localized: "document_detail_not_specified_mileage") : document.mileage.asFormattedMileage
                 )
-                
+
                 DetailCard(
                     icon: "calendar",
-                    label: "Date",
+                    label: "document_form_date_label",
                     value: document.date.shortDateString
                 )
             }
@@ -89,15 +89,15 @@ struct DocumentDetailView: View {
             
             VStack {
                 
-                PrimaryButton("Modifier", systemImage: "square.and.pencil", action: {
+                PrimaryButton("all_edit", systemImage: "square.and.pencil", action: {
                     store.send(.editDocumentButtonTapped)
                 })
-                
-                SecondaryButton("Afficher", systemImage: "text.document", action: {
+
+                SecondaryButton("all_display", systemImage: "text.document", action: {
                     selectedDocumentURL = URL(fileURLWithPath: document.fileURL)
                 })
-                
-                DestructiveButton("Supprimer", action: {
+
+                DestructiveButton("all_delete", action: {
                     store.send(.deleteDocument)
                 })
             }

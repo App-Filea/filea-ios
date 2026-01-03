@@ -51,6 +51,7 @@ struct MainStore {
         enum ActionView: Equatable {
             case openCreateVehicleButtonTapped
             case deleteVehicleButtonTapped
+            case settingsButtonTapped
         }
         
         enum Alert: Equatable {
@@ -70,10 +71,9 @@ struct MainStore {
                 
             case .view(let actionView):
                 switch actionView {
-                case .openCreateVehicleButtonTapped:
-                    return .send(.presentAddFirstVehicleView)
-                case .deleteVehicleButtonTapped:
-                    return .send(.deleteCurrentVehicle)
+                case .openCreateVehicleButtonTapped: return .send(.presentAddFirstVehicleView)
+                case .deleteVehicleButtonTapped: return .send(.deleteCurrentVehicle)
+                case .settingsButtonTapped: return .send(.showSettings)
                 }
                 
             case .onAppear:

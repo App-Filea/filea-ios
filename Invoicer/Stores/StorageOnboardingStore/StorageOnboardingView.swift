@@ -26,7 +26,7 @@ struct StorageOnboardingView: View {
                             .padding(.top, 60)
                             .padding(.bottom, 28)
 
-                        Text("Choisissez votre emplacement")
+                        Text("storage_onboarding_title")
                             .largeTitle()
                             .padding(.bottom, 40)
 
@@ -34,15 +34,15 @@ struct StorageOnboardingView: View {
                             StorageFeatureRow(
                                 icon: "externaldrive.badge.icloud",
                                 iconColor: .blue,
-                                title: "Stockage flexible",
-                                description: "Choisissez entre votre téléphone ou iCloud Drive."
+                                title: "storage_onboarding_feature_1_title",
+                                description: "storage_onboarding_feature_1_description"
                             )
 
                             StorageFeatureRow(
                                 icon: "checkmark.shield.fill",
                                 iconColor: .orange,
-                                title: "Vos données vous appartiennent",
-                                description: "Même après désinstallation, vos fichiers restent accessibles."
+                                title: "storage_onboarding_feature_2_title",
+                                description: "storage_onboarding_feature_2_description"
                             )
                         }
                         .padding(.bottom, 32)
@@ -57,7 +57,7 @@ struct StorageOnboardingView: View {
                 }
                 .scrollBounceBehavior(.basedOnSize)
                 
-                PrimaryButton("Sélectionner un dossier",
+                PrimaryButton("all_select_folder",
                               systemImage: "folder.badge.plus",
                               isLoading: store.isLoading,
                               action: { store.send(.selectFolderTapped) })
@@ -103,8 +103,8 @@ struct StorageIconView: View {
 struct StorageFeatureRow<style: ShapeStyle>: View {
     let icon: String
     let iconColor: style
-    let title: String
-    let description: String
+    let title: LocalizedStringKey
+    let description: LocalizedStringKey
 
     var body: some View {
         HStack(alignment: .top, spacing: 16) {
@@ -142,12 +142,12 @@ struct ErrorMessageView: View {
                     .font(.system(size: 16, weight: .medium))
                     .foregroundStyle(Color.red)
 
-                Text("Dossier inaccessible")
+                Text("storage_onboarding_error_title")
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(Color.primary)
             }
 
-            Text("Choisissez un dossier dans iCloud Drive ou un autre emplacement accessible.")
+            Text("storage_onboarding_error_description")
                 .font(.system(size: 14))
                 .foregroundStyle(Color.secondary)
                 .fixedSize(horizontal: false, vertical: true)

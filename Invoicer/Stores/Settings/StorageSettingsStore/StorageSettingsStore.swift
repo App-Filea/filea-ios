@@ -10,9 +10,7 @@ import ComposableArchitecture
 import Foundation
 
 @Reducer
-struct SettingsStore {
-
-    // MARK: - State
+struct StorageSettingsStore {
 
     @ObservableState
     struct State: Equatable {
@@ -22,8 +20,6 @@ struct SettingsStore {
         var errorMessage: String?
         var isLoading = false
     }
-
-    // MARK: - Action
 
     enum Action: Equatable {
         case onAppear
@@ -40,11 +36,7 @@ struct SettingsStore {
         case dismissError
     }
 
-    // MARK: - Dependencies
-
     @Dependency(\.storageManager) var storageManager
-
-    // MARK: - Reducer
 
     var body: some ReducerOf<Self> {
         Reduce { state, action in
@@ -85,15 +77,12 @@ struct SettingsStore {
 
                 return .run { send in
                     do {
-                        // Reset current storage
                         await storageManager.resetStorage()
 
-                        // Save new storage folder
                         try await storageManager.saveStorageFolder(url)
 
                         await send(.storageFolderChanged)
                     } catch {
-                        // Provide user-friendly error messages
                         let friendlyMessage = Self.getFriendlyErrorMessage(from: error, url: url)
                         await send(.changeStorageFailed(friendlyMessage))
                     }
@@ -105,7 +94,6 @@ struct SettingsStore {
 
             case .storageFolderChanged:
                 state.isLoading = false
-                // Reload the storage path
                 return .send(.loadCurrentStoragePath)
 
             case .changeStorageFailed(let errorMessage):
@@ -120,14 +108,10 @@ struct SettingsStore {
         }
     }
 
-    // MARK: - Helper Methods
-
-    /// Converts technical errors into user-friendly messages with helpful guidance
     private static func getFriendlyErrorMessage(from error: Error, url: URL) -> String {
         let errorDescription = error.localizedDescription.lowercased()
         let urlPath = url.path.lowercased()
 
-        // Permission denied errors
         if errorDescription.contains("permission") || errorDescription.contains("denied") {
             if urlPath.contains("file provider storage") || urlPath.contains("sur mon iphone") {
                 return "❌ Impossible de créer un dossier ici.\n\n💡 Conseil : Choisissez plutôt iCloud Drive ou créez d'abord un sous-dossier dans un emplacement existant."
@@ -136,17 +120,14 @@ struct SettingsStore {
             }
         }
 
-        // Bookmark creation errors
         if errorDescription.contains("bookmark") {
             return "❌ Impossible de sauvegarder l'emplacement.\n\n💡 Essayez de choisir un autre dossier ou redémarrez l'application."
         }
 
-        // Access errors
         if errorDescription.contains("access") {
             return "❌ Impossible d'accéder au dossier sélectionné.\n\n💡 Assurez-vous que le dossier existe toujours et qu'il est accessible."
         }
 
-        // Generic fallback with the original error
         return "❌ Une erreur s'est produite.\n\n💡 Essayez de sélectionner un autre emplacement (iCloud Drive recommandé).\n\nDétails : \(error.localizedDescription)"
     }
 }

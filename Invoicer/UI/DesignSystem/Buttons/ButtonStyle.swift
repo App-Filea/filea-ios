@@ -8,13 +8,13 @@
 import SwiftUI
 
 struct PrimaryButton: View {
-    let title: String
+    let title: LocalizedStringKey
     let systemImage: String?
     let isLoading: Bool
     let action: () -> Void
     
     init(
-        _ title: String,
+        _ title: LocalizedStringKey,
         systemImage: String? = nil,
         isLoading: Bool = false,
         action: @escaping () -> Void
@@ -51,13 +51,13 @@ struct PrimaryButton: View {
 }
 
 struct SecondaryButton: View {
-    let title: String
+    let title: LocalizedStringKey
     let systemImage: String?
     let isLoading: Bool
     let action: () -> Void
     
     init(
-        _ title: String,
+        _ title: LocalizedStringKey,
         systemImage: String? = nil,
         isLoading: Bool = false,
         action: @escaping () -> Void
@@ -94,11 +94,11 @@ struct SecondaryButton: View {
 }
 
 struct TertiaryButton: View {
-    let title: String
+    let title: LocalizedStringKey
     let action: () -> Void
     
     init(
-        _ title: String,
+        _ title: LocalizedStringKey,
         action: @escaping () -> Void
     ) {
         self.title = title
@@ -118,13 +118,13 @@ struct TertiaryButton: View {
 }
 
 struct DestructiveButton: View {
-    let title: String
+    let title: LocalizedStringKey
     let systemImage: String?
     let isLoading: Bool
     let action: () -> Void
     
     init(
-        _ title: String,
+        _ title: LocalizedStringKey,
         systemImage: String? = nil,
         isLoading: Bool = false,
         action: @escaping () -> Void
@@ -162,16 +162,13 @@ struct DestructiveButton: View {
 
 struct PrimaryCircleButton: View {
     let systemImage: String
-    let isLoading: Bool
     let action: () -> Void
     
     init(
         systemImage: String,
-        isLoading: Bool = false,
         action: @escaping () -> Void
     ) {
         self.systemImage = systemImage
-        self.isLoading = isLoading
         self.action = action
     }
     
@@ -179,20 +176,37 @@ struct PrimaryCircleButton: View {
         Button(action: action) {
             Group {
                 Image(systemName: systemImage)
-            }
-            .font(.system(size: 17, weight: .semibold))
-            .opacity(isLoading ? 0 : 1)
-            .overlay {
-                if isLoading {
-                    ProgressView()
-                        .controlSize(.regular)
-                        .tint(.primary)
-                }
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                .frame(width: 24, height: 24)
             }
         }
-        .frame(width: 40, height: 40)
-        .disabled(isLoading)
         .primaryCircleButtonStyle()
+    }
+}
+
+struct SecondaryCircleButton: View {
+    let systemImage: String
+    let action: () -> Void
+    
+    init(
+        systemImage: String,
+        action: @escaping () -> Void
+    ) {
+        self.systemImage = systemImage
+        self.action = action
+    }
+    
+    var body: some View {
+        Button(action: action) {
+                Image(systemName: systemImage)
+                    .resizable()
+                .frame(width: 22, height: 22)
+                .foregroundStyle(Color.primary)
+                .padding(8)
+                .background(Color(.tertiarySystemGroupedBackground))
+                .clipShape(.circle)
+        }
     }
 }
 
@@ -229,10 +243,12 @@ extension View {
 }
 
 #Preview {
-    Group {
+    VStack {
         PrimaryButton("Button", action: {})
         SecondaryButton("Button", action: {})
         TertiaryButton("Button", action: {})
         DestructiveButton("Button", action: {})
+        PrimaryCircleButton(systemImage: "gearshape", action: {})
+        SecondaryCircleButton(systemImage: "gearshape", action: {})
     }
 }

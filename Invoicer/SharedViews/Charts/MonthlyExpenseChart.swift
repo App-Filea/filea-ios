@@ -151,7 +151,6 @@ struct MonthlyExpenseChart: View {
 
 #Preview {
     VStack(spacing: Spacing.lg) {
-        // With data
         MonthlyExpenseChart(
             expenses: [
                 MonthlyExpense(month: 1, amount: 540),
@@ -170,7 +169,6 @@ struct MonthlyExpenseChart: View {
             year: 2025
         )
 
-        // Empty state
         MonthlyExpenseChart(
             expenses: [],
             year: 2025

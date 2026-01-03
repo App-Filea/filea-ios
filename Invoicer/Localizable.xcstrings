@@ -1354,6 +1354,40 @@
         }
       }
     },
+    "settings_distance_warning_message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The change of distance unit does not affect the values already entered. You will have to manually update the mileage of your vehicles and your documents."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Le changement d'unité de distance n'affecte pas les valeurs déjà saisies. Vous devrez mettre à jour manuellement le kilométrage de vos véhicules et de vos documents."
+          }
+        }
+      }
+    },
+    "settings_distance_warning_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warning"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Attention"
+          }
+        }
+      }
+    },
     "settings_global_title" : {
       "localizations" : {
         "en" : {

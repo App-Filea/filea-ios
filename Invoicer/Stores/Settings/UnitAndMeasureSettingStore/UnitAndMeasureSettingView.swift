@@ -57,6 +57,27 @@ struct UnitAndMeasureSettingView: View {
                         .frame(maxWidth: .infinity, alignment: .trailing)
                     }
                 }
+
+                // Warning about unit change
+                VStack(alignment: .leading, spacing: Spacing.xs) {
+                    HStack(spacing: Spacing.xs) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .font(.caption)
+                            .foregroundStyle(.orange)
+
+                        Text("settings_distance_warning_title")
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                            .foregroundStyle(.orange)
+                    }
+
+                    Text("settings_distance_warning_message")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+                .padding(Spacing.sm)
+                .background(Color.orange.tertiary)
+                .clipShape(RoundedRectangle(cornerRadius: Radius.sm))
             }
             .padding(Spacing.md)
         }

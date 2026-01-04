@@ -9,6 +9,7 @@ import SwiftUI
 import ComposableArchitecture
 import Charts
 import QuickLook
+import FirebaseCrashlytics
 
 struct MainView: View {
     @Bindable var store: StoreOf<MainStore>
@@ -162,8 +163,6 @@ struct MainView: View {
 
                                     Text(store.selectedVehicle.model)
                                         .title()
-//                                        .font(.system(size: 24, weight: .bold))
-//                                        .foregroundColor(.primary)
                                 }
 
                                 ZStack {

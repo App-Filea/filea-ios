@@ -1,6 +1,12 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "" : {
+
+    },
+    "%@" : {
+
+    },
     "add_document_mode_camera_subtitle" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1578,6 +1584,9 @@
           }
         }
       }
+    },
+    "Start" : {
+
     },
     "stat_card_total_cost_subtitle" : {
       "extractionState" : "manual",

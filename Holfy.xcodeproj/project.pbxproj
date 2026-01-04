@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		3F07416E2E6C7C5A00F18229 /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = 3F07416D2E6C7C5A00F18229 /* ComposableArchitecture */; };
 		3F0741702E6C7C5D00F18229 /* SharingGRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 3F07416F2E6C7C5D00F18229 /* SharingGRDB */; };
+		3FDFFEF92F0A7E2C00CDC99F /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 3FDFFEF82F0A7E2C00CDC99F /* FirebaseAnalytics */; };
+		3FDFFEFB2F0A7E2C00CDC99F /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 3FDFFEFA2F0A7E2C00CDC99F /* FirebaseCrashlytics */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -35,14 +37,14 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		3F0741362E6C714B00F18229 /* Invoicer */ = {
+		3F0741362E6C714B00F18229 /* Holfy */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Invoicer;
+			path = Holfy;
 			sourceTree = "<group>";
 		};
-		3F0741452E6C714D00F18229 /* InvoicerTests */ = {
+		3F0741452E6C714D00F18229 /* HolfyTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = InvoicerTests;
+			path = HolfyTests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -53,7 +55,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				3F0741702E6C7C5D00F18229 /* SharingGRDB in Frameworks */,
+				3FDFFEFB2F0A7E2C00CDC99F /* FirebaseCrashlytics in Frameworks */,
 				3F07416E2E6C7C5A00F18229 /* ComposableArchitecture in Frameworks */,
+				3FDFFEF92F0A7E2C00CDC99F /* FirebaseAnalytics in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -77,8 +81,8 @@
 		3F07412B2E6C714B00F18229 = {
 			isa = PBXGroup;
 			children = (
-				3F0741362E6C714B00F18229 /* Invoicer */,
-				3F0741452E6C714D00F18229 /* InvoicerTests */,
+				3F0741362E6C714B00F18229 /* Holfy */,
+				3F0741452E6C714D00F18229 /* HolfyTests */,
 				3F07416C2E6C7C5A00F18229 /* Frameworks */,
 				3F0741352E6C714B00F18229 /* Products */,
 			);
@@ -111,18 +115,21 @@
 				3F0741302E6C714B00F18229 /* Sources */,
 				3F0741312E6C714B00F18229 /* Frameworks */,
 				3F0741322E6C714B00F18229 /* Resources */,
+				3FA8F54A2F0A815500F443BF /* ShellScript */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				3F0741362E6C714B00F18229 /* Invoicer */,
+				3F0741362E6C714B00F18229 /* Holfy */,
 			);
 			name = Holfy;
 			packageProductDependencies = (
 				3F07416D2E6C7C5A00F18229 /* ComposableArchitecture */,
 				3F07416F2E6C7C5D00F18229 /* SharingGRDB */,
+				3FDFFEF82F0A7E2C00CDC99F /* FirebaseAnalytics */,
+				3FDFFEFA2F0A7E2C00CDC99F /* FirebaseCrashlytics */,
 			);
 			productName = Invoicer;
 			productReference = 3F0741342E6C714B00F18229 /* Holfy.app */;
@@ -142,7 +149,7 @@
 				3F0741442E6C714D00F18229 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				3F0741452E6C714D00F18229 /* InvoicerTests */,
+				3F0741452E6C714D00F18229 /* HolfyTests */,
 			);
 			name = HolfyTests;
 			packageProductDependencies = (
@@ -208,6 +215,7 @@
 				3F07415F2E6C738200F18229 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */,
 				3F0741602E6C73A700F18229 /* XCRemoteSwiftPackageReference "sharing-grdb" */,
 				3F0741652E6C76BE00F18229 /* XCRemoteSwiftPackageReference "supabase-swift" */,
+				3FDFFEF72F0A7E2C00CDC99F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 3F0741352E6C714B00F18229 /* Products */;
@@ -244,6 +252,32 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		3FA8F54A2F0A815500F443BF /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}",
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${PRODUCT_NAME}",
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Info.plist",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/GoogleService-Info.plist",
+				"$(TARGET_BUILD_DIR)/$(EXECUTABLE_PATH)",
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${PRODUCT_NAME}.debug.dylib",
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		3F0741302E6C714B00F18229 /* Sources */ = {
@@ -317,7 +351,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 5DDBZ7D32L;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -408,7 +442,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = Invoicer/Invoicer.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Holfy/Holfy.entitlements;
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = "";
@@ -453,7 +487,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = Invoicer/Invoicer.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Holfy/Holfy.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
@@ -651,6 +685,14 @@
 				minimumVersion = 2.5.1;
 			};
 		};
+		3FDFFEF72F0A7E2C00CDC99F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.7.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -663,6 +705,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 3F0741602E6C73A700F18229 /* XCRemoteSwiftPackageReference "sharing-grdb" */;
 			productName = SharingGRDB;
+		};
+		3FDFFEF82F0A7E2C00CDC99F /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3FDFFEF72F0A7E2C00CDC99F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		3FDFFEFA2F0A7E2C00CDC99F /* FirebaseCrashlytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3FDFFEF72F0A7E2C00CDC99F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCrashlytics;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

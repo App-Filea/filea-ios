@@ -1303,13 +1303,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Welcome to Filea"
+            "value" : "Welcome to Holfy"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bienvenue sur Filea"
+            "value" : "Bienvenue sur Holfy"
           }
         }
       }

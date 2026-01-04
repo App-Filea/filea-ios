@@ -1,15 +1,6 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "" : {
-
-    },
-    "%@" : {
-
-    },
-    "💡 Vos données sont stockées dans ce dossier. Si vous changez de dossier, toutes vos données seront automatiquement déplacées vers le nouvel emplacement." : {
-
-    },
     "add_document_mode_camera_subtitle" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -163,6 +154,57 @@
         }
       }
     },
+    "alert_change_storage_confirm_button" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continue"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuer"
+          }
+        }
+      }
+    },
+    "alert_change_storage_message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All your data will be automatically moved to the new folder. The old folder will be deleted once the move is complete. Are you sure you want to continue?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toutes vos données seront automatiquement déplacées vers le nouveau dossier.\nL’ancien dossier sera supprimé une fois le déplacement terminé. Êtes-vous sûr de vouloir continuer ?"
+          }
+        }
+      }
+    },
+    "alert_change_storage_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Change storage location"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Changer d'emplacement de stockage"
+          }
+        }
+      }
+    },
     "alert_create_vehicle_primary_already_exist_message" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -248,6 +290,40 @@
         }
       }
     },
+    "alert_storage_error_message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unable to move your folder to the selected location. Try to choose another location."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible de déplacer votre dossier à l’emplacement choisis. Essayer de choisir un autre emplacement."
+          }
+        }
+      }
+    },
+    "alert_storage_error_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Error"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erreur"
+          }
+        }
+      }
+    },
     "all_back" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -316,23 +392,6 @@
         }
       }
     },
-    "all_currency_symbol" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "€"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "€"
-          }
-        }
-      }
-    },
     "all_delete" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -384,23 +443,6 @@
         }
       }
     },
-    "all_mileage_unit" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "KM"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "KM"
-          }
-        }
-      }
-    },
     "all_no" : {
       "localizations" : {
         "en" : {
@@ -411,7 +453,7 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Non"
           }
         }
@@ -430,6 +472,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Non renseigné"
+          }
+        }
+      }
+    },
+    "all_ok" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
           }
         }
       }
@@ -479,7 +538,7 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Vélo"
           }
         }
@@ -513,7 +572,7 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Moto"
           }
         }
@@ -530,7 +589,7 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Autre"
           }
         }
@@ -547,63 +606,110 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Camion"
           }
         }
       }
     },
-    "Annuler" : {
-
-    },
-    "Aucune dépense enregistrée cette année" : {
-
-    },
-    "Changer d'emplacement de stockage" : {
-
-    },
-    "Configuration en cours..." : {
-
-    },
-    "Continuer" : {
-
-    },
-    "Dépenses mensuelles" : {
-
-    },
-    "Dépenses mensuelles sur l'année %lld" : {
-
-    },
-    "document_detail_not_specified_amount" : {
+    "chart_axis_amount" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "-- €"
+            "value" : "Amount"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "-- €"
+            "value" : "Montant"
           }
         }
       }
     },
-    "document_detail_not_specified_mileage" : {
+    "chart_axis_month" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "-- KM"
+            "value" : "Month"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "-- KM"
+            "value" : "Mois"
+          }
+        }
+      }
+    },
+    "chart_monthly_expenses" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Monthly expenses"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dépenses mensuelles"
+          }
+        }
+      }
+    },
+    "chart_monthly_expenses_year" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Monthly expenses for the year %lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dépenses mensuelles sur l'année %lld"
+          }
+        }
+      }
+    },
+    "chart_no_expense_this_year" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No expenses recorded this year"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune dépense enregistrée cette année"
+          }
+        }
+      }
+    },
+    "chart_total_expenses_months" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Total of %@ over %lld months"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Total de %@ sur %lld mois"
           }
         }
       }
@@ -784,13 +890,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "120000"
+            "value" : "0.0"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "120000"
+            "value" : "0.0"
           }
         }
       }
@@ -897,6 +1003,23 @@
         }
       }
     },
+    "document_status_incomplete" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incomplete"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incomplet"
+          }
+        }
+      }
+    },
     "edit_document_title" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -930,9 +1053,6 @@
           }
         }
       }
-    },
-    "Emplacement actuel" : {
-
     },
     "empty_vehicles_add_button" : {
       "extractionState" : "manual",
@@ -984,15 +1104,6 @@
           }
         }
       }
-    },
-    "Erreur" : {
-
-    },
-    "Graphique des dépenses mensuelles" : {
-
-    },
-    "Incomplet" : {
-
     },
     "main_documents_count" : {
       "extractionState" : "manual",
@@ -1078,18 +1189,6 @@
           }
         }
       }
-    },
-    "Mois" : {
-
-    },
-    "Montant" : {
-
-    },
-    "Non configuré" : {
-
-    },
-    "OK" : {
-
     },
     "on_boarding_feature_1_description" : {
       "extractionState" : "manual",
@@ -1209,9 +1308,6 @@
         }
       }
     },
-    "Réglages" : {
-
-    },
     "settings_currency_dollar" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1246,23 +1342,6 @@
         }
       }
     },
-    "settings_currency_info" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Select your preferred currency"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sélectionnez votre devise préférée"
-          }
-        }
-      }
-    },
     "settings_currency_label" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1276,23 +1355,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Devise"
-          }
-        }
-      }
-    },
-    "settings_distance_info" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Select your distance unit"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sélectionnez votre unité de distance"
           }
         }
       }
@@ -1359,7 +1421,7 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "Le changement d'unité de distance n'affecte pas les valeurs déjà saisies. Vous devrez mettre à jour manuellement le kilométrage de vos véhicules et de vos documents."
           }
         }
@@ -1398,6 +1460,74 @@
         }
       }
     },
+    "settings_storage_change_location" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Change storage location"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Changer d'emplacement de stockage"
+          }
+        }
+      }
+    },
+    "settings_storage_current_location" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Current location"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Emplacement actuel"
+          }
+        }
+      }
+    },
+    "settings_storage_info" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your data is stored in this folder. If you change the folder, all your data will be automatically moved to the new location."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vos données sont stockées dans ce dossier. Si vous changez de dossier, toutes vos données seront automatiquement déplacées vers le nouvel emplacement."
+          }
+        }
+      }
+    },
+    "settings_storage_loading_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configuration in progress..."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configuration en cours…"
+          }
+        }
+      }
+    },
     "settings_storage_title" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1411,6 +1541,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Stockage"
+          }
+        }
+      }
+    },
+    "settings_storage_unconfigured" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not configured"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non configuré"
           }
         }
       }
@@ -1431,26 +1578,6 @@
           }
         }
       }
-    },
-    "settings_units_info_message" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Changes take effect immediately throughout the app"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Les modifications prennent effet immédiatement dans toute l'application"
-          }
-        }
-      }
-    },
-    "Start" : {
-
     },
     "stat_card_total_cost_subtitle" : {
       "extractionState" : "manual",
@@ -1536,9 +1663,6 @@
           }
         }
       }
-    },
-    "Stockage" : {
-
     },
     "storage_onboarding_error_description" : {
       "extractionState" : "manual",
@@ -1891,7 +2015,7 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "needs_review",
+            "state" : "translated",
             "value" : "0.0"
           }
         }
@@ -2185,9 +2309,6 @@
           }
         }
       }
-    },
-    "Vous allez changer de dossier de stockage.\n\n📦 Toutes vos données seront automatiquement déplacées vers le nouveau dossier.\n\n🗑️ L'ancien dossier sera supprimé une fois le déplacement terminé." : {
-
     }
   },
   "version" : "1.0"

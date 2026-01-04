@@ -14,81 +14,60 @@ struct StorageSettingsView: View {
     @Bindable var store: StoreOf<StorageSettingsStore>
 
     var body: some View {
-        List {
-            Section {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Emplacement actuel")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+        ZStack {
+            Color(.systemBackground)
+                .ignoresSafeArea()
+            
+            ScrollView {
+                VStack(spacing: Spacing.md) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("settings_storage_current_location")
+                            .formFieldTitle()
+                            .padding(.horizontal, 4)
 
-                    if let path = store.currentStoragePath {
-                        Text(path)
-                            .font(.caption)
-                            .foregroundStyle(.primary)
-                            .padding(.vertical, 8)
-                            .padding(.horizontal, 12)
-                            .background(.secondary.opacity(0.1))
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                    } else {
-                        Text("Non configuré")
-                            .font(.caption)
-                            .foregroundStyle(.orange)
+                        VStack(spacing: 0) {
+                            VStack(alignment: .leading, spacing: 4) {
+                                if let path = store.currentStoragePath {
+                                    Text(path)
+                                        .formFieldLeadingTitle()
+                                } else {
+                                    Text("settings_storage_unconfigured")
+                                        .formFieldLeadingTitle()
+                                }
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 12)
+
+                            HStack(spacing: 8) {
+                                Image(systemName: "info.circle")
+                                Text("settings_storage_info")
+
+                                Spacer()
+                            }
+                            .formFieldInfoLabel()
+                            .padding(.vertical, 12)
+                            .padding(.horizontal, 16)
+                            .background(Color.gray.quinary)
+                        }
+                        .fieldCard(isError: false)
                     }
-                }
-                .padding(.vertical, 4)
 
-                Button(role: .destructive) {
-                    store.send(.changeStorageTapped)
-                } label: {
-                    HStack {
-                        Image(systemName: "folder.badge.gear")
-                        Text("Changer d'emplacement de stockage")
-                    }
+                    SecondaryButton("settings_storage_change_location", action: {
+                        store.send(.changeStorageTapped)
+                    })
                 }
-                .disabled(store.isLoading)
-
-            } header: {
-                Label("Stockage", systemImage: "externaldrive")
-            } footer: {
-                Text("💡 Vos données sont stockées dans ce dossier. Si vous changez de dossier, toutes vos données seront automatiquement déplacées vers le nouvel emplacement.")
+                .padding(Spacing.screenMargin)
             }
+            .scrollBounceBehavior(.basedOnSize)
         }
-        .navigationTitle("Réglages")
+        .navigationTitle("settings_storage_title")
         .navigationBarTitleDisplayMode(.large)
         .onAppear {
             store.send(.onAppear)
         }
-        .alert(
-            "Changer d'emplacement de stockage",
-            isPresented: Binding(
-                get: { store.showChangeStorageConfirmation },
-                set: { if !$0 { store.send(.cancelChangeStorage) } }
-            )
-        ) {
-            Button("Annuler", role: .cancel) {
-                store.send(.cancelChangeStorage)
-            }
-            Button("Continuer") {
-                store.send(.confirmChangeStorage)
-            }
-        } message: {
-            Text("Vous allez changer de dossier de stockage.\n\n📦 Toutes vos données seront automatiquement déplacées vers le nouveau dossier.\n\n🗑️ L'ancien dossier sera supprimé une fois le déplacement terminé.")
-        }
-        .alert(
-            "Erreur",
-            isPresented: Binding(
-                get: { store.errorMessage != nil },
-                set: { if !$0 { store.send(.dismissError) } }
-            )
-        ) {
-            Button("OK") {
-                store.send(.dismissError)
-            }
-        } message: {
-            if let errorMessage = store.errorMessage {
-                Text(errorMessage)
-            }
-        }
+        .alert($store.scope(state: \.confirmationAlert, action: \.confirmationAlert))
+        .alert($store.scope(state: \.errorAlert, action: \.errorAlert))
         .sheet(isPresented: Binding(
             get: { store.isSelectingNewFolder },
             set: { if !$0 { store.send(.folderSelectionCancelled) } }
@@ -114,12 +93,12 @@ struct StorageSettingsView: View {
 
                     VStack(spacing: 16) {
                         ProgressView()
-                            .tint(.white)
+                            .tint(Color.primary)
                             .scaleEffect(1.5)
 
-                        Text("Configuration en cours...")
+                        Text("settings_storage_loading_title")
                             .font(.headline)
-                            .foregroundStyle(.white)
+                            .foregroundStyle(Color.primary)
                     }
                     .padding(32)
                     .background(.ultraThinMaterial)
@@ -130,34 +109,30 @@ struct StorageSettingsView: View {
     }
 }
 
-#if DEBUG
-struct SettingsView_Previews: PreviewProvider {
-    static var previews: some View {
-        NavigationStack {
-            StorageSettingsView(
-                store: Store(
-                    initialState: StorageSettingsStore.State(
-                        currentStoragePath: "/Users/test/iCloud Drive/Invoicer"
-                    )
-                ) {
-                    StorageSettingsStore()
-                }
-            )
-        }
-        .previewDisplayName("Normal")
-
-        NavigationStack {
-            StorageSettingsView(
-                store: Store(
-                    initialState: StorageSettingsStore.State(
-                        currentStoragePath: nil
-                    )
-                ) {
-                    StorageSettingsStore()
-                }
-            )
-        }
-        .previewDisplayName("Not Configured")
+#Preview("normal") {
+    NavigationView {
+        StorageSettingsView(
+            store: Store(
+                initialState: StorageSettingsStore.State(
+                    currentStoragePath: "/Users/test/iCloud Drive/Invoicer"
+                )
+            ) {
+                StorageSettingsStore()
+            }
+        )
     }
 }
-#endif
+
+#Preview("non configuré") {
+    NavigationView {
+        StorageSettingsView(
+            store: Store(
+                initialState: StorageSettingsStore.State(
+                    currentStoragePath: nil
+                )
+            ) {
+                StorageSettingsStore()
+            }
+        )
+    }
+}

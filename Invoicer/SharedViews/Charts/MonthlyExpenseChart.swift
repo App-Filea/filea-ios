@@ -27,19 +27,16 @@ struct MonthlyExpenseChart: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            // Title
-            Text("Dépenses mensuelles")
+            Text("chart_monthly_expenses")
                 .secondarySubheadline()
 
-            // Chart
             if expenses.isEmpty || expenses.allSatisfy({ $0.amount == 0 }) {
                 emptyChart
             } else {
                 populatedChart
             }
 
-            // Subtitle
-            Text("Dépenses mensuelles sur l'année \(year)")
+            Text(String(format: String(localized: "chart_monthly_expenses_year"), year))
                 .caption()
         }
         .padding(Spacing.cardPadding)
@@ -51,8 +48,8 @@ struct MonthlyExpenseChart: View {
         Chart {
             ForEach(1...12, id: \.self) { month in
                 RectangleMark(
-                    x: .value("Mois", monthName(for: month)),
-                    y: .value("Montant", 0),
+                    x: .value(String(localized: "chart_axis_month"), monthName(for: month)),
+                    y: .value(String(localized: "chart_axis_amount"), 0),
                     height: 0.5
                 )
                 .foregroundStyle(Color.primary.tertiary)
@@ -77,8 +74,6 @@ struct MonthlyExpenseChart: View {
             }
         }
         .chartYAxis(.hidden)
-        .accessibilityLabel("Graphique des dépenses mensuelles")
-        .accessibilityValue("Aucune dépense enregistrée cette année")
     }
 
     private var populatedChart: some View {
@@ -86,9 +81,9 @@ struct MonthlyExpenseChart: View {
             ForEach(expenses) { expense in
                 if expense.amount > 0 {
                     BarMark(
-                        x: .value("Mois", expense.monthName),
+                        x: .value(String(localized: "chart_axis_month"), expense.monthName),
                         yStart: .value("Start", 0),
-                        yEnd: .value("Montant", expense.amount)
+                        yEnd: .value(String(localized: "chart_axis_amount"), expense.amount)
                     )
                     .foregroundStyle(
                         expense.month == currentMonth ?
@@ -97,8 +92,8 @@ struct MonthlyExpenseChart: View {
                     .clipShape(Capsule())
                 } else {
                     RectangleMark(
-                        x: .value("Mois", expense.monthName),
-                        y: .value("Montant", 0),
+                        x: .value(String(localized: "chart_axis_month"), expense.monthName),
+                        y: .value(String(localized: "chart_axis_amount"), 0),
                         height: 0.5
                     )
                     .foregroundStyle(Color.primary.tertiary)
@@ -123,8 +118,6 @@ struct MonthlyExpenseChart: View {
             }
         }
         .chartYAxis(.hidden)
-        .accessibilityLabel("Graphique des dépenses mensuelles")
-        .accessibilityValue(accessibilityDescription)
     }
 
     private var accessibilityDescription: String {
@@ -132,15 +125,19 @@ struct MonthlyExpenseChart: View {
         let monthsWithExpenses = expenses.filter { $0.amount > 0 }.count
 
         if totalExpenses == 0 {
-            return "Aucune dépense enregistrée cette année"
+            return String(localized: "chart_no_expense_this_year")
         }
 
-        return "Total de \(totalExpenses.asCurrencyStringNoDecimals(currency: currency)) sur \(monthsWithExpenses) mois"
+        return String(
+            format: String(localized: "chart_total_expenses_months"),
+            totalExpenses.asCurrencyStringNoDecimals(currency: currency),
+            monthsWithExpenses
+        )
     }
 
     private func monthName(for month: Int) -> String {
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "fr_FR")
+        formatter.locale = Locale.current
         formatter.dateFormat = "MMM"
 
         var components = DateComponents()

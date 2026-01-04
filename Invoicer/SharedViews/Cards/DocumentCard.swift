@@ -71,7 +71,7 @@ struct DocumentCard: View {
                     if document.amount == nil {
                         HStack(spacing: Spacing.xxs) {
                             Image(systemName: "exclamationmark.triangle.fill")
-                            Text("Incomplet")
+                            Text("document_status_incomplete")
                         }
                         .foregroundStyle(Color.orange)
                         .caption()

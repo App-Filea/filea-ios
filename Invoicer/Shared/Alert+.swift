@@ -40,3 +40,34 @@ extension AlertState where Action == MainStore.Action.Alert {
         }
     }
 }
+
+extension AlertState where Action == StorageSettingsStore.Action.ConfirmationAlert {
+    static func changeStorageLocationAlert() -> Self {
+        AlertState {
+            TextState(String(localized: "alert_change_storage_title"))
+        } actions: {
+            ButtonState(action: .confirm) {
+                TextState(String(localized: "alert_change_storage_confirm_button"))
+            }
+            ButtonState(role: .cancel, action: .cancel) {
+                TextState(String(localized: "all_cancel"))
+            }
+        } message: {
+            TextState(String(localized: "alert_change_storage_message"))
+        }
+    }
+}
+
+extension AlertState where Action == StorageSettingsStore.Action.ErrorAlert {
+    static func storageErrorAlert() -> Self {
+        AlertState {
+            TextState(String(localized: "alert_storage_error_title"))
+        } actions: {
+            ButtonState(action: .dismiss) {
+                TextState(String(localized: "all_ok"))
+            }
+        } message: {
+            TextState(String(localized: "alert_storage_error_message"))
+        }
+    }
+}

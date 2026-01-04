@@ -16,9 +16,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "3F0741332E6C714B00F18229"
-               BuildableName = "Invoicer.app"
-               BlueprintName = "Invoicer"
-               ReferencedContainer = "container:Invoicer.xcodeproj">
+               BuildableName = "Holfy.app"
+               BlueprintName = "Holfy"
+               ReferencedContainer = "container:Holfy.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -41,9 +41,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "3F0741412E6C714D00F18229"
-               BuildableName = "InvoicerTests.xctest"
-               BlueprintName = "InvoicerTests"
-               ReferencedContainer = "container:Invoicer.xcodeproj">
+               BuildableName = "HolfyTests.xctest"
+               BlueprintName = "HolfyTests"
+               ReferencedContainer = "container:Holfy.xcodeproj">
             </BuildableReference>
          </TestableReference>
          <TestableReference
@@ -52,9 +52,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "3F07414B2E6C714D00F18229"
-               BuildableName = "InvoicerUITests.xctest"
-               BlueprintName = "InvoicerUITests"
-               ReferencedContainer = "container:Invoicer.xcodeproj">
+               BuildableName = "HolfyUITests.xctest"
+               BlueprintName = "HolfyUITests"
+               ReferencedContainer = "container:Holfy.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -74,9 +74,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "3F0741332E6C714B00F18229"
-            BuildableName = "Invoicer.app"
-            BlueprintName = "Invoicer"
-            ReferencedContainer = "container:Invoicer.xcodeproj">
+            BuildableName = "Holfy.app"
+            BlueprintName = "Holfy"
+            ReferencedContainer = "container:Holfy.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -91,9 +91,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "3F0741332E6C714B00F18229"
-            BuildableName = "Invoicer.app"
-            BlueprintName = "Invoicer"
-            ReferencedContainer = "container:Invoicer.xcodeproj">
+            BuildableName = "Holfy.app"
+            BlueprintName = "Holfy"
+            ReferencedContainer = "container:Holfy.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

@@ -29,9 +29,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		3F0741342E6C714B00F18229 /* Invoicer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Invoicer.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		3F0741422E6C714D00F18229 /* InvoicerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = InvoicerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		3F07414C2E6C714D00F18229 /* InvoicerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = InvoicerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		3F0741342E6C714B00F18229 /* Holfy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Holfy.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3F0741422E6C714D00F18229 /* HolfyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HolfyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		3F07414C2E6C714D00F18229 /* HolfyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HolfyUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -87,9 +87,9 @@
 		3F0741352E6C714B00F18229 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				3F0741342E6C714B00F18229 /* Invoicer.app */,
-				3F0741422E6C714D00F18229 /* InvoicerTests.xctest */,
-				3F07414C2E6C714D00F18229 /* InvoicerUITests.xctest */,
+				3F0741342E6C714B00F18229 /* Holfy.app */,
+				3F0741422E6C714D00F18229 /* HolfyTests.xctest */,
+				3F07414C2E6C714D00F18229 /* HolfyUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -104,9 +104,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		3F0741332E6C714B00F18229 /* Invoicer */ = {
+		3F0741332E6C714B00F18229 /* Holfy */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 3F0741562E6C714D00F18229 /* Build configuration list for PBXNativeTarget "Invoicer" */;
+			buildConfigurationList = 3F0741562E6C714D00F18229 /* Build configuration list for PBXNativeTarget "Holfy" */;
 			buildPhases = (
 				3F0741302E6C714B00F18229 /* Sources */,
 				3F0741312E6C714B00F18229 /* Frameworks */,
@@ -119,18 +119,18 @@
 			fileSystemSynchronizedGroups = (
 				3F0741362E6C714B00F18229 /* Invoicer */,
 			);
-			name = Invoicer;
+			name = Holfy;
 			packageProductDependencies = (
 				3F07416D2E6C7C5A00F18229 /* ComposableArchitecture */,
 				3F07416F2E6C7C5D00F18229 /* SharingGRDB */,
 			);
 			productName = Invoicer;
-			productReference = 3F0741342E6C714B00F18229 /* Invoicer.app */;
+			productReference = 3F0741342E6C714B00F18229 /* Holfy.app */;
 			productType = "com.apple.product-type.application";
 		};
-		3F0741412E6C714D00F18229 /* InvoicerTests */ = {
+		3F0741412E6C714D00F18229 /* HolfyTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 3F0741592E6C714D00F18229 /* Build configuration list for PBXNativeTarget "InvoicerTests" */;
+			buildConfigurationList = 3F0741592E6C714D00F18229 /* Build configuration list for PBXNativeTarget "HolfyTests" */;
 			buildPhases = (
 				3F07413E2E6C714D00F18229 /* Sources */,
 				3F07413F2E6C714D00F18229 /* Frameworks */,
@@ -144,16 +144,16 @@
 			fileSystemSynchronizedGroups = (
 				3F0741452E6C714D00F18229 /* InvoicerTests */,
 			);
-			name = InvoicerTests;
+			name = HolfyTests;
 			packageProductDependencies = (
 			);
 			productName = InvoicerTests;
-			productReference = 3F0741422E6C714D00F18229 /* InvoicerTests.xctest */;
+			productReference = 3F0741422E6C714D00F18229 /* HolfyTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		3F07414B2E6C714D00F18229 /* InvoicerUITests */ = {
+		3F07414B2E6C714D00F18229 /* HolfyUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 3F07415C2E6C714D00F18229 /* Build configuration list for PBXNativeTarget "InvoicerUITests" */;
+			buildConfigurationList = 3F07415C2E6C714D00F18229 /* Build configuration list for PBXNativeTarget "HolfyUITests" */;
 			buildPhases = (
 				3F0741482E6C714D00F18229 /* Sources */,
 				3F0741492E6C714D00F18229 /* Frameworks */,
@@ -164,11 +164,11 @@
 			dependencies = (
 				3F07414E2E6C714D00F18229 /* PBXTargetDependency */,
 			);
-			name = InvoicerUITests;
+			name = HolfyUITests;
 			packageProductDependencies = (
 			);
 			productName = InvoicerUITests;
-			productReference = 3F07414C2E6C714D00F18229 /* InvoicerUITests.xctest */;
+			productReference = 3F07414C2E6C714D00F18229 /* HolfyUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -194,7 +194,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 3F07412F2E6C714B00F18229 /* Build configuration list for PBXProject "Invoicer" */;
+			buildConfigurationList = 3F07412F2E6C714B00F18229 /* Build configuration list for PBXProject "Holfy" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -214,9 +214,9 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				3F0741332E6C714B00F18229 /* Invoicer */,
-				3F0741412E6C714D00F18229 /* InvoicerTests */,
-				3F07414B2E6C714D00F18229 /* InvoicerUITests */,
+				3F0741332E6C714B00F18229 /* Holfy */,
+				3F0741412E6C714D00F18229 /* HolfyTests */,
+				3F07414B2E6C714D00F18229 /* HolfyUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -272,12 +272,12 @@
 /* Begin PBXTargetDependency section */
 		3F0741442E6C714D00F18229 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 3F0741332E6C714B00F18229 /* Invoicer */;
+			target = 3F0741332E6C714B00F18229 /* Holfy */;
 			targetProxy = 3F0741432E6C714D00F18229 /* PBXContainerItemProxy */;
 		};
 		3F07414E2E6C714D00F18229 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 3F0741332E6C714B00F18229 /* Invoicer */;
+			target = 3F0741332E6C714B00F18229 /* Holfy */;
 			targetProxy = 3F07414D2E6C714D00F18229 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -416,7 +416,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = Filea;
+				INFOPLIST_KEY_CFBundleDisplayName = Holfy;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Besoin de la camera stp";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
@@ -463,7 +463,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = Filea;
+				INFOPLIST_KEY_CFBundleDisplayName = Holfy;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Besoin de la camera stp";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
@@ -513,7 +513,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Invoicer.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Invoicer";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Holfy.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Holfy";
 				XROS_DEPLOYMENT_TARGET = 2.5;
 			};
 			name = Debug;
@@ -536,7 +536,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Invoicer.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Invoicer";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Holfy.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Holfy";
 				XROS_DEPLOYMENT_TARGET = 2.5;
 			};
 			name = Release;
@@ -588,7 +588,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		3F07412F2E6C714B00F18229 /* Build configuration list for PBXProject "Invoicer" */ = {
+		3F07412F2E6C714B00F18229 /* Build configuration list for PBXProject "Holfy" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				3F0741542E6C714D00F18229 /* Debug */,
@@ -597,7 +597,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		3F0741562E6C714D00F18229 /* Build configuration list for PBXNativeTarget "Invoicer" */ = {
+		3F0741562E6C714D00F18229 /* Build configuration list for PBXNativeTarget "Holfy" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				3F0741572E6C714D00F18229 /* Debug */,
@@ -606,7 +606,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		3F0741592E6C714D00F18229 /* Build configuration list for PBXNativeTarget "InvoicerTests" */ = {
+		3F0741592E6C714D00F18229 /* Build configuration list for PBXNativeTarget "HolfyTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				3F07415A2E6C714D00F18229 /* Debug */,
@@ -615,7 +615,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		3F07415C2E6C714D00F18229 /* Build configuration list for PBXNativeTarget "InvoicerUITests" */ = {
+		3F07415C2E6C714D00F18229 /* Build configuration list for PBXNativeTarget "HolfyUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				3F07415D2E6C714D00F18229 /* Debug */,

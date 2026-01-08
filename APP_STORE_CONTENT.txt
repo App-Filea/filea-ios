@@ -1,0 +1,225 @@
+================================================================================
+                        HOLFY - APP STORE CONTENT
+                     Description & Promotional Text
+                         Version 1.0 - January 2026
+================================================================================
+
+################################################################################
+#                              FRANÇAIS (FR)                                   #
+################################################################################
+
+--------------------------------------------------------------------------------
+TEXTE PROMOTIONNEL (170 caractères max)
+--------------------------------------------------------------------------------
+
+🚀 Nouveau ! Gérez tous vos documents automobiles en toute confidentialité. Stockage 100% local, aucun compte requis. Vos données restent sur votre iPhone. Téléchargez gratuitement !
+
+Caractères : 169/170 ✓
+
+
+--------------------------------------------------------------------------------
+SOUS-TITRE (30 caractères max)
+--------------------------------------------------------------------------------
+
+Gérez vos véhicules simplement
+
+Caractères : 29/30 ✓
+
+
+--------------------------------------------------------------------------------
+DESCRIPTION COMPLÈTE (4000 caractères max)
+--------------------------------------------------------------------------------
+
+Fini les documents perdus et les dépenses oubliées ! Holfy centralise tous vos documents automobiles et vous aide à maîtriser vos coûts d'entretien. Carte grise, assurance, factures de réparation : tout est à portée de main, organisé et sécurisé.
+
+Avec Holfy, vous savez exactement combien vous coûte chaque véhicule et ne manquez plus jamais une échéance importante.
+
+🚗 GÉREZ TOUS VOS VÉHICULES
+• Voitures, motos, camions, vélos ou scooters
+• Ajoutez autant de véhicules que vous le souhaitez
+• Organisez vos documents par type (administratif, entretien, réparation, carburant)
+• Consultez l'historique complet de chaque véhicule en un clin d'œil
+
+📄 CENTRALISEZ VOS DOCUMENTS
+• Carte grise, assurance, contrôle technique
+• Factures d'entretien, de réparation et de carburant
+• Photos de documents depuis votre appareil photo
+• Import de fichiers PDF depuis votre bibliothèque
+• Ajout de notes et de détails pour chaque document
+
+📊 SUIVEZ VOS DÉPENSES EN TEMPS RÉEL
+• Visualisez vos coûts totaux par véhicule
+• Graphiques mensuels de vos dépenses
+• Analyse détaillée par catégorie (entretien, carburant, réparations)
+• Identifiez rapidement vos postes de dépenses les plus importants
+• Comparez les coûts entre vos différents véhicules
+
+🔒 VOS DONNÉES RESTENT PRIVÉES
+• Stockage 100% local sur votre appareil
+• Aucun compte requis, aucune connexion cloud
+• Vos documents sensibles ne quittent jamais votre iPhone
+• Sauvegarde automatique compatible iCloud Drive
+• Exportation de vos données à tout moment
+
+✨ UNE INTERFACE SIMPLE ET ÉLÉGANTE
+• Design moderne et intuitif
+• Navigation fluide et rapide
+• Adapté au mode sombre
+• Optimisé pour tous les iPhones (iOS 18+)
+
+💡 POURQUOI CHOISIR HOLFY ?
+
+Vous êtes fatigué de chercher vos papiers de voiture dans une pile de documents ? Vous ne savez jamais combien vous coûte réellement l'entretien de vos véhicules ? Vous avez peur de perdre vos factures importantes ?
+
+Holfy résout ces problèmes en quelques secondes. Prenez simplement une photo de votre document ou importez un PDF, et l'application s'occupe du reste. Toutes vos informations sont organisées, consultables instantanément et protégées.
+
+Que vous soyez propriétaire d'une seule voiture ou d'une flotte de véhicules, Holfy s'adapte à vos besoins. Professionnel gérant plusieurs utilitaires, motard passionné ou famille avec plusieurs voitures : Holfy simplifie votre gestion automobile au quotidien.
+
+🎯 IDÉAL POUR :
+• Les propriétaires soucieux de maîtriser leurs budgets
+• Les familles avec plusieurs véhicules
+• Les professionnels gérant des flottes
+• Les passionnés qui veulent garder un historique complet
+• Toute personne voulant organiser ses documents administratifs
+
+🚀 COMMENCEZ DÈS AUJOURD'HUI
+
+Téléchargez Holfy gratuitement et reprenez le contrôle de vos documents automobiles. En quelques minutes, vous aurez une vision claire de vos véhicules, vos dépenses et votre historique.
+
+Plus besoin de fouiller dans vos tiroirs : avec Holfy, tout est toujours à portée de main.
+
+
+--------------------------------------------------------------------------------
+MOTS-CLÉS (100 caractères max)
+--------------------------------------------------------------------------------
+
+voiture,document,gestion,véhicule,entretien,facture,assurance,moto,dépense,budget,auto
+
+Caractères : 87/100 ✓
+
+
+################################################################################
+#                              ENGLISH (EN)                                    #
+################################################################################
+
+--------------------------------------------------------------------------------
+PROMOTIONAL TEXT (170 characters max)
+--------------------------------------------------------------------------------
+
+🚀 New! Manage all your vehicle documents with complete privacy. 100% local storage, no account required. Your data stays on your iPhone. Download free now!
+
+Characters: 167/170 ✓
+
+
+--------------------------------------------------------------------------------
+SUBTITLE (30 characters max)
+--------------------------------------------------------------------------------
+
+Manage your vehicles easily
+
+Characters: 27/30 ✓
+
+
+--------------------------------------------------------------------------------
+FULL DESCRIPTION (4000 characters max)
+--------------------------------------------------------------------------------
+
+No more lost documents or forgotten expenses! Holfy centralizes all your vehicle documents and helps you master your maintenance costs. Registration, insurance, repair invoices: everything at your fingertips, organized and secure.
+
+With Holfy, you know exactly how much each vehicle costs you and never miss an important deadline again.
+
+🚗 MANAGE ALL YOUR VEHICLES
+• Cars, motorcycles, trucks, bicycles or scooters
+• Add as many vehicles as you want
+• Organize your documents by type (administrative, maintenance, repair, fuel)
+• View the complete history of each vehicle at a glance
+
+📄 CENTRALIZE YOUR DOCUMENTS
+• Registration, insurance, vehicle inspection
+• Maintenance, repair and fuel invoices
+• Photo documents from your camera
+• Import PDF files from your library
+• Add notes and details for each document
+
+📊 TRACK YOUR EXPENSES IN REAL TIME
+• View your total costs per vehicle
+• Monthly expense charts
+• Detailed analysis by category (maintenance, fuel, repairs)
+• Quickly identify your biggest expense items
+• Compare costs between your different vehicles
+
+🔒 YOUR DATA STAYS PRIVATE
+• 100% local storage on your device
+• No account required, no cloud connection
+• Your sensitive documents never leave your iPhone
+• Automatic backup compatible with iCloud Drive
+• Export your data at any time
+
+✨ A SIMPLE AND ELEGANT INTERFACE
+• Modern and intuitive design
+• Smooth and fast navigation
+• Adapted to dark mode
+• Optimized for all iPhones (iOS 18+)
+
+💡 WHY CHOOSE HOLFY?
+
+Tired of searching for your car papers in a pile of documents? Never know how much your vehicle maintenance really costs? Afraid of losing your important invoices?
+
+Holfy solves these problems in seconds. Simply take a photo of your document or import a PDF, and the app takes care of the rest. All your information is organized, instantly accessible and protected.
+
+Whether you own a single car or a fleet of vehicles, Holfy adapts to your needs. Professional managing multiple utility vehicles, passionate motorcyclist or family with several cars: Holfy simplifies your daily automotive management.
+
+🎯 IDEAL FOR:
+• Owners concerned about controlling their budgets
+• Families with multiple vehicles
+• Professionals managing fleets
+• Enthusiasts who want to keep a complete history
+• Anyone wanting to organize their administrative documents
+
+🚀 START TODAY
+
+Download Holfy for free and take back control of your vehicle documents. In just a few minutes, you'll have a clear view of your vehicles, expenses and history.
+
+No more rummaging through your drawers: with Holfy, everything is always at your fingertips.
+
+
+--------------------------------------------------------------------------------
+KEYWORDS (100 characters max)
+--------------------------------------------------------------------------------
+
+car,document,management,vehicle,maintenance,invoice,insurance,motorcycle,expense,budget,auto
+
+Characters: 92/100 ✓
+
+
+################################################################################
+#                         TECHNICAL INFORMATION                                #
+################################################################################
+
+App Name: Holfy
+Bundle ID: com.nicolasbarb.filea
+Version: 1.0
+Build: 5
+Platform: iOS 18.5+, macOS 15.4+
+
+Primary Category: Productivity
+Secondary Category: Finance
+
+Privacy:
+- 100% local storage (no cloud)
+- No account creation required
+- No data collection
+- No analytics or tracking
+- Compatible with iCloud Drive for backup
+
+Key Features:
+- Multi-vehicle management (cars, motorcycles, trucks, bikes, scooters)
+- Document organization (administrative, maintenance, repairs, fuel)
+- Expense tracking with charts and statistics
+- Camera and PDF import
+- Dark mode support
+- Offline-first architecture
+
+================================================================================
+                              END OF DOCUMENT
+================================================================================

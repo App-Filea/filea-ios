@@ -38,7 +38,7 @@ struct DocumentDetailStore {
         case dismiss
     }
     
-    @Dependency(\.vehicleRepository) var vehicleRepository
+    @Dependency(\.vehicleGRDBClient) var vehicleRepository
     @Dependency(\.documentRepository) var documentRepository
     @Dependency(\.dismiss) var dismiss
     

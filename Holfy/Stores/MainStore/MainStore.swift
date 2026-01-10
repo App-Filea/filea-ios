@@ -59,7 +59,7 @@ struct MainStore {
         }
     }
     
-    @Dependency(\.vehicleRepository) var vehicleRepository
+    @Dependency(\.vehicleGRDBClient) var vehicleRepository
 
     var body: some ReducerOf<Self> {
         Scope(state: \.warningVehicle, action: \.warningVehicle) { WarningVehicleStore() }

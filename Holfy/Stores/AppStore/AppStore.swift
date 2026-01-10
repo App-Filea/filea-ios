@@ -39,7 +39,7 @@ struct AppStore {
         case initiateMainStore
     }
 
-    @Dependency(\.vehicleRepository) var vehicleRepository
+    @Dependency(\.vehicleGRDBClient) var vehicleRepository
     @Dependency(\.storageManager) var storageManager
 
     var body: some ReducerOf<Self> {

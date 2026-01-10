@@ -85,7 +85,7 @@ struct AddVehicleStore {
         }
     }
 
-    @Dependency(\.vehicleRepository) var vehicleRepository
+    @Dependency(\.vehicleGRDBClient) var vehicleRepository
     @Dependency(\.uuid) var uuid
     @Dependency(\.dismiss) var dismiss
 

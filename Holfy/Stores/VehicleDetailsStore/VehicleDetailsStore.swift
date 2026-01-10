@@ -22,7 +22,7 @@ struct VehicleDetailsStore {
         case editVehicle
     }
     
-    @Dependency(\.vehicleRepository) var vehicleRepository
+    @Dependency(\.vehicleGRDBClient) var vehicleRepository
     @Dependency(\.dismiss) var dismiss
     
     var body: some ReducerOf<Self> {

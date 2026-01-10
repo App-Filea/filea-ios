@@ -50,7 +50,7 @@ final class DocumentRepository: DocumentRepositoryProtocol, @unchecked Sendable 
     private let logger = Logger(subsystem: AppConstants.bundleIdentifier, category: "DocumentRepository")
     private let fileManager = FileManager.default
 
-    @Dependency(\.vehicleRepository) var vehicleRepository
+    @Dependency(\.vehicleGRDBClient) var vehicleRepository
     @Dependency(\.documentDatabaseRepository) var documentDbRepo
     @Dependency(\.storageManager) var storageManager
     @Dependency(\.syncManagerClient) var syncManager
@@ -293,6 +293,22 @@ final class DocumentRepository: DocumentRepositoryProtocol, @unchecked Sendable 
             return "document_\(timestamp)_\(uniqueId)"
         } else {
             return "document_\(timestamp)_\(uniqueId).\(fileExtension)"
+        }
+    }
+}
+
+// MARK: - Repository Error
+
+enum RepositoryError: Error, LocalizedError {
+    case notFound(String)
+    case invalidData(String)
+
+    var errorDescription: String? {
+        switch self {
+        case .notFound(let message):
+            return message
+        case .invalidData(let message):
+            return message
         }
     }
 }

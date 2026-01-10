@@ -52,20 +52,20 @@ extension VehicleGRDBClient: DependencyKey {
                     .appendingPathComponent(folderName)
                     .path
 
-                // 2. Create record in GRDB
+                // 2. Create physical folder FIRST (required for JSON export)
+                let _ = try await storageManager.createVehicleFolder(folderName)
+                print("   📁 Folder created: \(folderName)")
+
+                // 3. Create record in GRDB
                 let record = vehicle.toRecord(folderPath: folderPath)
                 try await database.write { db in
                     try VehicleRecord.insert { record }.execute(db)
                 }
                 print("   ✅ Vehicle saved to database")
 
-                // 3. Sync to JSON with debouncing
-                await syncManager.syncAfterChange(vehicle.id)
-                print("   💾 JSON sync scheduled")
-
-                // 4. Create physical folder
-                let _ = try await storageManager.createVehicleFolder(folderName)
-                print("   📁 Folder created: \(folderName)\n")
+                // 4. Export to JSON immediately (no debounce for creation)
+                try await syncManager.exportVehicleToJSON(vehicle.id)
+                print("   💾 JSON exported immediately\n")
             },
 
             // MARK: - Update Vehicle

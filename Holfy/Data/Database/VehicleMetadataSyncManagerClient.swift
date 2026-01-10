@@ -9,7 +9,7 @@ import Foundation
 import Dependencies
 
 struct VehicleMetadataSyncManagerClient: Sendable {
-    var syncAfterChange: @Sendable (String) async throws -> Void
+    var syncAfterChange: @Sendable (String) async -> Void
     var exportVehicleToJSON: @Sendable (String) async throws -> Void
     var importVehicleFromJSON: @Sendable (String) async throws -> String
     var scanAndRebuildDatabase: @Sendable (String) async throws -> [String]
@@ -25,7 +25,7 @@ extension VehicleMetadataSyncManagerClient: DependencyKey {
 
         return VehicleMetadataSyncManagerClient(
             syncAfterChange: { vehicleId in
-                try await syncManager.syncAfterChange(vehicleId: vehicleId)
+                await syncManager.syncAfterChange(vehicleId: vehicleId)
             },
             exportVehicleToJSON: { vehicleId in
                 try await syncManager.exportVehicleToJSON(vehicleId: vehicleId)

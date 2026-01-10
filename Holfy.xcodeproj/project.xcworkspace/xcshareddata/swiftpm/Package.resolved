@@ -1,5 +1,5 @@
 {
-  "originHash" : "c400c7ebeb8fc386abf6d8e096cf69168ae291a9aa7a52d82cf6767f18a91649",
+  "originHash" : "aa80a9805e1af2b809f4bd11971ee716a3364e5fd55eca3699d1a644fd5e12e0",
   "pins" : [
     {
       "identity" : "abseil-cpp-binary",
@@ -78,8 +78,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/groue/GRDB.swift",
       "state" : {
-        "revision" : "8ba1bc9a96afc731a000fd4136dd13a5a46297bd",
-        "version" : "7.6.1"
+        "revision" : "aa0079aeb82a4bf00324561a40bffe68c6fe1c26",
+        "version" : "7.9.0"
       }
     },
     {
@@ -137,12 +137,12 @@
       }
     },
     {
-      "identity" : "sharing-grdb",
+      "identity" : "sqlite-data",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/pointfreeco/sharing-grdb",
+      "location" : "https://github.com/pointfreeco/sqlite-data",
       "state" : {
-        "revision" : "09e4c8a59dd670bdaec00c8c5007420a35236b58",
-        "version" : "0.7.0"
+        "revision" : "8af16d5303372ecd01962ae59b2ad2f921d36fac",
+        "version" : "1.4.3"
       }
     },
     {
@@ -294,8 +294,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/swift-snapshot-testing",
       "state" : {
-        "revision" : "d7e40607dcd6bc26543f5d9433103f06e0b28f8f",
-        "version" : "1.18.6"
+        "revision" : "a8b7c5e0ed33d8ab8887d1654d9b59f2cbad529b",
+        "version" : "1.18.7"
       }
     },
     {
@@ -303,8 +303,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/swift-structured-queries",
       "state" : {
-        "revision" : "49f18c24145a6e061cc581662f468b7c18523b8d",
-        "version" : "0.18.0"
+        "revision" : "907cd2c4a31f6e45e0632e29bdac06977985faca",
+        "version" : "0.26.0"
       }
     },
     {

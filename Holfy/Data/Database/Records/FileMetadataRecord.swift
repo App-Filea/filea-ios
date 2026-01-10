@@ -7,7 +7,7 @@
 
 import Foundation
 import GRDB
-import SharingGRDB
+import SQLiteData
 
 /// Record de persistence pour les métadonnées de fichiers
 /// Utilisé uniquement pour la couche base de données

@@ -17,6 +17,7 @@ actor VehicleMetadataSyncManager {
     private let jsonFileName = ".vehicle_metadata.json"
     private let encoder: JSONEncoder
     private let decoder: JSONDecoder
+    private lazy var debouncer: JSONExportDebouncer = JSONExportDebouncer(syncManager: self)
 
     // MARK: - Initialization
 
@@ -194,11 +195,15 @@ actor VehicleMetadataSyncManager {
 
     // MARK: - Sync Automatique
 
-    /// Met à jour le JSON après une modification dans la BDD
+    /// Met à jour le JSON après une modification dans la BDD avec debouncing
+    ///
+    /// Utilise un debouncer pour éviter les exports multiples rapprochés.
+    /// L'export effectif n'aura lieu que 500ms après le dernier appel.
+    ///
     /// - Parameter vehicleId: Identifiant du véhicule modifié
-    /// - Throws: Erreur si la synchronisation échoue
-    func syncAfterChange(vehicleId: String) async throws {
-        try await exportVehicleToJSON(vehicleId: vehicleId)
+    func syncAfterChange(vehicleId: String) async {
+        print("🔄 [SyncManager] Scheduling debounced export for vehicle: \(vehicleId)")
+        await debouncer.schedule(vehicleId: vehicleId)
     }
 
     // MARK: - Helpers

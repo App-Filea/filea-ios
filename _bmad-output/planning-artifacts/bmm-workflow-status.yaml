@@ -1,0 +1,134 @@
+# Workflow Status - Holfy
+# Generated: 2026-01-08
+# Track: BMad Method (Brownfield)
+
+# This tracks progress through BMM methodology Analysis, Planning, and Solutioning phases.
+# Implementation phase is tracked separately in sprint-status.yaml
+
+# STATUS DEFINITIONS:
+# ==================
+# Initial Status (before completion):
+#   - required: Must be completed to progress
+#   - optional: Can be completed but not required
+#   - recommended: Strongly suggested but not required
+#   - conditional: Required only if certain conditions met (e.g., if_has_ui)
+#
+# Completion Status:
+#   - {file-path}: File created/found (e.g., "docs/product-brief.md")
+#   - skipped: Optional/conditional workflow that was skipped
+
+generated: "2026-01-08"
+project: "Holfy"
+project_type: "iOS application - Gestion d'historique automobile avec factures, statistiques et partage multi-véhicules"
+selected_track: "method"
+field_type: "brownfield"
+workflow_path: "{project-root}/_bmad/bmm/workflows/workflow-status/paths/method-brownfield.yaml"
+
+workflow_status:
+  # ============================================
+  # PHASE 0: DOCUMENTATION (Prerequisite)
+  # ============================================
+  - phase: 0
+    name: "Documentation"
+    workflows:
+      - id: "document-project"
+        name: "Document Existing Project"
+        status: "required"
+        agent: "analyst"
+        command: "/bmad:bmm:workflows:document-project"
+        purpose: "Understand existing codebase before planning"
+        note: "Prerequisite for brownfield - creates comprehensive project documentation"
+
+  # ============================================
+  # PHASE 1: ANALYSIS (Optional Discovery)
+  # ============================================
+  - phase: 1
+    name: "Analysis"
+    workflows:
+      - id: "brainstorm"
+        name: "Brainstorming Session"
+        status: "optional"
+        agent: "analyst"
+        command: "/bmad:core:workflows:brainstorming"
+        purpose: "Creative exploration and ideation"
+        note: "Selected by user"
+
+      - id: "research"
+        name: "Research Workflow"
+        status: "optional"
+        agent: "analyst"
+        command: "/bmad:bmm:workflows:research"
+        purpose: "Technical and domain analysis"
+        note: "Selected by user - can have multiple research workflows"
+
+  # ============================================
+  # PHASE 2: PLANNING (Required)
+  # ============================================
+  - phase: 2
+    name: "Planning"
+    workflows:
+      - id: "prd"
+        name: "Product Requirements Document"
+        status: "required"
+        agent: "pm"
+        command: "/bmad:bmm:workflows:create-prd"
+        purpose: "Define product requirements with FRs and NFRs"
+
+      - id: "ux-design"
+        name: "UX Design"
+        status: "conditional"
+        agent: "ux-designer"
+        command: "/bmad:bmm:workflows:create-ux-design"
+        purpose: "User experience and interface design"
+        note: "Required if UI changes detected - determined after PRD"
+
+  # ============================================
+  # PHASE 3: SOLUTIONING (Required)
+  # ============================================
+  - phase: 3
+    name: "Solutioning"
+    workflows:
+      - id: "architecture"
+        name: "Architecture Document"
+        status: "required"
+        agent: "architect"
+        command: "/bmad:bmm:workflows:create-architecture"
+        purpose: "System architecture and technical decisions"
+
+      - id: "epics-and-stories"
+        name: "Epics and Stories"
+        status: "required"
+        agent: "pm"
+        command: "/bmad:bmm:workflows:create-epics-and-stories"
+        purpose: "Break down PRD into implementable epics and stories"
+        note: "Uses full context (PRD + UX + Architecture)"
+
+      - id: "test-design"
+        name: "Test Design"
+        status: "optional"
+        agent: "tea"
+        command: "/bmad:bmm:workflows:testarch-test-design"
+        purpose: "System-level testability review"
+        note: "Testability assessment before gate check"
+
+      - id: "implementation-readiness"
+        name: "Implementation Readiness Check"
+        status: "required"
+        agent: "architect"
+        command: "/bmad:bmm:workflows:check-implementation-readiness"
+        purpose: "Validate PRD + Architecture + Epics completeness"
+        note: "Gate check before implementation phase"
+
+  # ============================================
+  # PHASE 4: IMPLEMENTATION
+  # ============================================
+  - phase: 4
+    name: "Implementation"
+    workflows:
+      - id: "sprint-planning"
+        name: "Sprint Planning"
+        status: "required"
+        agent: "sm"
+        command: "/bmad:bmm:workflows:sprint-planning"
+        purpose: "Create sprint plan and tracking"
+        note: "Subsequent implementation tracked in sprint-status.yaml"

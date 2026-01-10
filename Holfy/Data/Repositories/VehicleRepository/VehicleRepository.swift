@@ -18,7 +18,7 @@ actor VehicleRepository {
             .path
 
         try await grdbRepo.create(vehicle, folderPath)
-        try await syncManager.syncAfterChange(vehicle.id)
+        await syncManager.syncAfterChange(vehicle.id)
         let folderURL = try await storageManager.createVehicleFolder(folderName)
 
         do {
@@ -38,7 +38,7 @@ actor VehicleRepository {
             .path
 
         try await grdbRepo.update(vehicle, folderPath)
-        try await syncManager.syncAfterChange(vehicle.id)
+        await syncManager.syncAfterChange(vehicle.id)
 
         do {
             try await fileRepo.update(vehicle)
@@ -51,7 +51,7 @@ actor VehicleRepository {
 
         let allVehicles = try await grdbRepo.fetchAll()
         for vehicle in allVehicles {
-            try await syncManager.syncAfterChange(vehicle.id)
+            await syncManager.syncAfterChange(vehicle.id)
         }
 
         do {

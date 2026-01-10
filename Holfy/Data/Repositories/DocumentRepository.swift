@@ -101,7 +101,7 @@ final class DocumentRepository: DocumentRepositoryProtocol, @unchecked Sendable 
             logger.info("💾 Metadata sauvegardée en BDD")
 
             // 3. Sync to JSON
-            try await syncManager.syncAfterChange(vehicleId)
+            await syncManager.syncAfterChange(vehicleId)
             logger.info("💾 Synchronisation JSON réussie")
 
         } catch {
@@ -157,7 +157,7 @@ final class DocumentRepository: DocumentRepositoryProtocol, @unchecked Sendable 
             logger.info("💾 Metadata sauvegardée en BDD")
 
             // 3. Sync to JSON
-            try await syncManager.syncAfterChange(vehicleId)
+            await syncManager.syncAfterChange(vehicleId)
             logger.info("💾 Synchronisation JSON réussie")
 
         } catch {
@@ -178,7 +178,7 @@ final class DocumentRepository: DocumentRepositoryProtocol, @unchecked Sendable 
         try await documentDbRepo.update(document, vehicleId)
 
         // Sync to JSON
-        try await syncManager.syncAfterChange(vehicleId)
+        await syncManager.syncAfterChange(vehicleId)
         logger.info("💾 Synchronisation JSON réussie")
 
         logger.info("✅ Document mis à jour avec succès")
@@ -210,7 +210,7 @@ final class DocumentRepository: DocumentRepositoryProtocol, @unchecked Sendable 
             logger.info("📄 Fichier supprimé: \(document.fileURL)")
 
             // 3. Sync to JSON
-            try await syncManager.syncAfterChange(vehicleId)
+            await syncManager.syncAfterChange(vehicleId)
             logger.info("💾 Synchronisation JSON réussie")
 
         } catch {
@@ -263,7 +263,7 @@ final class DocumentRepository: DocumentRepositoryProtocol, @unchecked Sendable 
             logger.info("🗑️ Ancienne image supprimée: \(oldFileURL.lastPathComponent)")
 
             // 4. Sync to JSON
-            try await syncManager.syncAfterChange(vehicleId)
+            await syncManager.syncAfterChange(vehicleId)
             logger.info("💾 Synchronisation JSON réussie")
 
         } catch {

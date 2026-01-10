@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		3F07416E2E6C7C5A00F18229 /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = 3F07416D2E6C7C5A00F18229 /* ComposableArchitecture */; };
-		3F0741702E6C7C5D00F18229 /* SharingGRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 3F07416F2E6C7C5D00F18229 /* SharingGRDB */; };
+		3F0741702E6C7C5D00F18229 /* SQLiteData in Frameworks */ = {isa = PBXBuildFile; productRef = 3F07416F2E6C7C5D00F18229 /* SQLiteData */; };
 		3FDFFEF92F0A7E2C00CDC99F /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 3FDFFEF82F0A7E2C00CDC99F /* FirebaseAnalytics */; };
 		3FDFFEFB2F0A7E2C00CDC99F /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 3FDFFEFA2F0A7E2C00CDC99F /* FirebaseCrashlytics */; };
 /* End PBXBuildFile section */
@@ -54,7 +54,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3F0741702E6C7C5D00F18229 /* SharingGRDB in Frameworks */,
+				3F0741702E6C7C5D00F18229 /* SQLiteData in Frameworks */,
 				3FDFFEFB2F0A7E2C00CDC99F /* FirebaseCrashlytics in Frameworks */,
 				3F07416E2E6C7C5A00F18229 /* ComposableArchitecture in Frameworks */,
 				3FDFFEF92F0A7E2C00CDC99F /* FirebaseAnalytics in Frameworks */,
@@ -127,7 +127,7 @@
 			name = Holfy;
 			packageProductDependencies = (
 				3F07416D2E6C7C5A00F18229 /* ComposableArchitecture */,
-				3F07416F2E6C7C5D00F18229 /* SharingGRDB */,
+				3F07416F2E6C7C5D00F18229 /* SQLiteData */,
 				3FDFFEF82F0A7E2C00CDC99F /* FirebaseAnalytics */,
 				3FDFFEFA2F0A7E2C00CDC99F /* FirebaseCrashlytics */,
 			);
@@ -213,7 +213,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				3F07415F2E6C738200F18229 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */,
-				3F0741602E6C73A700F18229 /* XCRemoteSwiftPackageReference "sharing-grdb" */,
+				3F0741602E6C73A700F18229 /* XCRemoteSwiftPackageReference "sqlite-data" */,
 				3F0741652E6C76BE00F18229 /* XCRemoteSwiftPackageReference "supabase-swift" */,
 				3FDFFEF72F0A7E2C00CDC99F /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
@@ -669,12 +669,12 @@
 				minimumVersion = 1.22.2;
 			};
 		};
-		3F0741602E6C73A700F18229 /* XCRemoteSwiftPackageReference "sharing-grdb" */ = {
+		3F0741602E6C73A700F18229 /* XCRemoteSwiftPackageReference "sqlite-data" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/pointfreeco/sharing-grdb";
+			repositoryURL = "https://github.com/pointfreeco/sqlite-data";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 0.7.0;
+				minimumVersion = 1.4.0;
 			};
 		};
 		3F0741652E6C76BE00F18229 /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
@@ -701,10 +701,10 @@
 			package = 3F07415F2E6C738200F18229 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */;
 			productName = ComposableArchitecture;
 		};
-		3F07416F2E6C7C5D00F18229 /* SharingGRDB */ = {
+		3F07416F2E6C7C5D00F18229 /* SQLiteData */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 3F0741602E6C73A700F18229 /* XCRemoteSwiftPackageReference "sharing-grdb" */;
-			productName = SharingGRDB;
+			package = 3F0741602E6C73A700F18229 /* XCRemoteSwiftPackageReference "sqlite-data" */;
+			productName = SQLiteData;
 		};
 		3FDFFEF82F0A7E2C00CDC99F /* FirebaseAnalytics */ = {
 			isa = XCSwiftPackageProductDependency;

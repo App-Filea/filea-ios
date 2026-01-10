@@ -1,0 +1,10 @@
+Holfy/Stores/AddDocumentStore/AddDocumentStore.swift
+Holfy/Stores/AddFirstVehicleStore/AddFirstVehicleStore.swift
+Holfy/Stores/AddVehicleStore/AddVehicleStore.swift
+Holfy/Stores/AppStore/AppStore.swift
+Holfy/Stores/DocumentDetailStore/DocumentDetailStore.swift
+Holfy/Stores/EditDocumentStore/EditDocumentStore.swift
+Holfy/Stores/EditVehicleStore/EditVehicleStore.swift
+Holfy/Stores/MainStore/MainStore.swift
+Holfy/Stores/VehicleDetailsStore/VehicleDetailsStore.swift
+Holfy/Stores/VehiclesListStore/VehiclesListStore.swift

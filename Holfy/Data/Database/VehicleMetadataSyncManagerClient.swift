@@ -21,7 +21,8 @@ struct VehicleMetadataSyncManagerClient: Sendable {
 extension VehicleMetadataSyncManagerClient: DependencyKey {
     nonisolated static let liveValue: VehicleMetadataSyncManagerClient = {
         @Dependency(\.database) var database
-        let syncManager = VehicleMetadataSyncManager(database: database)
+        @Dependency(\.storageManager) var storageManager
+        let syncManager = VehicleMetadataSyncManager(database: database, storageManager: storageManager)
 
         return VehicleMetadataSyncManagerClient(
             syncAfterChange: { vehicleId in

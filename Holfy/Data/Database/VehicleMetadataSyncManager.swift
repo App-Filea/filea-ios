@@ -14,6 +14,7 @@ actor VehicleMetadataSyncManager {
     // MARK: - Properties
 
     private let database: DatabaseManager
+    private let storageManager: VehicleStorageManagerClient
     private let jsonFileName = ".vehicle_metadata.json"
     private let encoder: JSONEncoder
     private let decoder: JSONDecoder
@@ -21,8 +22,9 @@ actor VehicleMetadataSyncManager {
 
     // MARK: - Initialization
 
-    init(database: DatabaseManager) {
+    init(database: DatabaseManager, storageManager: VehicleStorageManagerClient) {
         self.database = database
+        self.storageManager = storageManager
 
         // Configuration de l'encodeur JSON
         self.encoder = JSONEncoder()
@@ -78,21 +80,13 @@ actor VehicleMetadataSyncManager {
         // 5. Encoder en JSON
         let jsonData = try encoder.encode(metadataFile)
 
-        // 6. Créer le dossier du véhicule s'il n'existe pas
-        let folderURL = URL(fileURLWithPath: vehicleRecord.folderPath)
-        let fileManager = FileManager.default
+        // 6. Utiliser VehicleStorageManager pour écrire le JSON de manière cohérente
+        try await storageManager.saveJSONFile(
+            vehicleRecord.folderPath,
+            jsonFileName,
+            jsonData
+        )
 
-        if !fileManager.fileExists(atPath: folderURL.path) {
-            print("   📁 Création du dossier : \(folderURL.lastPathComponent)")
-            try fileManager.createDirectory(at: folderURL, withIntermediateDirectories: true)
-        }
-
-        // 7. Écrire le fichier JSON dans le dossier du véhicule
-        let jsonURL = folderURL.appendingPathComponent(jsonFileName)
-
-        try jsonData.write(to: jsonURL)
-
-        print("   └─ Fichier : \(jsonURL.path)")
         print("✅ [SyncManager] Export JSON réussi\n")
     }
 

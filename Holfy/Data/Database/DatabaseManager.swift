@@ -40,7 +40,15 @@ actor DatabaseManager {
                 create: true
             )
 
-            let appDirectory = appSupportURL.appendingPathComponent("Invoicer", isDirectory: true)
+            // Migration: Renommer l'ancien dossier "Invoicer" vers "Holfy" s'il existe
+            let oldDirectory = appSupportURL.appendingPathComponent("Invoicer", isDirectory: true)
+            let appDirectory = appSupportURL.appendingPathComponent("Holfy", isDirectory: true)
+
+            if fileManager.fileExists(atPath: oldDirectory.path) && !fileManager.fileExists(atPath: appDirectory.path) {
+                print("📦 [DatabaseManager] Migration du dossier Invoicer → Holfy...")
+                try fileManager.moveItem(at: oldDirectory, to: appDirectory)
+                print("✅ [DatabaseManager] Dossier migré avec succès")
+            }
 
             // Créer le dossier si nécessaire
             if !fileManager.fileExists(atPath: appDirectory.path) {
@@ -48,7 +56,7 @@ actor DatabaseManager {
                 print("   📁 Dossier créé : \(appDirectory.path)")
             }
 
-            self.databasePath = appDirectory.appendingPathComponent("invoicer.db").path
+            self.databasePath = appDirectory.appendingPathComponent("holfy.db").path
             print("   📍 Chemin par défaut : \(self.databasePath)")
         }
 

@@ -13,10 +13,10 @@ enum AppConstants {
     // MARK: - App Information
 
     /// The app's display name
-    static let appName = "Invoicer"
+    static let appName = "Holfy"
 
     /// The app's bundle identifier
-    static let bundleIdentifier = "com.invoicer.nbarb.Invoicer"
+    static let bundleIdentifier = "com.nicolasbarb.filea"
 
     /// The current app version
     static var appVersion: String {

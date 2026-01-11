@@ -114,7 +114,7 @@ struct StorageSettingsView: View {
         StorageSettingsView(
             store: Store(
                 initialState: StorageSettingsStore.State(
-                    currentStoragePath: "/Users/test/iCloud Drive/Invoicer"
+                    currentStoragePath: "/Users/test/iCloud Drive/Holfy"
                 )
             ) {
                 StorageSettingsStore()

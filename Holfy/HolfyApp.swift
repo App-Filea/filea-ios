@@ -31,7 +31,15 @@ struct HolfyApp: App {
         // Lancer la migration des données legacy si nécessaire
         Task {
             @Dependency(\.legacyMigrator) var migrator
-            let result = await migrator.migrateIfNeeded()
+            @Dependency(\.storageManager) var storageManager
+
+            // Get the storage root URL
+            guard let storageRoot = await storageManager.getRootURL() else {
+                print("ℹ️ [HolfyApp] No storage configured yet - skipping migration")
+                return
+            }
+
+            let result = await migrator.migrateIfNeeded(storageRoot)
 
             print("📦 [HolfyApp] Migration result: \(result.userMessage)")
 

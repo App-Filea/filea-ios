@@ -61,27 +61,46 @@ actor LegacyDataMigrator {
     // MARK: - Public Migration API
 
     /// Migrates legacy data if needed
+    /// - Parameter storageRoot: The root storage URL chosen by the user
     /// - Returns: Migration result with statistics
-    func migrateIfNeeded() async -> MigrationResult {
-        logger.info("🔍 [LegacyMigrator] Checking for legacy data...")
+    func migrateIfNeeded(at storageRoot: URL) async -> MigrationResult {
+        logger.info("🔍 [LegacyMigrator] Checking for legacy data at: \(storageRoot.path)")
 
-        // Check if migration already completed
+        // 1. Check if "Vehicles" folder exists (needs renaming)
+        let legacyVehiclesDir = storageRoot.appendingPathComponent("Vehicles")
+        let newHolfyDir = storageRoot.appendingPathComponent(AppConstants.vehiclesDirectoryName)
+
+        if fileManager.fileExists(atPath: legacyVehiclesDir.path) &&
+           !fileManager.fileExists(atPath: newHolfyDir.path) {
+            logger.info("📦 [LegacyMigrator] Renaming 'Vehicles' → 'Holfy'...")
+            do {
+                try fileManager.moveItem(at: legacyVehiclesDir, to: newHolfyDir)
+                logger.info("✅ [LegacyMigrator] Folder renamed successfully")
+            } catch {
+                logger.error("❌ [LegacyMigrator] Failed to rename folder: \(error.localizedDescription)")
+                return .failed(error)
+            }
+        }
+
+        // 2. Check if vehicles.json exists in Holfy folder
+        let vehiclesJsonFile = newHolfyDir.appendingPathComponent("vehicles.json")
+        guard fileManager.fileExists(atPath: vehiclesJsonFile.path) else {
+            logger.info("✅ [LegacyMigrator] No vehicles.json found - fresh install or already migrated")
+            markMigrationCompleted()
+            return .noLegacyData
+        }
+
+        // Check if migration already completed for this specific file
         if UserDefaults.standard.bool(forKey: migrationCompletedKey) {
             logger.info("✅ [LegacyMigrator] Migration already completed previously")
             return .alreadyMigrated
         }
 
-        // Check if legacy file exists
-        guard fileManager.fileExists(atPath: legacyVehiclesFile.path) else {
-            logger.info("✅ [LegacyMigrator] No legacy data found - fresh install")
-            markMigrationCompleted()
-            return .noLegacyData
-        }
-
         logger.warning("⚠️ [LegacyMigrator] Legacy vehicles.json found - migration required")
 
+        // 3. Perform migration
         do {
-            let result = try await performMigration()
+            let result = try await performMigration(vehiclesJsonFile: vehiclesJsonFile, holfyDirectory: newHolfyDir)
             markMigrationCompleted()
             return result
         } catch {
@@ -92,39 +111,29 @@ actor LegacyDataMigrator {
 
     // MARK: - Private Migration Logic
 
-    private func performMigration() async throws -> MigrationResult {
+    private func performMigration(vehiclesJsonFile: URL, holfyDirectory: URL) async throws -> MigrationResult {
         logger.info("🚀 [LegacyMigrator] Starting migration process...")
+        logger.info("   ├─ JSON file: \(vehiclesJsonFile.path)")
+        logger.info("   └─ Holfy directory: \(holfyDirectory.path)")
 
         // 1. Read legacy vehicles.json
-        let legacyVehicles = try readLegacyVehiclesFile()
+        let legacyVehicles = try readLegacyVehiclesFile(at: vehiclesJsonFile)
         logger.info("📖 [LegacyMigrator] Found \(legacyVehicles.count) vehicle(s) in legacy data")
 
         guard !legacyVehicles.isEmpty else {
             logger.info("📭 [LegacyMigrator] Empty legacy file - nothing to migrate")
-            try backupLegacyFile()
-            try deleteLegacyVehiclesFolder()
+            try deleteVehiclesJsonFile(at: vehiclesJsonFile)
             return .success(vehiclesMigrated: 0, documentsMigrated: 0)
         }
 
-        // 2. Get user-selected storage root (or use legacy location)
-        let storageRoot = try await determineStorageRoot()
-        logger.info("📁 [LegacyMigrator] Storage root: \(storageRoot.path)")
-
-        // 3. Create new Holfy folder structure
-        let newHolfyDirectory = storageRoot.appendingPathComponent(AppConstants.vehiclesDirectoryName)
-        if !fileManager.fileExists(atPath: newHolfyDirectory.path) {
-            try fileManager.createDirectory(at: newHolfyDirectory, withIntermediateDirectories: true)
-            logger.info("📁 [LegacyMigrator] Created new Holfy directory: \(newHolfyDirectory.path)")
-        }
-
-        // 4. Migrate each vehicle
+        // 2. Migrate each vehicle
         var vehiclesMigrated = 0
         var documentsMigrated = 0
         var errors: [String] = []
 
         for vehicle in legacyVehicles {
             do {
-                let docsCount = try await migrateVehicle(vehicle, storageRoot: storageRoot)
+                let docsCount = try await migrateVehicle(vehicle, holfyDirectory: holfyDirectory)
                 vehiclesMigrated += 1
                 documentsMigrated += docsCount
                 logger.info("✅ [LegacyMigrator] Migrated: \(vehicle.brand) \(vehicle.model) (\(docsCount) docs)")
@@ -135,24 +144,21 @@ actor LegacyDataMigrator {
             }
         }
 
-        // 5. Backup legacy file
-        try backupLegacyFile()
-
-        // 6. Delete legacy Vehicles folder after successful migration
+        // 3. Delete vehicles.json after successful migration
         if errors.isEmpty {
-            try deleteLegacyVehiclesFolder()
+            try deleteVehiclesJsonFile(at: vehiclesJsonFile)
         }
 
-        // 7. Return result
+        // 4. Return result
         if errors.isEmpty {
             logger.info("🎉 [LegacyMigrator] Migration completed successfully!")
             logger.info("   ├─ Vehicles migrated: \(vehiclesMigrated)")
             logger.info("   ├─ Documents migrated: \(documentsMigrated)")
-            logger.info("   └─ Legacy 'Vehicles' folder deleted")
+            logger.info("   └─ Legacy vehicles.json deleted")
             return .success(vehiclesMigrated: vehiclesMigrated, documentsMigrated: documentsMigrated)
         } else {
             logger.warning("⚠️ [LegacyMigrator] Migration completed with errors:")
-            logger.warning("   ⚠️ Legacy 'Vehicles' folder NOT deleted due to errors")
+            logger.warning("   ⚠️ Legacy vehicles.json NOT deleted due to errors")
             errors.forEach { logger.warning("   - \($0)") }
             return .partialSuccess(
                 vehiclesMigrated: vehiclesMigrated,
@@ -162,51 +168,36 @@ actor LegacyDataMigrator {
         }
     }
 
-    private func migrateVehicle(_ vehicle: Vehicle, storageRoot: URL) async throws -> Int {
-        // 1. Determine folder paths
+    private func migrateVehicle(_ vehicle: Vehicle, holfyDirectory: URL) async throws -> Int {
+        // 1. Determine vehicle folder path in Holfy directory
         let folderName = "\(vehicle.brand)\(vehicle.model)"
-        let legacyVehiclePath = legacyVehiclesDirectory.appendingPathComponent(folderName)
-        let newVehiclePath = storageRoot
-            .appendingPathComponent(AppConstants.vehiclesDirectoryName)
-            .appendingPathComponent(folderName)
+        let vehicleFolderPath = holfyDirectory.appendingPathComponent(folderName)
 
-        // 2. Copy vehicle folder from legacy to new Holfy directory
-        if fileManager.fileExists(atPath: legacyVehiclePath.path) {
-            // Copy entire folder with all documents
-            if !fileManager.fileExists(atPath: newVehiclePath.path) {
-                try fileManager.copyItem(at: legacyVehiclePath, to: newVehiclePath)
-                logger.info("📦 [LegacyMigrator] Copied folder: \(folderName)")
-            } else {
-                logger.warning("⚠️ [LegacyMigrator] Destination folder already exists: \(folderName)")
-            }
-        } else {
-            // Legacy folder doesn't exist, create empty new folder
-            try fileManager.createDirectory(at: newVehiclePath, withIntermediateDirectories: true)
-            logger.info("📁 [LegacyMigrator] Created new folder: \(folderName)")
+        // 2. Ensure vehicle folder exists
+        if !fileManager.fileExists(atPath: vehicleFolderPath.path) {
+            try fileManager.createDirectory(at: vehicleFolderPath, withIntermediateDirectories: true)
+            logger.info("📁 [LegacyMigrator] Created folder: \(folderName)")
         }
 
-        // 3. Insert vehicle into GRDB with new folder path
-        let vehicleRecord = vehicle.toRecord(folderPath: newVehiclePath.path)
+        // 3. Insert vehicle into GRDB
+        let vehicleRecord = vehicle.toRecord(folderPath: vehicleFolderPath.path)
         try await database.write { db in
             try VehicleRecord.insert { vehicleRecord }.execute(db)
         }
 
-        // 4. Insert documents into GRDB with updated paths
+        // 4. Insert documents into GRDB
         var migratedDocsCount = 0
         for document in vehicle.documents {
-            // Update document file path to point to new Holfy folder
-            var updatedDocument = document
-            let filename = URL(fileURLWithPath: document.fileURL).lastPathComponent
-            updatedDocument.fileURL = newVehiclePath.appendingPathComponent(filename).path
-
-            let fileRecord = updatedDocument.toRecord(vehicleId: vehicle.id)
+            // Documents are already in the right folder (since we just renamed Vehicles → Holfy)
+            // We just need to insert them into GRDB with their current paths
+            let fileRecord = document.toRecord(vehicleId: vehicle.id)
             try await database.write { db in
                 try FileMetadataRecord.insert { fileRecord }.execute(db)
             }
             migratedDocsCount += 1
         }
 
-        // 5. Create .vehicle_metadata.json
+        // 5. Create .vehicle_metadata.json in the vehicle folder
         try await syncManager.exportVehicleToJSON(vehicle.id)
 
         return migratedDocsCount
@@ -214,46 +205,22 @@ actor LegacyDataMigrator {
 
     // MARK: - Helper Methods
 
-    private func readLegacyVehiclesFile() throws -> [Vehicle] {
-        let jsonData = try Data(contentsOf: legacyVehiclesFile)
+    private func readLegacyVehiclesFile(at fileURL: URL) throws -> [Vehicle] {
+        let jsonData = try Data(contentsOf: fileURL)
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         return try decoder.decode([Vehicle].self, from: jsonData)
     }
 
-    private func determineStorageRoot() async throws -> URL {
-        // Try to get user-selected storage root
-        if let userRoot = await storageManager.getRootURL() {
-            return userRoot
-        }
-
-        // Fallback to legacy Documents directory
-        logger.warning("⚠️ [LegacyMigrator] No storage root configured, using legacy location")
-        return legacyDocumentsDirectory
-    }
-
-    private func deleteLegacyVehiclesFolder() throws {
-        guard fileManager.fileExists(atPath: legacyVehiclesDirectory.path) else {
-            logger.info("ℹ️ [LegacyMigrator] No legacy 'Vehicles' folder to delete")
+    private func deleteVehiclesJsonFile(at fileURL: URL) throws {
+        guard fileManager.fileExists(atPath: fileURL.path) else {
+            logger.info("ℹ️ [LegacyMigrator] No vehicles.json file to delete")
             return
         }
 
-        logger.info("🗑️ [LegacyMigrator] Deleting legacy 'Vehicles' folder...")
-        try fileManager.removeItem(at: legacyVehiclesDirectory)
-        logger.info("✅ [LegacyMigrator] Legacy 'Vehicles' folder deleted successfully")
-    }
-
-    private func backupLegacyFile() throws {
-        let backupURL = legacyVehiclesFile.appendingPathExtension("backup")
-
-        // Remove existing backup if any
-        if fileManager.fileExists(atPath: backupURL.path) {
-            try fileManager.removeItem(at: backupURL)
-        }
-
-        // Rename to backup
-        try fileManager.moveItem(at: legacyVehiclesFile, to: backupURL)
-        logger.info("💾 [LegacyMigrator] Legacy file backed up: vehicles.json.backup")
+        logger.info("🗑️ [LegacyMigrator] Deleting vehicles.json file...")
+        try fileManager.removeItem(at: fileURL)
+        logger.info("✅ [LegacyMigrator] vehicles.json deleted successfully")
     }
 
     private func markMigrationCompleted() {

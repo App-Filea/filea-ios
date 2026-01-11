@@ -10,7 +10,7 @@ import Foundation
 import Dependencies
 
 struct LegacyDataMigratorClient: Sendable {
-    var migrateIfNeeded: @Sendable () async -> MigrationResult
+    var migrateIfNeeded: @Sendable (URL) async -> MigrationResult
 }
 
 // MARK: - Dependency Key
@@ -28,14 +28,14 @@ extension LegacyDataMigratorClient: DependencyKey {
         )
 
         return LegacyDataMigratorClient(
-            migrateIfNeeded: {
-                await migrator.migrateIfNeeded()
+            migrateIfNeeded: { storageRoot in
+                await migrator.migrateIfNeeded(at: storageRoot)
             }
         )
     }()
 
     nonisolated static let testValue: LegacyDataMigratorClient = LegacyDataMigratorClient(
-        migrateIfNeeded: { .alreadyMigrated }
+        migrateIfNeeded: { _ in .alreadyMigrated }
     )
 }
 

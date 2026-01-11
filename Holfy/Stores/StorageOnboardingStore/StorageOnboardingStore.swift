@@ -210,40 +210,40 @@ struct StorageOnboardingStore {
 
                 return .run { send in
                     do {
-                        // 1. Sauvegarder le dossier (crée le bookmark + dossier Holfy/)
+                        // 1. Sauvegarder le dossier (crée le bookmark + gère le renommage Vehicles→Holfy)
                         print("💾 [StorageOnboardingStore] Saving storage folder...")
                         try await storageManager.saveStorageFolder(url)
                         print("✅ [StorageOnboardingStore] Storage folder saved successfully")
 
-                        // 2. Gérer la migration du nom de dossier "Vehicles" → "Holfy" si nécessaire
-                        let oldVehiclesDir = url.appendingPathComponent("Vehicles")
-                        let newHolfyDir = url.appendingPathComponent(AppConstants.vehiclesDirectoryName)
+                        // 2. Lancer la migration si vehicles.json existe
+                        @Dependency(\.legacyMigrator) var migrator
+                        let migrationResult = await migrator.migrateIfNeeded(url)
 
-                        if FileManager.default.fileExists(atPath: oldVehiclesDir.path) &&
-                           !FileManager.default.fileExists(atPath: newHolfyDir.path) {
-                            print("📦 [StorageOnboardingStore] Migration du dossier Vehicles → Holfy...")
-                            try FileManager.default.moveItem(at: oldVehiclesDir, to: newHolfyDir)
-                            print("✅ [StorageOnboardingStore] Dossier migré avec succès")
-                        }
+                        switch migrationResult {
+                        case .success(let vehicles, let documents):
+                            print("✅ [StorageOnboardingStore] Migration réussie: \(vehicles) véhicules, \(documents) documents")
+                        case .partialSuccess(let vehicles, let documents, let errors):
+                            print("⚠️ [StorageOnboardingStore] Migration partielle: \(vehicles) véhicules, \(documents) documents")
+                            print("   Erreurs: \(errors)")
+                        case .noLegacyData:
+                            print("ℹ️ [StorageOnboardingStore] Pas de données legacy à migrer")
 
-                        // 3. Vérifier s'il y a des données existantes à importer
-                        if FileManager.default.fileExists(atPath: newHolfyDir.path) {
-                            print("📦 [StorageOnboardingStore] Dossier Holfy existant détecté")
-                            print("🔄 [StorageOnboardingStore] Reconstruction de la BDD depuis les JSON...")
-
-                            // 4. Scanner et reconstruire la BDD depuis tous les .vehicle_metadata.json
-                            let importedVehicles = try await syncManager.scanAndRebuildDatabase(newHolfyDir.path)
-
-                            if !importedVehicles.isEmpty {
-                                print("✅ [StorageOnboardingStore] \(importedVehicles.count) véhicule(s) importé(s)\n")
-                            } else {
-                                print("📭 [StorageOnboardingStore] Aucun véhicule trouvé dans le dossier\n")
+                            // Vérifier s'il y a des .vehicle_metadata.json existants
+                            let holfyDir = url.appendingPathComponent(AppConstants.vehiclesDirectoryName)
+                            if FileManager.default.fileExists(atPath: holfyDir.path) {
+                                print("📦 [StorageOnboardingStore] Scanning for existing .vehicle_metadata.json files...")
+                                let importedVehicles = try await syncManager.scanAndRebuildDatabase(holfyDir.path)
+                                if !importedVehicles.isEmpty {
+                                    print("✅ [StorageOnboardingStore] \(importedVehicles.count) véhicule(s) importé(s)")
+                                }
                             }
-                        } else {
-                            print("📁 [StorageOnboardingStore] Nouveau dossier Holfy créé\n")
+                        case .alreadyMigrated:
+                            print("ℹ️ [StorageOnboardingStore] Migration déjà effectuée")
+                        case .failed(let error):
+                            print("❌ [StorageOnboardingStore] Migration failed: \(error.localizedDescription)")
                         }
 
-                        // 5. Marquer comme réussi
+                        // 3. Marquer comme réussi
                         await send(.folderSaved)
                     } catch {
                         print("❌ [StorageOnboardingStore] Failed to save storage folder")

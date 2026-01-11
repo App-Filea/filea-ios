@@ -102,6 +102,7 @@ actor LegacyDataMigrator {
         guard !legacyVehicles.isEmpty else {
             logger.info("📭 [LegacyMigrator] Empty legacy file - nothing to migrate")
             try backupLegacyFile()
+            try deleteLegacyVehiclesFolder()
             return .success(vehiclesMigrated: 0, documentsMigrated: 0)
         }
 
@@ -109,8 +110,12 @@ actor LegacyDataMigrator {
         let storageRoot = try await determineStorageRoot()
         logger.info("📁 [LegacyMigrator] Storage root: \(storageRoot.path)")
 
-        // 3. Rename "Vehicles" folder to "Holfy" if needed
-        try migrateVehiclesFolderName(at: storageRoot)
+        // 3. Create new Holfy folder structure
+        let newHolfyDirectory = storageRoot.appendingPathComponent(AppConstants.vehiclesDirectoryName)
+        if !fileManager.fileExists(atPath: newHolfyDirectory.path) {
+            try fileManager.createDirectory(at: newHolfyDirectory, withIntermediateDirectories: true)
+            logger.info("📁 [LegacyMigrator] Created new Holfy directory: \(newHolfyDirectory.path)")
+        }
 
         // 4. Migrate each vehicle
         var vehiclesMigrated = 0
@@ -133,14 +138,21 @@ actor LegacyDataMigrator {
         // 5. Backup legacy file
         try backupLegacyFile()
 
-        // 6. Return result
+        // 6. Delete legacy Vehicles folder after successful migration
+        if errors.isEmpty {
+            try deleteLegacyVehiclesFolder()
+        }
+
+        // 7. Return result
         if errors.isEmpty {
             logger.info("🎉 [LegacyMigrator] Migration completed successfully!")
             logger.info("   ├─ Vehicles migrated: \(vehiclesMigrated)")
-            logger.info("   └─ Documents migrated: \(documentsMigrated)")
+            logger.info("   ├─ Documents migrated: \(documentsMigrated)")
+            logger.info("   └─ Legacy 'Vehicles' folder deleted")
             return .success(vehiclesMigrated: vehiclesMigrated, documentsMigrated: documentsMigrated)
         } else {
             logger.warning("⚠️ [LegacyMigrator] Migration completed with errors:")
+            logger.warning("   ⚠️ Legacy 'Vehicles' folder NOT deleted due to errors")
             errors.forEach { logger.warning("   - \($0)") }
             return .partialSuccess(
                 vehiclesMigrated: vehiclesMigrated,
@@ -151,40 +163,41 @@ actor LegacyDataMigrator {
     }
 
     private func migrateVehicle(_ vehicle: Vehicle, storageRoot: URL) async throws -> Int {
-        // 1. Determine folder path
+        // 1. Determine folder paths
         let folderName = "\(vehicle.brand)\(vehicle.model)"
         let legacyVehiclePath = legacyVehiclesDirectory.appendingPathComponent(folderName)
         let newVehiclePath = storageRoot
             .appendingPathComponent(AppConstants.vehiclesDirectoryName)
             .appendingPathComponent(folderName)
 
-        // 2. Move/Copy vehicle folder if it exists in legacy location
-        if fileManager.fileExists(atPath: legacyVehiclePath.path),
-           storageRoot.path != legacyDocumentsDirectory.path {
-            // User selected a different storage location - move the folder
-            try fileManager.moveItem(at: legacyVehiclePath, to: newVehiclePath)
-            logger.info("📦 [LegacyMigrator] Moved folder: \(folderName)")
-        } else if !fileManager.fileExists(atPath: newVehiclePath.path) {
-            // Create new folder if it doesn't exist
+        // 2. Copy vehicle folder from legacy to new Holfy directory
+        if fileManager.fileExists(atPath: legacyVehiclePath.path) {
+            // Copy entire folder with all documents
+            if !fileManager.fileExists(atPath: newVehiclePath.path) {
+                try fileManager.copyItem(at: legacyVehiclePath, to: newVehiclePath)
+                logger.info("📦 [LegacyMigrator] Copied folder: \(folderName)")
+            } else {
+                logger.warning("⚠️ [LegacyMigrator] Destination folder already exists: \(folderName)")
+            }
+        } else {
+            // Legacy folder doesn't exist, create empty new folder
             try fileManager.createDirectory(at: newVehiclePath, withIntermediateDirectories: true)
-            logger.info("📁 [LegacyMigrator] Created folder: \(folderName)")
+            logger.info("📁 [LegacyMigrator] Created new folder: \(folderName)")
         }
 
-        // 3. Insert vehicle into GRDB
+        // 3. Insert vehicle into GRDB with new folder path
         let vehicleRecord = vehicle.toRecord(folderPath: newVehiclePath.path)
         try await database.write { db in
             try VehicleRecord.insert { vehicleRecord }.execute(db)
         }
 
-        // 4. Insert documents into GRDB
+        // 4. Insert documents into GRDB with updated paths
         var migratedDocsCount = 0
         for document in vehicle.documents {
-            // Update document file path if folder was moved
+            // Update document file path to point to new Holfy folder
             var updatedDocument = document
-            if storageRoot.path != legacyDocumentsDirectory.path {
-                let filename = URL(fileURLWithPath: document.fileURL).lastPathComponent
-                updatedDocument.fileURL = newVehiclePath.appendingPathComponent(filename).path
-            }
+            let filename = URL(fileURLWithPath: document.fileURL).lastPathComponent
+            updatedDocument.fileURL = newVehiclePath.appendingPathComponent(filename).path
 
             let fileRecord = updatedDocument.toRecord(vehicleId: vehicle.id)
             try await database.write { db in
@@ -219,26 +232,15 @@ actor LegacyDataMigrator {
         return legacyDocumentsDirectory
     }
 
-    private func migrateVehiclesFolderName(at storageRoot: URL) throws {
-        let oldVehiclesFolder = storageRoot.appendingPathComponent("Vehicles")
-        let newVehiclesFolder = storageRoot.appendingPathComponent(AppConstants.vehiclesDirectoryName)
-
-        // Check if old "Vehicles" folder exists
-        guard fileManager.fileExists(atPath: oldVehiclesFolder.path) else {
-            logger.info("ℹ️ [LegacyMigrator] No 'Vehicles' folder to migrate")
+    private func deleteLegacyVehiclesFolder() throws {
+        guard fileManager.fileExists(atPath: legacyVehiclesDirectory.path) else {
+            logger.info("ℹ️ [LegacyMigrator] No legacy 'Vehicles' folder to delete")
             return
         }
 
-        // Check if new "Holfy" folder already exists
-        if fileManager.fileExists(atPath: newVehiclesFolder.path) {
-            logger.warning("⚠️ [LegacyMigrator] Both 'Vehicles' and 'Holfy' folders exist - keeping Holfy")
-            return
-        }
-
-        // Rename Vehicles → Holfy
-        logger.info("📦 [LegacyMigrator] Renaming 'Vehicles' folder to 'Holfy'...")
-        try fileManager.moveItem(at: oldVehiclesFolder, to: newVehiclesFolder)
-        logger.info("✅ [LegacyMigrator] Folder renamed: Vehicles → Holfy")
+        logger.info("🗑️ [LegacyMigrator] Deleting legacy 'Vehicles' folder...")
+        try fileManager.removeItem(at: legacyVehiclesDirectory)
+        logger.info("✅ [LegacyMigrator] Legacy 'Vehicles' folder deleted successfully")
     }
 
     private func backupLegacyFile() throws {

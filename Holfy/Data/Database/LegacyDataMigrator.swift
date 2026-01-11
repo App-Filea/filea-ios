@@ -109,7 +109,10 @@ actor LegacyDataMigrator {
         let storageRoot = try await determineStorageRoot()
         logger.info("📁 [LegacyMigrator] Storage root: \(storageRoot.path)")
 
-        // 3. Migrate each vehicle
+        // 3. Rename "Vehicles" folder to "Holfy" if needed
+        try migrateVehiclesFolderName(at: storageRoot)
+
+        // 4. Migrate each vehicle
         var vehiclesMigrated = 0
         var documentsMigrated = 0
         var errors: [String] = []
@@ -127,10 +130,10 @@ actor LegacyDataMigrator {
             }
         }
 
-        // 4. Backup legacy file
+        // 5. Backup legacy file
         try backupLegacyFile()
 
-        // 5. Return result
+        // 6. Return result
         if errors.isEmpty {
             logger.info("🎉 [LegacyMigrator] Migration completed successfully!")
             logger.info("   ├─ Vehicles migrated: \(vehiclesMigrated)")
@@ -214,6 +217,28 @@ actor LegacyDataMigrator {
         // Fallback to legacy Documents directory
         logger.warning("⚠️ [LegacyMigrator] No storage root configured, using legacy location")
         return legacyDocumentsDirectory
+    }
+
+    private func migrateVehiclesFolderName(at storageRoot: URL) throws {
+        let oldVehiclesFolder = storageRoot.appendingPathComponent("Vehicles")
+        let newVehiclesFolder = storageRoot.appendingPathComponent(AppConstants.vehiclesDirectoryName)
+
+        // Check if old "Vehicles" folder exists
+        guard fileManager.fileExists(atPath: oldVehiclesFolder.path) else {
+            logger.info("ℹ️ [LegacyMigrator] No 'Vehicles' folder to migrate")
+            return
+        }
+
+        // Check if new "Holfy" folder already exists
+        if fileManager.fileExists(atPath: newVehiclesFolder.path) {
+            logger.warning("⚠️ [LegacyMigrator] Both 'Vehicles' and 'Holfy' folders exist - keeping Holfy")
+            return
+        }
+
+        // Rename Vehicles → Holfy
+        logger.info("📦 [LegacyMigrator] Renaming 'Vehicles' folder to 'Holfy'...")
+        try fileManager.moveItem(at: oldVehiclesFolder, to: newVehiclesFolder)
+        logger.info("✅ [LegacyMigrator] Folder renamed: Vehicles → Holfy")
     }
 
     private func backupLegacyFile() throws {

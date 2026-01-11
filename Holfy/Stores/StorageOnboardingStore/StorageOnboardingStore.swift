@@ -210,20 +210,29 @@ struct StorageOnboardingStore {
 
                 return .run { send in
                     do {
-                        // 1. Sauvegarder le dossier (crée le bookmark + dossier Vehicles/)
+                        // 1. Sauvegarder le dossier (crée le bookmark + dossier Holfy/)
                         print("💾 [StorageOnboardingStore] Saving storage folder...")
                         try await storageManager.saveStorageFolder(url)
                         print("✅ [StorageOnboardingStore] Storage folder saved successfully")
 
-                        // 2. Vérifier s'il y a des données existantes à importer
-                        let vehiclesDir = url.appendingPathComponent("Vehicles")
+                        // 2. Gérer la migration du nom de dossier "Vehicles" → "Holfy" si nécessaire
+                        let oldVehiclesDir = url.appendingPathComponent("Vehicles")
+                        let newHolfyDir = url.appendingPathComponent(AppConstants.vehiclesDirectoryName)
 
-                        if FileManager.default.fileExists(atPath: vehiclesDir.path) {
-                            print("📦 [StorageOnboardingStore] Dossier Vehicles existant détecté")
+                        if FileManager.default.fileExists(atPath: oldVehiclesDir.path) &&
+                           !FileManager.default.fileExists(atPath: newHolfyDir.path) {
+                            print("📦 [StorageOnboardingStore] Migration du dossier Vehicles → Holfy...")
+                            try FileManager.default.moveItem(at: oldVehiclesDir, to: newHolfyDir)
+                            print("✅ [StorageOnboardingStore] Dossier migré avec succès")
+                        }
+
+                        // 3. Vérifier s'il y a des données existantes à importer
+                        if FileManager.default.fileExists(atPath: newHolfyDir.path) {
+                            print("📦 [StorageOnboardingStore] Dossier Holfy existant détecté")
                             print("🔄 [StorageOnboardingStore] Reconstruction de la BDD depuis les JSON...")
 
-                            // 3. Scanner et reconstruire la BDD depuis tous les .vehicle_metadata.json
-                            let importedVehicles = try await syncManager.scanAndRebuildDatabase(vehiclesDir.path)
+                            // 4. Scanner et reconstruire la BDD depuis tous les .vehicle_metadata.json
+                            let importedVehicles = try await syncManager.scanAndRebuildDatabase(newHolfyDir.path)
 
                             if !importedVehicles.isEmpty {
                                 print("✅ [StorageOnboardingStore] \(importedVehicles.count) véhicule(s) importé(s)\n")
@@ -231,10 +240,10 @@ struct StorageOnboardingStore {
                                 print("📭 [StorageOnboardingStore] Aucun véhicule trouvé dans le dossier\n")
                             }
                         } else {
-                            print("📁 [StorageOnboardingStore] Nouveau dossier Vehicles créé\n")
+                            print("📁 [StorageOnboardingStore] Nouveau dossier Holfy créé\n")
                         }
 
-                        // 4. Marquer comme réussi
+                        // 5. Marquer comme réussi
                         await send(.folderSaved)
                     } catch {
                         print("❌ [StorageOnboardingStore] Failed to save storage folder")

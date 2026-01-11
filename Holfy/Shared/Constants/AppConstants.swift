@@ -31,7 +31,7 @@ enum AppConstants {
     // MARK: - File Storage
 
     /// Base directory name for vehicle storage
-    static let vehiclesDirectoryName = "Vehicles"
+    static let vehiclesDirectoryName = "Holfy"
 
     /// JSON file name for vehicles list
     static let vehiclesFileName = "vehicles.json"

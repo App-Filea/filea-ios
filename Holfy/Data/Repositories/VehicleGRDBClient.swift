@@ -41,22 +41,19 @@ extension VehicleGRDBClient: DependencyKey {
             createVehicle: { vehicle in
                 print("➕ [VehicleGRDBClient] Creating vehicle: \(vehicle.brand) \(vehicle.model)")
 
-                // 1. Compute folder path
-                let folderName = "\(vehicle.brand)\(vehicle.model)"
-                guard let rootURL = await storageManager.getRootURL() else {
+                // 1. Check storage is configured
+                guard await storageManager.getRootURL() != nil else {
                     print("❌ [VehicleGRDBClient] Storage not configured")
                     throw VehicleGRDBError.storageNotConfigured
                 }
-                let folderPath = rootURL
-                    .appendingPathComponent("Vehicles")
-                    .appendingPathComponent(folderName)
-                    .path
 
                 // 2. Create physical folder FIRST (required for JSON export)
-                let _ = try await storageManager.createVehicleFolder(folderName)
-                print("   📁 Folder created: \(folderName)")
+                let folderName = "\(vehicle.brand)\(vehicle.model)"
+                let folderURL = try await storageManager.createVehicleFolder(folderName)
+                let folderPath = folderURL.path
+                print("   📁 Folder created: \(folderPath)")
 
-                // 3. Create record in GRDB
+                // 3. Create record in GRDB with actual folder path
                 let record = vehicle.toRecord(folderPath: folderPath)
                 try await database.write { db in
                     try VehicleRecord.insert { record }.execute(db)
@@ -64,23 +61,31 @@ extension VehicleGRDBClient: DependencyKey {
                 print("   ✅ Vehicle saved to database")
 
                 // 4. Export to JSON immediately (no debounce for creation)
-                try await syncManager.exportVehicleToJSON(vehicle.id)
-                print("   💾 JSON exported immediately\n")
+                do {
+                    try await syncManager.exportVehicleToJSON(vehicle.id)
+                    print("   💾 JSON exported immediately\n")
+                } catch {
+                    print("   ❌ JSON export failed: \(error.localizedDescription)")
+                    print("   ⚠️ Vehicle created but JSON not exported\n")
+                    // Don't throw - vehicle is created successfully
+                }
             },
 
             // MARK: - Update Vehicle
             updateVehicle: { vehicle in
                 print("✏️ [VehicleGRDBClient] Updating vehicle: \(vehicle.id)")
 
-                // 1. Compute folder path
-                let folderName = "\(vehicle.brand)\(vehicle.model)"
-                guard let rootURL = await storageManager.getRootURL() else {
-                    throw VehicleGRDBError.storageNotConfigured
+                // 1. Get existing folder path from database
+                let existingFolderPath = try await database.read { db in
+                    try VehicleRecord.where { $0.id.in([vehicle.id]) }
+                        .fetchOne(db)?
+                        .folderPath
                 }
-                let folderPath = rootURL
-                    .appendingPathComponent("Vehicles")
-                    .appendingPathComponent(folderName)
-                    .path
+
+                guard let folderPath = existingFolderPath else {
+                    print("   ❌ Vehicle not found in database")
+                    throw VehicleGRDBError.vehicleNotFound(vehicle.id)
+                }
 
                 // 2. Update in GRDB
                 var record = vehicle.toRecord(folderPath: folderPath)

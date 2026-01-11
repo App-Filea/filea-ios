@@ -222,6 +222,32 @@ actor VehicleStorageManager {
         }
     }
 
+    /// Saves a JSON file to a vehicle folder using the vehicle's folder path
+    /// - Parameters:
+    ///   - folderPath: The full path to the vehicle folder
+    ///   - filename: The name of the JSON file to save
+    ///   - data: The JSON data to write
+    /// - Throws: StorageError if the file cannot be saved
+    func saveJSONFile(toFolderPath folderPath: String, filename: String, data: Data) async throws {
+        let folderURL = URL(fileURLWithPath: folderPath)
+
+        // Ensure the vehicle folder exists (it should already exist)
+        if !fileManager.fileExists(atPath: folderPath) {
+            logger.warning("⚠️ Vehicle folder doesn't exist, creating: \(folderPath)")
+            try fileManager.createDirectoryCoordinated(at: folderURL)
+        }
+
+        let fileURL = folderURL.appendingPathComponent(filename)
+
+        do {
+            try data.write(to: fileURL)
+            logger.info("💾 JSON file saved: \(fileURL.path)")
+        } catch {
+            logger.error("❌ Failed to save JSON file: \(error.localizedDescription)")
+            throw StorageError.fileSaveFailed(filename)
+        }
+    }
+
     /// Migrates all content from the old storage location to the new one by moving (not copying)
     /// - Parameters:
     ///   - oldURL: The current root URL (must be accessed with security-scoped resource)

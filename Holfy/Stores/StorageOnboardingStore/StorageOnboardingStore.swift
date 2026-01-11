@@ -239,8 +239,8 @@ struct StorageOnboardingStore {
                             }
                         case .alreadyMigrated:
                             print("ℹ️ [StorageOnboardingStore] Migration déjà effectuée")
-                        case .failed(let error):
-                            print("❌ [StorageOnboardingStore] Migration failed: \(error.localizedDescription)")
+                        case .failed(let errorDescription):
+                            print("❌ [StorageOnboardingStore] Migration failed: \(errorDescription)")
                         }
 
                         // 3. Marquer comme réussi

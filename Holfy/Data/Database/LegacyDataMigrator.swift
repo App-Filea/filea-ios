@@ -66,46 +66,41 @@ actor LegacyDataMigrator {
     func migrateIfNeeded(at storageRoot: URL) async -> MigrationResult {
         logger.info("🔍 [LegacyMigrator] Checking for legacy data at: \(storageRoot.path)")
 
-        // 1. Check if "Vehicles" folder exists (needs renaming)
+        // 1. Check if vehicles.json exists in legacy "Vehicles" folder
         let legacyVehiclesDir = storageRoot.appendingPathComponent("Vehicles")
-        let newHolfyDir = storageRoot.appendingPathComponent(AppConstants.vehiclesDirectoryName)
+        let legacyVehiclesJsonFile = legacyVehiclesDir.appendingPathComponent("vehicles.json")
 
-        if fileManager.fileExists(atPath: legacyVehiclesDir.path) &&
-           !fileManager.fileExists(atPath: newHolfyDir.path) {
-            logger.info("📦 [LegacyMigrator] Renaming 'Vehicles' → 'Holfy'...")
-            do {
-                try fileManager.moveItem(at: legacyVehiclesDir, to: newHolfyDir)
-                logger.info("✅ [LegacyMigrator] Folder renamed successfully")
-            } catch {
-                logger.error("❌ [LegacyMigrator] Failed to rename folder: \(error.localizedDescription)")
-                return .failed(error)
-            }
-        }
-
-        // 2. Check if vehicles.json exists in Holfy folder
-        let vehiclesJsonFile = newHolfyDir.appendingPathComponent("vehicles.json")
-        guard fileManager.fileExists(atPath: vehiclesJsonFile.path) else {
-            logger.info("✅ [LegacyMigrator] No vehicles.json found - fresh install or already migrated")
-            markMigrationCompleted()
+        guard fileManager.fileExists(atPath: legacyVehiclesJsonFile.path) else {
+            logger.info("✅ [LegacyMigrator] No vehicles.json in Vehicles/ folder - no migration needed")
             return .noLegacyData
         }
 
-        // Check if migration already completed for this specific file
-        if UserDefaults.standard.bool(forKey: migrationCompletedKey) {
-            logger.info("✅ [LegacyMigrator] Migration already completed previously")
-            return .alreadyMigrated
-        }
+        logger.warning("⚠️ [LegacyMigrator] Found vehicles.json in Vehicles/ folder - performing migration")
 
-        logger.warning("⚠️ [LegacyMigrator] Legacy vehicles.json found - migration required")
-
-        // 3. Perform migration
+        // 2. Perform migration (WHILE still in Vehicles/ folder)
         do {
-            let result = try await performMigration(vehiclesJsonFile: vehiclesJsonFile, holfyDirectory: newHolfyDir)
-            markMigrationCompleted()
+            let result = try await performMigration(
+                vehiclesJsonFile: legacyVehiclesJsonFile,
+                holfyDirectory: legacyVehiclesDir  // Still "Vehicles" at this point
+            )
+
+            // 3. Migration successful - now rename Vehicles → Holfy
+            let newHolfyDir = storageRoot.appendingPathComponent(AppConstants.vehiclesDirectoryName)
+
+            // Check if Holfy already exists (shouldn't happen, but handle it)
+            if fileManager.fileExists(atPath: newHolfyDir.path) {
+                logger.warning("⚠️ [LegacyMigrator] Holfy folder already exists - migration was already done")
+                return .alreadyMigrated
+            }
+
+            logger.info("📦 [LegacyMigrator] Renaming 'Vehicles' → 'Holfy'...")
+            try fileManager.moveItem(at: legacyVehiclesDir, to: newHolfyDir)
+            logger.info("✅ [LegacyMigrator] Folder renamed successfully")
+
             return result
         } catch {
             logger.error("❌ [LegacyMigrator] Migration failed: \(error.localizedDescription)")
-            return .failed(error)
+            return .failed(error.localizedDescription)
         }
     }
 
@@ -206,10 +201,46 @@ actor LegacyDataMigrator {
     // MARK: - Helper Methods
 
     private func readLegacyVehiclesFile(at fileURL: URL) throws -> [Vehicle] {
+        logger.info("📖 [LegacyMigrator] Reading vehicles.json file...")
+
         let jsonData = try Data(contentsOf: fileURL)
+        logger.info("   ├─ File size: \(jsonData.count) bytes")
+
+        // Log first 500 characters to see the format
+        if let jsonString = String(data: jsonData, encoding: .utf8) {
+            let preview = String(jsonString.prefix(500))
+            logger.info("   ├─ JSON preview: \(preview)")
+        }
+
         let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        return try decoder.decode([Vehicle].self, from: jsonData)
+        // Legacy format uses timestamp (number), not ISO8601 string
+        decoder.dateDecodingStrategy = .deferredToDate
+
+        do {
+            let vehicles = try decoder.decode([Vehicle].self, from: jsonData)
+            logger.info("   └─ Successfully decoded \(vehicles.count) vehicles")
+            return vehicles
+        } catch {
+            logger.error("❌ [LegacyMigrator] Decoding error: \(error)")
+            if let decodingError = error as? DecodingError {
+                switch decodingError {
+                case .keyNotFound(let key, let context):
+                    logger.error("   ├─ Missing key: \(key.stringValue)")
+                    logger.error("   └─ Context: \(context.debugDescription)")
+                case .typeMismatch(let type, let context):
+                    logger.error("   ├─ Type mismatch: expected \(type)")
+                    logger.error("   └─ Context: \(context.debugDescription)")
+                case .valueNotFound(let type, let context):
+                    logger.error("   ├─ Value not found: \(type)")
+                    logger.error("   └─ Context: \(context.debugDescription)")
+                case .dataCorrupted(let context):
+                    logger.error("   └─ Data corrupted: \(context.debugDescription)")
+                @unknown default:
+                    logger.error("   └─ Unknown decoding error")
+                }
+            }
+            throw error
+        }
     }
 
     private func deleteVehiclesJsonFile(at fileURL: URL) throws {
@@ -232,12 +263,12 @@ actor LegacyDataMigrator {
 
 // MARK: - Migration Result
 
-enum MigrationResult {
+enum MigrationResult: Equatable {
     case success(vehiclesMigrated: Int, documentsMigrated: Int)
     case partialSuccess(vehiclesMigrated: Int, documentsMigrated: Int, errors: [String])
     case noLegacyData
     case alreadyMigrated
-    case failed(Error)
+    case failed(String)
 
     var isSuccess: Bool {
         switch self {
@@ -258,8 +289,8 @@ enum MigrationResult {
             return "Aucune donnée à migrer."
         case .alreadyMigrated:
             return "Migration déjà effectuée."
-        case .failed(let error):
-            return "Échec de la migration : \(error.localizedDescription)"
+        case .failed(let errorDescription):
+            return "Échec de la migration : \(errorDescription)"
         }
     }
 }

@@ -75,11 +75,18 @@ actor VehicleStorageManager {
 
             logger.info("🔓 Security-scoped resource access is now active")
 
-            // Create the Vehicles directory immediately while security-scoped access is active
-            // Use NSFileCoordinator for File Provider compatibility (iCloud, Google Drive, etc.)
+            // Only create Holfy directory if there's no legacy Vehicles folder to migrate
+            let legacyVehiclesURL = url.appendingPathComponent("Vehicles")
             let vehiclesURL = url.appendingPathComponent(AppConstants.vehiclesDirectoryName)
-            try fileManager.createDirectoryCoordinated(at: vehiclesURL)
-            logger.info("📁 Vehicles directory created successfully")
+
+            // Check if legacy Vehicles folder exists
+            if fileManager.fileExists(atPath: legacyVehiclesURL.path) {
+                logger.info("📦 Legacy Vehicles/ folder detected - skipping Holfy/ creation (will be renamed after migration)")
+            } else {
+                // No legacy folder - create Holfy directory
+                try fileManager.createDirectoryCoordinated(at: vehiclesURL)
+                logger.info("📁 Holfy directory created successfully")
+            }
         } catch {
             // If bookmark creation failed, stop accessing the resource
             url.stopAccessingSecurityScopedResource()
@@ -141,16 +148,22 @@ actor VehicleStorageManager {
             self.isAccessingSecurityScopedResource = true
             logger.info("✅ Persistent folder restored: \(url.path)")
 
-            // Ensure the Vehicles directory exists
-            // Use NSFileCoordinator for File Provider compatibility
+            // Only create Holfy directory if there's no legacy Vehicles folder to migrate
+            let legacyVehiclesURL = url.appendingPathComponent("Vehicles")
             let vehiclesURL = url.appendingPathComponent(AppConstants.vehiclesDirectoryName)
-            do {
-                try fileManager.createDirectoryCoordinated(at: vehiclesURL)
-                logger.info("📁 Vehicles directory verified/created")
-            } catch {
-                logger.error("❌ Failed to create vehicles directory during restore: \(error.localizedDescription)")
-                return .invalidAccess
-                // Continue anyway - it will be retried later if needed
+
+            // Check if legacy Vehicles folder exists
+            if fileManager.fileExists(atPath: legacyVehiclesURL.path) {
+                logger.info("📦 Legacy Vehicles/ folder detected - skipping Holfy/ creation (will be renamed after migration)")
+            } else {
+                // No legacy folder - ensure Holfy directory exists
+                do {
+                    try fileManager.createDirectoryCoordinated(at: vehiclesURL)
+                    logger.info("📁 Holfy directory verified/created")
+                } catch {
+                    logger.error("❌ Failed to create Holfy directory during restore: \(error.localizedDescription)")
+                    // Continue anyway - it will be retried later if needed
+                }
             }
 
             return .configured(url)

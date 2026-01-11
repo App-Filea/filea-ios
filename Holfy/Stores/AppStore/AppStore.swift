@@ -21,12 +21,15 @@ struct AppStore {
         @Presents var onboarding: OnboardingStore.State?
         @Presents var storageOnboarding: StorageOnboardingStore.State?
         var path = StackState<Path.State>()
+        var storageRootURL: URL?
     }
 
     enum Action: Equatable {
         case initiate
         case checkStorage
         case storageStateChecked(VehicleStorageManager.StorageState)
+        case checkLegacyMigration
+        case migrationCompleted(MigrationResult)
         case initiateCompleted
         case path(StackActionOf<Path>)
         case onboarding(PresentationAction<OnboardingStore.Action>)
@@ -41,6 +44,7 @@ struct AppStore {
 
     @Dependency(\.vehicleGRDBClient) var vehicleRepository
     @Dependency(\.storageManager) var storageManager
+    @Dependency(\.legacyMigrator) var legacyMigrator
 
     var body: some ReducerOf<Self> {
         Reduce { state, action in
@@ -67,10 +71,44 @@ struct AppStore {
                     state.storageOnboarding = StorageOnboardingStore.State()
                     return .none
 
-                case .configured:
+                case .configured(let url):
+                    state.storageRootURL = url
                     state.$isStorageConfigured.withLock { $0 = true }
+                    return .send(.checkLegacyMigration)
+                }
+
+            case .checkLegacyMigration:
+                guard let storageRoot = state.storageRootURL else {
+                    print("⚠️ [AppStore] No storage root URL - skipping migration")
                     return .send(.getAllVehicles)
                 }
+
+                return .run { send in
+                    print("🔍 [AppStore] Checking for legacy data migration...")
+                    let result = await legacyMigrator.migrateIfNeeded(storageRoot)
+                    await send(.migrationCompleted(result))
+                }
+
+            case .migrationCompleted(let result):
+                print("📦 [AppStore] Migration completed: \(result.userMessage)")
+
+                switch result {
+                case .success(let vehicles, let documents):
+                    print("   ├─ Vehicles migrated: \(vehicles)")
+                    print("   └─ Documents migrated: \(documents)")
+                case .partialSuccess(let vehicles, let documents, let errors):
+                    print("   ├─ Vehicles migrated: \(vehicles)")
+                    print("   ├─ Documents migrated: \(documents)")
+                    print("   └─ Errors: \(errors.count)")
+                case .noLegacyData:
+                    print("   └─ No legacy data found")
+                case .alreadyMigrated:
+                    print("   └─ Already migrated previously")
+                case .failed(let errorDescription):
+                    print("   └─ Error: \(errorDescription)")
+                }
+
+                return .send(.getAllVehicles)
 
             case .getAllVehicles:
                 return .run { send in

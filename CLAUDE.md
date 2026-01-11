@@ -130,11 +130,10 @@ Invoicer/
 │   │   ├── Document.swift
 │   │   └── VehicleStatistics.swift
 │   ├── Repositories/                      # 📦 Repositories (CRUD)
-│   │   ├── VehicleRepository.swift        # Ancien système (fichiers)
-│   │   ├── VehicleDatabaseRepository.swift # Nouveau système (GRDB)
+│   │   ├── VehicleGRDBClient.swift        # Client GRDB simplifié (consolidé)
 │   │   ├── DocumentRepository.swift
 │   │   ├── StatisticsRepository.swift
-│   │   └── RepositoryDependencies.swift
+│   │   └── DocumentDatabase/              # Document GRDB repositories
 │   ├── Services/                          # 🔧 Services métier
 │   │   ├── FileStorageService.swift
 │   │   └── VehicleCostCalculator.swift
@@ -267,14 +266,20 @@ Documentation/
 
 #### Flux de Synchronisation
 ```
-User Action → Domain Model → Repository
+User Action → TCA Store → VehicleGRDBClient
      ↓
   GRDB Insert/Update (Record)
      ↓
-  SyncManager.syncAfterChange()
+  SyncManager.syncAfterChange() [avec debouncing]
      ↓
   Export automatique vers .vehicle_metadata.json
 ```
+
+**Architecture Simplifiée (Janvier 2026) :**
+- ✅ **1 seul client** : `VehicleGRDBClient` consolide toute la logique CRUD
+- ✅ **Logique métier intégrée** : Création de dossiers, paths, sync JSON
+- ✅ **Debouncing intelligent** : JSON export optimisé (500ms)
+- ✅ **Error handling explicite** : Pas de `try?` silencieux
 
 #### Stratégie Local-First
 - ✅ Toutes les données stockées localement (GRDB + JSON)
@@ -290,7 +295,10 @@ User Action → Domain Model → Repository
 
 ### Dependencies Framework
 - Point-Free's Dependencies pour l'injection de dépendances
-- `@Dependency(\.vehicleRepository)`, `@Dependency(\.database)`, etc.
+- **Véhicules** : `@Dependency(\.vehicleGRDBClient)` - Client GRDB consolidé
+- **Database** : `@Dependency(\.database)` - Accès direct GRDB
+- **Storage** : `@Dependency(\.storageManager)` - Gestion fichiers
+- **Sync** : `@Dependency(\.syncManagerClient)` - Export JSON
 - `DependencyKey` pour la configuration centralisée
 
 ## Dépendances et Frameworks
@@ -302,13 +310,14 @@ User Action → Domain Model → Repository
    - Usage : Architecture unidirectionnelle, state management, navigation
    - Documentation : https://github.com/pointfreeco/swift-composable-architecture
 
-2. **Sharing-GRDB** (`pointfreeco/sharing-grdb`)
-   - Version : 0.7.0+
+2. **SQLite Data** (`pointfreeco/sqlite-data`)
+   - Version : 1.4.3+
    - Usage : Base de données locale SQLite avec réactivité SwiftUI
    - Utilise GRDB.swift sous le capot
    - Macro `@Table` pour définir les tables
    - StructuredQueries pour les requêtes type-safe
-   - Documentation : https://github.com/pointfreeco/sharing-grdb
+   - **Note** : Remplace `sharing-grdb` (archivé en 2026)
+   - Documentation : https://github.com/pointfreeco/sqlite-data
 
 3. **Supabase Swift** (`supabase/supabase-swift`)
    - Version : 2.5.1+
@@ -328,9 +337,9 @@ User Action → Domain Model → Repository
 
 ## Conventions de Code
 
-### Syntaxe Sharing-GRDB (OBLIGATOIRE)
+### Syntaxe SQLite Data / StructuredQueries (OBLIGATOIRE)
 
-**⚠️ NE PAS utiliser la syntaxe GRDB standard !** Sharing-GRDB utilise une syntaxe différente.
+**⚠️ NE PAS utiliser la syntaxe GRDB standard !** SQLite Data utilise une syntaxe différente via StructuredQueries.
 
 #### ✅ Syntaxe Correcte (Sharing-GRDB)
 
@@ -366,7 +375,56 @@ let count = try VehicleRecord.all.fetchCount(db)
 // ❌ Ne fonctionne PAS
 try record.insert(db)           // Utiliser .insert { }.execute()
 try record.save(db)             // Utiliser .upsert { }.execute()
-record.hasMany(FileRecord.self) // Pas de hasMany/belongsTo dans Sharing-GRDB
+record.hasMany(FileRecord.self) // Pas de hasMany/belongsTo dans SQLite Data
+```
+
+### Pattern VehicleGRDBClient (Architecture Simplifiée)
+
+**Depuis Janvier 2026**, l'architecture Repository a été simplifiée pour consolider toute la logique dans un seul client.
+
+#### ✅ Pattern Actuel (Simplifié)
+
+```swift
+// Dans un Store TCA
+@Dependency(\.vehicleGRDBClient) var vehicleClient
+
+// Créer un véhicule (tout-en-un : folder + GRDB + JSON)
+try await vehicleClient.createVehicle(vehicle)
+
+// Mettre à jour
+try await vehicleClient.updateVehicle(vehicle)
+
+// Récupérer
+let vehicle = try await vehicleClient.getVehicle(id)
+let all = try await vehicleClient.getAllVehicles()
+
+// Supprimer
+try await vehicleClient.deleteVehicle(id)
+
+// Définir comme véhicule principal
+try await vehicleClient.setPrimaryVehicle(id)
+```
+
+#### 🎯 Avantages du Pattern Simplifié
+
+1. **Un seul point d'entrée** : Pas de navigation entre 3 couches
+2. **Logique consolidée** : Création folder + GRDB + JSON dans le client
+3. **Error handling explicite** : JSON export n'empêche pas création véhicule
+4. **Sync automatique** : `syncAfterChange()` appelé automatiquement avec debouncing
+5. **Testabilité** : Mock simple via `@Dependency` et `testValue`
+
+#### ⚠️ Important
+
+- Le client gère **automatiquement** la création du dossier physique
+- Le `folderPath` est **récupéré depuis la BDD** lors des updates (pas recalculé)
+- JSON export avec **debouncing** : 500ms après dernière mutation
+- Pas de `try?` silencieux : Tous les errors sont propagés ou loggés
+
+#### ❌ Ancien Pattern (NE PLUS UTILISER)
+
+```swift
+// ❌ Ancien système avec 3 couches
+@Dependency(\.vehicleRepository) var vehicleRepo  // Ne compile plus !
 ```
 
 ### Conventions de Logging

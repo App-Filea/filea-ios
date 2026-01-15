@@ -31,6 +31,49 @@ struct VehicleDetailTabStore {
     @ObservableState
     struct State: Equatable {
         var selectedTab: Tab = .overview
+
+        // Computed property for filtering documents based on selected tab
+        func filteredDocuments(from allDocuments: [Document]) -> [Document] {
+            switch selectedTab {
+            case .overview:
+                // Return all documents, sorted by date (most recent first)
+                return allDocuments.sorted { $0.date > $1.date }
+
+            case .statistics:
+                // No documents for statistics tab (stats only)
+                return []
+
+            case .maintenance:
+                // Filter maintenance + repair + technicalInspection types
+                return allDocuments
+                    .filter { $0.type == .maintenance || $0.type == .repair || $0.type == .technicalInspection }
+                    .sorted { $0.date > $1.date }
+
+            case .administration:
+                // Placeholder - no specific documents yet (for future use)
+                return []
+
+            case .fuel:
+                // Placeholder - no specific documents yet (for future use)
+                return []
+            }
+        }
+
+        // Computed property for document count per tab
+        func documentCount(for tab: Tab, from allDocuments: [Document]) -> Int {
+            switch tab {
+            case .overview:
+                return allDocuments.count
+            case .statistics:
+                return 0  // No badge for statistics
+            case .maintenance:
+                return allDocuments.filter { $0.type == .maintenance || $0.type == .repair || $0.type == .technicalInspection }.count
+            case .administration:
+                return 0  // Placeholder for future
+            case .fuel:
+                return 0  // Placeholder for future
+            }
+        }
     }
 
     enum Action: Equatable {

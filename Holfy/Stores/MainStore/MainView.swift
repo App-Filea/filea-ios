@@ -70,50 +70,17 @@ struct MainView: View {
             VehicleOverviewView(store: store)
 
         case .statistics:
-            placeholderView(
-                icon: "chart.bar",
-                title: "Statistiques",
-                description: "Statistiques détaillées à venir"
-            )
+            VehicleStatisticsView(store: store)
 
         case .maintenance:
-            placeholderView(
-                icon: "wrench.and.screwdriver",
-                title: "Entretiens & Réparations",
-                description: "Vue des entretiens et réparations à venir"
-            )
+            VehicleMaintenanceView(store: store)
 
         case .administration:
-            placeholderView(
-                icon: "building.columns",
-                title: "Administration",
-                description: "Documents administratifs à venir"
-            )
+            VehicleAdministrationView(store: store)
 
         case .fuel:
-            placeholderView(
-                icon: "fuelpump",
-                title: "Carburant",
-                description: "Historique de carburant à venir"
-            )
+            VehicleFuelView(store: store)
         }
-    }
-
-    private func placeholderView(icon: String, title: String, description: String) -> some View {
-        VStack(spacing: Spacing.md) {
-            Image(systemName: icon)
-                .font(.system(size: 48))
-                .foregroundStyle(Color.secondary)
-            Text(title)
-                .font(.title2)
-                .bold()
-                .foregroundStyle(Color.primary)
-            Text(description)
-                .font(.subheadline)
-                .foregroundStyle(Color.secondary)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding(Spacing.xxl)
     }
 
 

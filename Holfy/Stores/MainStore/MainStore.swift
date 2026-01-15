@@ -21,6 +21,7 @@ struct MainStore {
         @Presents var addFirstVehicle: AddFirstVehicleStore.State?
         @Presents var addDocument: AddDocumentStore.State?
 
+        var tabStore: VehicleDetailTabStore.State = .init()
         var warningVehicle: WarningVehicleStore.State = WarningVehicleStore.State()
         var totalCostVehicle: TotalCostVehicleStore.State = TotalCostVehicleStore.State()
         var vehicleMonthlyExpenses: VehicleMonthlyExpensesStore.State = VehicleMonthlyExpensesStore.State()
@@ -30,6 +31,7 @@ struct MainStore {
 
     enum Action: Equatable {
         case view(ActionView)
+        case tabStore(VehicleDetailTabStore.Action)
         case warningVehicle(WarningVehicleStore.Action)
         case totalCostVehicle(TotalCostVehicleStore.Action)
         case vehicleMonthlyExpenses(VehicleMonthlyExpensesStore.Action)
@@ -62,6 +64,7 @@ struct MainStore {
     @Dependency(\.vehicleGRDBClient) var vehicleRepository
 
     var body: some ReducerOf<Self> {
+        Scope(state: \.tabStore, action: \.tabStore) { VehicleDetailTabStore() }
         Scope(state: \.warningVehicle, action: \.warningVehicle) { WarningVehicleStore() }
         Scope(state: \.totalCostVehicle, action: \.totalCostVehicle) { TotalCostVehicleStore() }
         Scope(state: \.vehicleMonthlyExpenses, action: \.vehicleMonthlyExpenses) { VehicleMonthlyExpensesStore() }
@@ -138,7 +141,10 @@ struct MainStore {
             case .updateAllVehicles(let newVehiclesList):
                     state.$vehicles.withLock { $0 = newVehiclesList }
                 return .none
-                
+
+            case .tabStore:
+                return .none
+
             default: return .none
             }
         }

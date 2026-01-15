@@ -44,79 +44,78 @@ struct MainView: View {
     }
 
     private var mainContentView: some View {
-        VStack(spacing: Spacing.md) {
+        VStack(spacing: 0) {
             headerView
                 .padding(.horizontal, Spacing.md)
 
-            ScrollView {
-                VStack(alignment: .leading, spacing: Spacing.md) {
-                    // Stats cards
-                    HStack(spacing: Spacing.sm) {
-                        TotalCostVehicleView(store: store.scope(state: \.totalCostVehicle, action: \.totalCostVehicle))
+            // Custom Segmented Control
+            CustomSegmentedControl(
+                store: store.scope(
+                    state: \.tabStore,
+                    action: \.tabStore
+                )
+            )
+            .padding(.vertical, Spacing.sm)
+            .background(Color(.systemBackground))
 
-                        WarningVehicleView(store: store.scope(state: \.warningVehicle, action: \.warningVehicle))
-                    }
-
-                    VehicleMonthlyExpensesView(store: store.scope(state: \.vehicleMonthlyExpenses, action: \.vehicleMonthlyExpenses))
-
-                    Divider()
-
-                    HStack {
-                        Image(systemName: "folder.fill")
-                            .title()
-
-                        Text(String(format: String(localized: "main_documents_count"), store.selectedVehicle.documents.count))
-                            .title()
-                        
-                        Spacer()
-                        
-                        PrimaryCircleButton(systemImage: "plus") {
-                            store.send(.showAddDocument)
-                        }
-                    }
-
-                    if store.selectedVehicle.documents.isEmpty {
-                        emptyDocumentsView
-                    } else {
-                        documentsListView
-                    }
-                }
-                .padding(.horizontal, Spacing.md)
-            }
-            .scrollBounceBehavior(.basedOnSize)
+            // Content based on selected tab
+            tabContentView
         }
     }
 
-    private var emptyDocumentsView: some View {
+    @ViewBuilder
+    private var tabContentView: some View {
+        switch store.tabStore.selectedTab {
+        case .overview:
+            VehicleOverviewView(store: store)
+
+        case .statistics:
+            placeholderView(
+                icon: "chart.bar",
+                title: "Statistiques",
+                description: "Statistiques détaillées à venir"
+            )
+
+        case .maintenance:
+            placeholderView(
+                icon: "wrench.and.screwdriver",
+                title: "Entretiens & Réparations",
+                description: "Vue des entretiens et réparations à venir"
+            )
+
+        case .administration:
+            placeholderView(
+                icon: "building.columns",
+                title: "Administration",
+                description: "Documents administratifs à venir"
+            )
+
+        case .fuel:
+            placeholderView(
+                icon: "fuelpump",
+                title: "Carburant",
+                description: "Historique de carburant à venir"
+            )
+        }
+    }
+
+    private func placeholderView(icon: String, title: String, description: String) -> some View {
         VStack(spacing: Spacing.md) {
-            Image(systemName: "doc.fill")
-                .imageScale(.large)
+            Image(systemName: icon)
+                .font(.system(size: 48))
                 .foregroundStyle(Color.secondary)
-            Text("main_empty_documents_title")
-                .font(.headline)
+            Text(title)
+                .font(.title2)
+                .bold()
                 .foregroundStyle(Color.primary)
-            Text("main_empty_documents_subtitle")
+            Text(description)
                 .font(.subheadline)
                 .foregroundStyle(Color.secondary)
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, Spacing.xxl)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(Spacing.xxl)
     }
 
-    private var documentsListView: some View {
-        LazyVStack(spacing: Spacing.sm) {
-            ForEach(store.selectedVehicle.documents.groupedByMonth(), id: \.title) { section in
-                VStack(alignment: .leading, spacing: Spacing.sm) {
-                    Text(section.title)
-                        .secondarySubheadline()
-
-                    ForEach(section.items) { document in
-                        eventElement(of: document)
-                    }
-                }
-            }
-        }
-    }
 
     private var headerView: some View {
         VStack(alignment: .leading, spacing: Spacing.xs) {
@@ -195,13 +194,6 @@ struct MainView: View {
         }
         .padding(.top, Spacing.xs)
     }
-
-    private func eventElement(of document: Document) -> some View {
-        DocumentCard(document: document) {
-            store.send(.showDocumentDetail(document))
-        }
-    }
-
 }
 
 #Preview("Empty vehicle list") {
@@ -219,7 +211,8 @@ struct MainView: View {
                         documents: [
                             .init(fileURL: "", name: "Vidange", date: .now, mileage: "100000", type: .maintenance)
                         ]
-                    ))
+                    )),
+                    tabStore: VehicleDetailTabStore.State()
                 ),
                 reducer: { MainStore() }
             )
@@ -230,7 +223,7 @@ struct MainView: View {
 #Preview("Selected vehicle") {
     @Shared(.selectedCurrency) var currency = .dollar
     @Shared(.selectedDistanceUnit) var distanceUnit = .miles
-    
+
     NavigationView {
         MainView(
             store: Store(
@@ -258,7 +251,8 @@ struct MainView: View {
                         documents: [
                             .init(fileURL: "", name: "Vidange", date: .now, mileage: "", type: .maintenance)
                         ]
-                    ))
+                    )),
+                    tabStore: VehicleDetailTabStore.State()
                 ),
                 reducer: { MainStore() }
             )

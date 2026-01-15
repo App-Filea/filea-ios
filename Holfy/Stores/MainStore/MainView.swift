@@ -60,6 +60,7 @@ struct MainView: View {
 
             // Content based on selected tab
             tabContentView
+            Spacer()
         }
     }
 
@@ -205,6 +206,10 @@ struct MainView: View {
                             plate: "BZ-029-YV",
                             documents: [
                                 .init(fileURL: "", name: "Vidange", date: .now, mileage: "100000", type: .maintenance)
+                                .init(fileURL: "", name: "CT1", date: .now, mileage: "100000", type: .technicalInspection)
+                                .init(fileURL: "", name: "Réparation", date: .now, mileage: "100000", type: .repair)
+                                .init(fileURL: "", name: "J'sais plus", date: .now, mileage: "100000", type: .other)
+                                .init(fileURL: "", name: "CT2", date: .now, mileage: "100000", type: .technicalInspection)
                             ]
                         )
                     ],

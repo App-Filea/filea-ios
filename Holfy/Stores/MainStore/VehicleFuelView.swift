@@ -29,7 +29,7 @@ struct VehicleFuelView: View {
 
             Text("Vous pourrez suivre vos pleins d'essence et analyser votre consommation")
                 .font(.footnote)
-                .foregroundStyle(Color.tertiary)
+                .foregroundStyle(Color(.tertiaryLabel))
                 .multilineTextAlignment(.center)
                 .padding(.top, Spacing.sm)
         }

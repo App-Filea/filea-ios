@@ -29,7 +29,7 @@ struct VehicleAdministrationView: View {
 
             Text("Vous pourrez gérer vos documents administratifs comme les assurances, cartes grises, etc.")
                 .font(.footnote)
-                .foregroundStyle(Color.tertiary)
+                .foregroundStyle(Color(.tertiaryLabel))
                 .multilineTextAlignment(.center)
                 .padding(.top, Spacing.sm)
         }

@@ -15,12 +15,9 @@ struct VehicleAdministrationView: View {
         VStack(spacing: 0) {
             DocumentListView(
                 documents: store.filteredDocuments,
-                tab: .administration,
+                emptyStateMessage: "Aucun Document Administratif",
                 onDocumentTap: { document in
                     store.send(.documentTapped(document))
-                },
-                onAddDocument: {
-                    store.send(.addDocumentTapped)
                 }
             )
             .padding(.horizontal, Spacing.md)

@@ -9,9 +9,8 @@ import SwiftUI
 
 struct DocumentListView: View {
     let documents: [Document]
-    let tab: VehicleDetailTabStore.Tab
+    let emptyStateMessage: String
     let onDocumentTap: (Document) -> Void
-    let onAddDocument: () -> Void
 
     var body: some View {
         Group {
@@ -24,17 +23,22 @@ struct DocumentListView: View {
     }
 
     private var emptyStateView: some View {
-        Group {
-            if let emptyContent = EmptyStateContent.content(for: tab) {
-                EmptyStateView(
-                    content: emptyContent,
-                    onCTATapped: onAddDocument
-                )
-            } else {
-                // Fallback for tabs without empty state (e.g., Statistics)
-                EmptyView()
-            }
+        VStack(spacing: Spacing.md) {
+            Image(systemName: "doc.fill")
+                .font(.system(size: 48))
+                .foregroundStyle(Color.secondary)
+
+            Text(emptyStateMessage)
+                .font(.headline)
+                .foregroundStyle(Color.primary)
+
+            Text("Les documents de cette catégorie apparaîtront ici")
+                .font(.subheadline)
+                .foregroundStyle(Color.secondary)
+                .multilineTextAlignment(.center)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(Spacing.xxl)
     }
 
     private var documentsListView: some View {

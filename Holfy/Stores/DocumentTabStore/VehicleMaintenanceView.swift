@@ -15,12 +15,9 @@ struct VehicleMaintenanceView: View {
         VStack(spacing: 0) {
             DocumentListView(
                 documents: store.filteredDocuments,
-                tab: .maintenance,
+                emptyStateMessage: "Aucun Entretien",
                 onDocumentTap: { document in
                     store.send(.documentTapped(document))
-                },
-                onAddDocument: {
-                    store.send(.addDocumentTapped)
                 }
             )
             .padding(.horizontal, Spacing.md)

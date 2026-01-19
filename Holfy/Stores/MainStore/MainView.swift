@@ -44,23 +44,33 @@ struct MainView: View {
     }
 
     private var mainContentView: some View {
-        VStack(spacing: 0) {
-            headerView
-                .padding(.horizontal, Spacing.md)
+        ZStack(alignment: .bottomTrailing) {
+            VStack(spacing: 0) {
+                headerView
+                    .padding(.horizontal, Spacing.md)
 
-            // Custom Segmented Control
-            CustomSegmentedControl(
-                store: store.scope(
-                    state: \.tabStore,
-                    action: \.tabStore
+                // Custom Segmented Control
+                CustomSegmentedControl(
+                    store: store.scope(
+                        state: \.tabStore,
+                        action: \.tabStore
+                    )
                 )
-            )
-            .padding(.vertical, Spacing.sm)
-            .background(Color(.systemBackground))
+                .padding(.vertical, Spacing.sm)
+                .background(Color(.systemBackground))
 
-            // Content based on selected tab
-            tabContentView
-            Spacer()
+                // Content based on selected tab
+                tabContentView
+                Spacer()
+            }
+
+            // Quick Action Button (Floating Action Button)
+            if store.tabStore.showsQuickAction, let label = store.tabStore.quickActionLabel {
+                QuickActionButton(label: label) {
+                    store.send(.tabStore(.quickActionTapped))
+                }
+                .padding(Spacing.md)
+            }
         }
     }
 
@@ -205,10 +215,10 @@ struct MainView: View {
                             registrationDate: Date(timeIntervalSince1970: 1322784000),
                             plate: "BZ-029-YV",
                             documents: [
-                                .init(fileURL: "", name: "Vidange", date: .now, mileage: "100000", type: .maintenance)
-                                .init(fileURL: "", name: "CT1", date: .now, mileage: "100000", type: .technicalInspection)
-                                .init(fileURL: "", name: "Réparation", date: .now, mileage: "100000", type: .repair)
-                                .init(fileURL: "", name: "J'sais plus", date: .now, mileage: "100000", type: .other)
+                                .init(fileURL: "", name: "Vidange", date: .now, mileage: "100000", type: .maintenance),
+                                .init(fileURL: "", name: "CT1", date: .now, mileage: "100000", type: .technicalInspection),
+                                .init(fileURL: "", name: "Réparation", date: .now, mileage: "100000", type: .repair),
+                                .init(fileURL: "", name: "J'sais plus", date: .now, mileage: "100000", type: .other),
                                 .init(fileURL: "", name: "CT2", date: .now, mileage: "100000", type: .technicalInspection)
                             ]
                         )

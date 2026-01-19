@@ -74,10 +74,44 @@ struct VehicleDetailTabStore {
                 return 0  // Placeholder for future
             }
         }
+
+        // Computed property for Quick Action button label
+        var quickActionLabel: String? {
+            switch selectedTab {
+            case .overview, .statistics:
+                return nil  // Read-only tabs - no quick action
+            case .maintenance:
+                return "➕ Ajouter Entretien"
+            case .administration:
+                return "➕ Ajouter Document Admin"
+            case .fuel:
+                return "➕ Ajouter Plein"
+            }
+        }
+
+        // Computed property for pre-selected document type
+        var preSelectedDocumentType: DocumentType? {
+            switch selectedTab {
+            case .overview, .statistics:
+                return nil  // No pre-selection for read-only tabs
+            case .maintenance:
+                return .maintenance
+            case .administration:
+                return nil  // No administrative type in enum yet (placeholder for future)
+            case .fuel:
+                return nil  // No fuel type in enum yet (placeholder for future)
+            }
+        }
+
+        // Computed property to determine if Quick Action should be shown
+        var showsQuickAction: Bool {
+            quickActionLabel != nil
+        }
     }
 
     enum Action: Equatable {
         case tabSelected(Tab)
+        case quickActionTapped
     }
 
     var body: some ReducerOf<Self> {
@@ -85,6 +119,10 @@ struct VehicleDetailTabStore {
             switch action {
             case let .tabSelected(tab):
                 state.selectedTab = tab
+                return .none
+
+            case .quickActionTapped:
+                // Handled by parent store (MainStore)
                 return .none
             }
         }

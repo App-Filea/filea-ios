@@ -180,14 +180,21 @@ struct AddDocumentView: View {
 
                     Spacer()
 
-                    Picker("document_form_type_label", selection: $store.documentType) {
-                        ForEach(DocumentType.allCases) { type in
-                            Text(type.displayName)
-                                .tag(type)
+                    if store.isTypePickerDisabled {
+                        // Read-only display when type is pre-selected from Quick Action
+                        Text(store.documentType.displayName)
+                            .formFieldLeadingTitle()
+                            .foregroundStyle(Color.secondary)
+                    } else {
+                        Picker("document_form_type_label", selection: $store.documentType) {
+                            ForEach(DocumentType.allCases) { type in
+                                Text(type.displayName)
+                                    .tag(type)
+                            }
                         }
+                        .pickerStyle(.menu)
+                        .labelsHidden()
                     }
-                    .pickerStyle(.menu)
-                    .labelsHidden()
                 }
             }
 

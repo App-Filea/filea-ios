@@ -142,6 +142,20 @@ struct MainStore {
                     state.$vehicles.withLock { $0 = newVehiclesList }
                 return .none
 
+            case .tabStore(.quickActionTapped):
+                // Open AddDocumentStore with pre-selected type from active tab
+                let preSelectedType = state.tabStore.preSelectedDocumentType
+                let lastKnownMileage = state.selectedVehicle.mileage ?? ""
+
+                state.addDocument = AddDocumentStore.State(
+                    vehicleId: state.selectedVehicle.id,
+                    viewState: .metadataForm,
+                    documentMileage: lastKnownMileage,
+                    documentType: preSelectedType ?? .maintenance,
+                    preSelectedType: preSelectedType
+                )
+                return .none
+
             case .tabStore:
                 return .none
 

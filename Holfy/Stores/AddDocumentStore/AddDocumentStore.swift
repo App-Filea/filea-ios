@@ -33,7 +33,7 @@ struct AddDocumentStore {
 
         @Shared(.vehicles) var vehicles: [Vehicle] = []
         @Shared(.selectedVehicle) var selectedVehicle: Vehicle
-        
+
         static func initialState(vehicleId: String, viewState: ViewState = .modeChoice) -> Self {
             .init(vehicleId: vehicleId, viewState: viewState)
         }
@@ -44,6 +44,7 @@ struct AddDocumentStore {
         var documentMileage: String = ""
         var documentType: DocumentType = .maintenance
         var documentAmount: String = ""
+        var preSelectedType: DocumentType? = nil  // Set when opened from Quick Action
 
         enum ViewState: Equatable {
             case modeChoice
@@ -53,6 +54,10 @@ struct AddDocumentStore {
         // Validation computed properties
         var hasSourceSelected: Bool {
             selectedFileURL != nil
+        }
+
+        var isTypePickerDisabled: Bool {
+            preSelectedType != nil
         }
     }
 

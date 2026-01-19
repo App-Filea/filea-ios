@@ -22,6 +22,14 @@ struct MainStore {
         @Presents var addDocument: AddDocumentStore.State?
 
         var tabStore: VehicleDetailTabStore.State = .init()
+
+        // Child stores for tabs
+        var statisticsStore: VehicleStatisticsStore.State = .init()
+        var maintenanceStore: DocumentTabStore.State = .init(tab: .maintenance)
+        var administrationStore: DocumentTabStore.State = .init(tab: .administration)
+        var fuelStore: DocumentTabStore.State = .init(tab: .fuel)
+
+        // Stats stores (used by both Overview and Statistics tabs)
         var warningVehicle: WarningVehicleStore.State = WarningVehicleStore.State()
         var totalCostVehicle: TotalCostVehicleStore.State = TotalCostVehicleStore.State()
         var vehicleMonthlyExpenses: VehicleMonthlyExpensesStore.State = VehicleMonthlyExpensesStore.State()
@@ -32,9 +40,18 @@ struct MainStore {
     enum Action: Equatable {
         case view(ActionView)
         case tabStore(VehicleDetailTabStore.Action)
+
+        // Child stores actions
+        case statisticsStore(VehicleStatisticsStore.Action)
+        case maintenanceStore(DocumentTabStore.Action)
+        case administrationStore(DocumentTabStore.Action)
+        case fuelStore(DocumentTabStore.Action)
+
+        // Stats stores actions
         case warningVehicle(WarningVehicleStore.Action)
         case totalCostVehicle(TotalCostVehicleStore.Action)
         case vehicleMonthlyExpenses(VehicleMonthlyExpensesStore.Action)
+
         case onAppear
         case vehicleDetail(PresentationAction<VehicleDetailsStore.Action>)
         case vehiclesList(PresentationAction<VehiclesListStore.Action>)
@@ -65,13 +82,35 @@ struct MainStore {
 
     var body: some ReducerOf<Self> {
         Scope(state: \.tabStore, action: \.tabStore) { VehicleDetailTabStore() }
+
+        // Child stores for tabs
+        Scope(state: \.statisticsStore, action: \.statisticsStore) { VehicleStatisticsStore() }
+        Scope(state: \.maintenanceStore, action: \.maintenanceStore) { DocumentTabStore() }
+        Scope(state: \.administrationStore, action: \.administrationStore) { DocumentTabStore() }
+        Scope(state: \.fuelStore, action: \.fuelStore) { DocumentTabStore() }
+
+        // Stats stores
         Scope(state: \.warningVehicle, action: \.warningVehicle) { WarningVehicleStore() }
         Scope(state: \.totalCostVehicle, action: \.totalCostVehicle) { TotalCostVehicleStore() }
         Scope(state: \.vehicleMonthlyExpenses, action: \.vehicleMonthlyExpenses) { VehicleMonthlyExpensesStore() }
 
         Reduce { state, action in
             switch action {
-                
+
+            // Handle delegated actions from DocumentTabStore
+            case .maintenanceStore(.documentTapped(let document)),
+                 .administrationStore(.documentTapped(let document)),
+                 .fuelStore(.documentTapped(let document)):
+                return .send(.showDocumentDetail(document))
+
+            case .maintenanceStore(.addDocumentTapped),
+                 .administrationStore(.addDocumentTapped),
+                 .fuelStore(.addDocumentTapped):
+                return .send(.tabStore(.quickActionTapped))
+
+            case .statisticsStore:
+                return .none  // Pure compositeur
+
             case .view(let actionView):
                 switch actionView {
                 case .openCreateVehicleButtonTapped: return .send(.presentAddFirstVehicleView)

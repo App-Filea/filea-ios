@@ -81,16 +81,36 @@ struct MainView: View {
             VehicleOverviewView(store: store)
 
         case .statistics:
-            VehicleStatisticsView(store: store)
+            VehicleStatisticsView(
+                store: store.scope(
+                    state: \.statisticsStore,
+                    action: \.statisticsStore
+                )
+            )
 
         case .maintenance:
-            VehicleMaintenanceView(store: store)
+            VehicleMaintenanceView(
+                store: store.scope(
+                    state: \.maintenanceStore,
+                    action: \.maintenanceStore
+                )
+            )
 
         case .administration:
-            VehicleAdministrationView(store: store)
+            VehicleAdministrationView(
+                store: store.scope(
+                    state: \.administrationStore,
+                    action: \.administrationStore
+                )
+            )
 
         case .fuel:
-            VehicleFuelView(store: store)
+            VehicleFuelView(
+                store: store.scope(
+                    state: \.fuelStore,
+                    action: \.fuelStore
+                )
+            )
         }
     }
 

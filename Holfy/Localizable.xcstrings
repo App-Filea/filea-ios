@@ -7,6 +7,9 @@
     "%@" : {
 
     },
+    "•" : {
+
+    },
     "add_document_mode_camera_subtitle" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -618,9 +621,6 @@
         }
       }
     },
-    "Cette fonctionnalité sera disponible prochainement" : {
-
-    },
     "chart_axis_amount" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1029,9 +1029,6 @@
         }
       }
     },
-    "Documents Administratifs" : {
-
-    },
     "edit_document_title" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1118,12 +1115,6 @@
       }
     },
     "Graphiques et analyses supplémentaires à venir" : {
-
-    },
-    "Historique de Carburant" : {
-
-    },
-    "Les documents de cette catégorie apparaîtront ici" : {
 
     },
     "main_documents_count" : {
@@ -1328,6 +1319,9 @@
           }
         }
       }
+    },
+    "Ouvrir le formulaire d'ajout de document avec le type pré-sélectionné" : {
+
     },
     "settings_currency_dollar" : {
       "extractionState" : "manual",
@@ -2336,12 +2330,6 @@
           }
         }
       }
-    },
-    "Vous pourrez gérer vos documents administratifs comme les assurances, cartes grises, etc." : {
-
-    },
-    "Vous pourrez suivre vos pleins d'essence et analyser votre consommation" : {
-
     }
   },
   "version" : "1.0"

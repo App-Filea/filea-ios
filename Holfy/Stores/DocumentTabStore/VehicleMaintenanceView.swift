@@ -9,22 +9,18 @@ import SwiftUI
 import ComposableArchitecture
 
 struct VehicleMaintenanceView: View {
-    @Bindable var store: StoreOf<MainStore>
-
-    private var filteredDocuments: [Document] {
-        store.tabStore.filteredDocuments(from: store.selectedVehicle.documents)
-    }
+    @Bindable var store: StoreOf<DocumentTabStore>
 
     var body: some View {
         VStack(spacing: 0) {
             DocumentListView(
-                documents: filteredDocuments,
+                documents: store.filteredDocuments,
                 tab: .maintenance,
                 onDocumentTap: { document in
-                    store.send(.showDocumentDetail(document))
+                    store.send(.documentTapped(document))
                 },
                 onAddDocument: {
-                    store.send(.tabStore(.quickActionTapped))
+                    store.send(.addDocumentTapped)
                 }
             )
             .padding(.horizontal, Spacing.md)

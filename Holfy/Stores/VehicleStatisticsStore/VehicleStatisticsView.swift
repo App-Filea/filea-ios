@@ -9,19 +9,34 @@ import SwiftUI
 import ComposableArchitecture
 
 struct VehicleStatisticsView: View {
-    @Bindable var store: StoreOf<MainStore>
+    @Bindable var store: StoreOf<VehicleStatisticsStore>
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: Spacing.md) {
                 // Stats cards
                 HStack(spacing: Spacing.sm) {
-                    TotalCostVehicleView(store: store.scope(state: \.totalCostVehicle, action: \.totalCostVehicle))
+                    TotalCostVehicleView(
+                        store: store.scope(
+                            state: \.totalCostVehicle,
+                            action: \.totalCostVehicle
+                        )
+                    )
 
-                    WarningVehicleView(store: store.scope(state: \.warningVehicle, action: \.warningVehicle))
+                    WarningVehicleView(
+                        store: store.scope(
+                            state: \.warningVehicle,
+                            action: \.warningVehicle
+                        )
+                    )
                 }
 
-                VehicleMonthlyExpensesView(store: store.scope(state: \.vehicleMonthlyExpenses, action: \.vehicleMonthlyExpenses))
+                VehicleMonthlyExpensesView(
+                    store: store.scope(
+                        state: \.vehicleMonthlyExpenses,
+                        action: \.vehicleMonthlyExpenses
+                    )
+                )
 
                 Divider()
 

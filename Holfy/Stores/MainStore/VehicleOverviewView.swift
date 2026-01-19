@@ -25,8 +25,6 @@ struct VehicleOverviewView: View {
                     WarningVehicleView(store: store.scope(state: \.warningVehicle, action: \.warningVehicle))
                 }
 
-                VehicleMonthlyExpensesView(store: store.scope(state: \.vehicleMonthlyExpenses, action: \.vehicleMonthlyExpenses))
-
                 Divider()
 
                 HStack {
@@ -35,12 +33,6 @@ struct VehicleOverviewView: View {
 
                     Text(String(format: String(localized: "main_documents_count"), filteredDocuments.count))
                         .title()
-
-                    Spacer()
-
-                    PrimaryCircleButton(systemImage: "plus") {
-                        store.send(.showAddDocument)
-                    }
                 }
 
                 DocumentListView(

@@ -11,29 +11,23 @@ import ComposableArchitecture
 struct VehicleFuelView: View {
     @Bindable var store: StoreOf<MainStore>
 
+    private var filteredDocuments: [Document] {
+        store.tabStore.filteredDocuments(from: store.selectedVehicle.documents)
+    }
+
     var body: some View {
-        VStack(spacing: Spacing.md) {
-            Image(systemName: "fuelpump")
-                .font(.system(size: 48))
-                .foregroundStyle(Color.secondary)
-
-            Text("Historique de Carburant")
-                .font(.title2)
-                .bold()
-                .foregroundStyle(Color.primary)
-
-            Text("Cette fonctionnalité sera disponible prochainement")
-                .font(.subheadline)
-                .foregroundStyle(Color.secondary)
-                .multilineTextAlignment(.center)
-
-            Text("Vous pourrez suivre vos pleins d'essence et analyser votre consommation")
-                .font(.footnote)
-                .foregroundStyle(Color(.tertiaryLabel))
-                .multilineTextAlignment(.center)
-                .padding(.top, Spacing.sm)
+        VStack(spacing: 0) {
+            DocumentListView(
+                documents: filteredDocuments,
+                tab: .fuel,
+                onDocumentTap: { document in
+                    store.send(.showDocumentDetail(document))
+                },
+                onAddDocument: {
+                    store.send(.tabStore(.quickActionTapped))
+                }
+            )
+            .padding(.horizontal, Spacing.md)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding(Spacing.xxl)
     }
 }

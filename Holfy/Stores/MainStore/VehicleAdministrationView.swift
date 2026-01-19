@@ -11,29 +11,23 @@ import ComposableArchitecture
 struct VehicleAdministrationView: View {
     @Bindable var store: StoreOf<MainStore>
 
+    private var filteredDocuments: [Document] {
+        store.tabStore.filteredDocuments(from: store.selectedVehicle.documents)
+    }
+
     var body: some View {
-        VStack(spacing: Spacing.md) {
-            Image(systemName: "building.columns")
-                .font(.system(size: 48))
-                .foregroundStyle(Color.secondary)
-
-            Text("Documents Administratifs")
-                .font(.title2)
-                .bold()
-                .foregroundStyle(Color.primary)
-
-            Text("Cette fonctionnalité sera disponible prochainement")
-                .font(.subheadline)
-                .foregroundStyle(Color.secondary)
-                .multilineTextAlignment(.center)
-
-            Text("Vous pourrez gérer vos documents administratifs comme les assurances, cartes grises, etc.")
-                .font(.footnote)
-                .foregroundStyle(Color(.tertiaryLabel))
-                .multilineTextAlignment(.center)
-                .padding(.top, Spacing.sm)
+        VStack(spacing: 0) {
+            DocumentListView(
+                documents: filteredDocuments,
+                tab: .administration,
+                onDocumentTap: { document in
+                    store.send(.showDocumentDetail(document))
+                },
+                onAddDocument: {
+                    store.send(.tabStore(.quickActionTapped))
+                }
+            )
+            .padding(.horizontal, Spacing.md)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding(Spacing.xxl)
     }
 }

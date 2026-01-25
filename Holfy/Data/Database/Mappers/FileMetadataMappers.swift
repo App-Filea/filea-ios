@@ -29,7 +29,8 @@ extension Document {
             fileSize: 0, // À calculer si nécessaire
             mimeType: inferMimeType(from: fileName),
             createdAt: Date(),
-            modifiedAt: Date()
+            modifiedAt: Date(),
+            expirationDate: expirationDate
         )
     }
 
@@ -73,7 +74,8 @@ extension FileMetadataRecord {
             date: date,
             mileage: mileage,
             type: DocumentType(rawValue: documentType) ?? .other,
-            amount: amount
+            amount: amount,
+            expirationDate: expirationDate
         )
     }
 }
@@ -99,7 +101,8 @@ extension Document {
             fileSize: 0,
             mimeType: inferMimeType(from: fileName),
             createdAt: Date(),
-            modifiedAt: Date()
+            modifiedAt: Date(),
+            expirationDate: expirationDate
         )
     }
 }
@@ -120,7 +123,8 @@ extension FileMetadataDTO {
             date: date,
             mileage: mileage,
             type: DocumentType(rawValue: documentType) ?? .other,
-            amount: amount
+            amount: amount,
+            expirationDate: expirationDate
         )
     }
 }
@@ -142,7 +146,8 @@ extension FileMetadataRecord {
             fileSize: fileSize,
             mimeType: mimeType,
             createdAt: createdAt,
-            modifiedAt: modifiedAt
+            modifiedAt: modifiedAt,
+            expirationDate: expirationDate
         )
     }
 }
@@ -165,7 +170,8 @@ extension FileMetadataDTO {
             fileSize: fileSize,
             mimeType: mimeType,
             createdAt: createdAt,
-            modifiedAt: modifiedAt
+            modifiedAt: modifiedAt,
+            expirationDate: expirationDate
         )
     }
 }

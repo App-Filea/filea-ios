@@ -54,6 +54,31 @@ struct EditDocumentView: View {
                                 .datePickerStyle(.compact)
                         }
                     }
+
+                    if store.type == .technicalInspection {
+                        FormField(titleLabel: "document_form_expiration_date_title",
+                                  infoLabel: "document_form_expiration_date_info") {
+                            HStack {
+                                Text("document_form_expiration_date_label")
+                                    .formFieldLeadingTitle()
+
+                                Spacer()
+
+                                DatePicker(
+                                    "",
+                                    selection: Binding(
+                                        get: { store.expirationDate ?? Date() },
+                                        set: { store.expirationDate = $0 }
+                                    ),
+                                    in: Date()...,
+                                    displayedComponents: .date
+                                )
+                                .labelsHidden()
+                                .datePickerStyle(.compact)
+                            }
+                        }
+                    }
+
                     FormField(titleLabel: "document_form_additional_info", infoLabel: "document_form_mileage_info") {
                         HStack(spacing: 12) {
                             Text("document_form_mileage_label")

@@ -26,6 +26,7 @@ struct EditDocumentStore {
         var mileage: String
         var type: DocumentType
         var amount: String
+        var expirationDate: Date?
 
         init(vehicleId: String, document: Document) {
             self.vehicleId = vehicleId
@@ -38,6 +39,7 @@ struct EditDocumentStore {
             self.mileage = document.mileage
             self.type = document.type
             self.amount = document.amount.map { String($0) } ?? ""
+            self.expirationDate = document.expirationDate
         }
     }
     
@@ -64,6 +66,7 @@ struct EditDocumentStore {
                 updatedDocument.mileage = state.mileage
                 updatedDocument.type = state.type
                 updatedDocument.amount = Double(state.amount.replacingOccurrences(of: ",", with: "."))
+                updatedDocument.expirationDate = state.type == .technicalInspection ? state.expirationDate : nil
                 
                 return .run { [vehicleId = state.vehicleId, document = updatedDocument] send in
                     do {

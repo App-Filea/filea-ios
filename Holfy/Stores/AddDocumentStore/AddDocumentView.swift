@@ -221,6 +221,30 @@ struct AddDocumentView: View {
                 }
             }
 
+            if store.documentType == .technicalInspection {
+                FormField(titleLabel: "document_form_expiration_date_title",
+                          infoLabel: "document_form_expiration_date_info") {
+                    HStack {
+                        Text("document_form_expiration_date_label")
+                            .formFieldLeadingTitle()
+
+                        Spacer()
+
+                        DatePicker(
+                            "",
+                            selection: Binding(
+                                get: { store.documentExpirationDate },
+                                set: { store.send(.view(.expirationDateChanged($0))) }
+                            ),
+                            in: Date()...,
+                            displayedComponents: .date
+                        )
+                        .labelsHidden()
+                        .datePickerStyle(.compact)
+                    }
+                }
+            }
+
             FormField(titleLabel: "document_form_mileage_title",
                       infoLabel: "document_form_mileage_info") {
                 HStack(spacing: 12) {

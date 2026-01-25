@@ -44,6 +44,7 @@ struct AddDocumentStore {
         var documentMileage: String = ""
         var documentType: DocumentType = .maintenance
         var documentAmount: String = ""
+        var documentExpirationDate: Date = Calendar.current.date(byAdding: .year, value: 2, to: Date()) ?? Date()
         var preSelectedType: DocumentType? = nil  // Set when opened from Quick Action
 
         enum ViewState: Equatable {
@@ -86,6 +87,7 @@ struct AddDocumentStore {
             case backFromMetadataFormButtonTapped
             case closeButtonTapped
             case saveButtonTapped
+            case expirationDateChanged(Date)
         }
     }
 
@@ -148,6 +150,10 @@ struct AddDocumentStore {
                         return .none
                     }
                     return .send(.saveDocument)
+
+                case .expirationDateChanged(let date):
+                    state.documentExpirationDate = date
+                    return .none
                 }
 
             case .openCameraScan:
@@ -198,19 +204,21 @@ struct AddDocumentStore {
 
             case .saveDocument:
                 let amount = Double(state.documentAmount.replacingOccurrences(of: ",", with: "."))
+                let expirationDate: Date? = state.documentType == .technicalInspection ? state.documentExpirationDate : nil
 
                 guard let fileURL = state.selectedFileURL else {
                     return .none
                 }
 
-                return .run { [vehicleId = state.vehicleId, name = state.documentName, date = state.documentDate, mileage = state.documentMileage, type = state.documentType] send in
+                return .run { [vehicleId = state.vehicleId, name = state.documentName, date = state.documentDate, mileage = state.documentMileage, type = state.documentType, expirationDate] send in
                     do {
                         let metadata = DocumentMetadata(
                             name: name,
                             date: date,
                             mileage: mileage,
                             type: type,
-                            amount: amount
+                            amount: amount,
+                            expirationDate: expirationDate
                         )
                         _ = try await documentRepository.save(fileURL: fileURL, for: vehicleId, metadata: metadata)
                         await send(.documentSaved)

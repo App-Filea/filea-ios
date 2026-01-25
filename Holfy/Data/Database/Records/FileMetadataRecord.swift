@@ -53,4 +53,7 @@ struct FileMetadataRecord {
 
     /// Date de dernière modification
     var modifiedAt: Date
+
+    /// Date d'expiration du document (pour le contrôle technique)
+    var expirationDate: Date?
 }

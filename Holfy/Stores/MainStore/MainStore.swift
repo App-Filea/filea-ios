@@ -219,7 +219,7 @@ struct MainStore {
 
                 state.addDocument = AddDocumentStore.State(
                     vehicleId: state.selectedVehicle.id,
-                    viewState: .metadataForm,
+                    viewState: .modeChoice,
                     documentMileage: lastKnownMileage,
                     documentType: preSelectedType ?? .maintenance,
                     preSelectedType: preSelectedType

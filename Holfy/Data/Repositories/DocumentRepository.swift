@@ -29,6 +29,16 @@ struct DocumentMetadata: Sendable {
     let mileage: String
     let type: DocumentType
     let amount: Double?
+    let expirationDate: Date?
+
+    init(name: String, date: Date, mileage: String, type: DocumentType, amount: Double?, expirationDate: Date? = nil) {
+        self.name = name
+        self.date = date
+        self.mileage = mileage
+        self.type = type
+        self.amount = amount
+        self.expirationDate = expirationDate
+    }
 }
 
 // MARK: - Dependency Registration
@@ -84,7 +94,8 @@ final class DocumentRepository: DocumentRepositoryProtocol, @unchecked Sendable 
             date: metadata.date,
             mileage: metadata.mileage,
             type: metadata.type,
-            amount: metadata.amount
+            amount: metadata.amount,
+            expirationDate: metadata.expirationDate
         )
 
         // ✅ TRANSACTION ATOMIQUE : File + Database
@@ -136,7 +147,8 @@ final class DocumentRepository: DocumentRepositoryProtocol, @unchecked Sendable 
             date: metadata.date,
             mileage: metadata.mileage,
             type: metadata.type,
-            amount: metadata.amount
+            amount: metadata.amount,
+            expirationDate: metadata.expirationDate
         )
 
         // ✅ TRANSACTION ATOMIQUE : File + Database

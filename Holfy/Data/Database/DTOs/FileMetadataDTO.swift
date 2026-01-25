@@ -24,6 +24,7 @@ struct FileMetadataDTO: Codable {
     var mimeType: String
     var createdAt: Date
     var modifiedAt: Date
+    var expirationDate: Date?
 
     // MARK: - Coding Keys
 
@@ -40,5 +41,6 @@ struct FileMetadataDTO: Codable {
         case mimeType
         case createdAt
         case modifiedAt
+        case expirationDate
     }
 }

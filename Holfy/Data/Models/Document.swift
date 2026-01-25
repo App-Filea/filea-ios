@@ -39,8 +39,9 @@ struct Document: Codable, Equatable, Identifiable {
     var mileage: String
     var type: DocumentType
     var amount: Double?
+    var expirationDate: Date?
 
-    init(id: String? = nil, fileURL: String, name: String, date: Date, mileage: String, type: DocumentType, amount: Double? = nil) {
+    init(id: String? = nil, fileURL: String, name: String, date: Date, mileage: String, type: DocumentType, amount: Double? = nil, expirationDate: Date? = nil) {
         self.id = id ?? UUID().uuidString.lowercased()
         self.fileURL = fileURL
         self.name = name
@@ -48,6 +49,7 @@ struct Document: Codable, Equatable, Identifiable {
         self.mileage = mileage
         self.type = type
         self.amount = amount
+        self.expirationDate = expirationDate
     }
     
     var fileType: String {

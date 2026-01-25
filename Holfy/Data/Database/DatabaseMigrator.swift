@@ -60,6 +60,14 @@ enum DatabaseMigrator {
             try db.create(index: "idx_file_documentType", on: "fileMetadataRecords", columns: ["documentType"])
         }
 
+        // MARK: - Migration v1.1: Ajout de la date d'expiration
+
+        migrator.registerMigration("v1.1_add_expiration_date_to_file_metadata") { db in
+            try db.alter(table: "fileMetadataRecords") { table in
+                table.add(column: "expirationDate", .datetime)
+            }
+        }
+
         // MARK: - Futures migrations
         // Ajouter ici les prochaines migrations avec des versions incrémentales
 

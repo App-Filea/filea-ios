@@ -618,6 +618,9 @@
         }
       }
     },
+    "Ce document n'existe plus." : {
+
+    },
     "chart_axis_amount" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -719,6 +722,9 @@
           }
         }
       }
+    },
+    "Document introuvable" : {
+
     },
     "document_form_additional_info" : {
       "extractionState" : "manual",
@@ -1161,9 +1167,6 @@
           }
         }
       }
-    },
-    "Graphiques et analyses supplémentaires à venir" : {
-
     },
     "Les documents de cette catégorie apparaîtront ici" : {
 
@@ -1729,9 +1732,6 @@
           }
         }
       }
-    },
-    "Statistiques Détaillées" : {
-
     },
     "storage_onboarding_error_description" : {
       "extractionState" : "manual",
@@ -2590,6 +2590,54 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mon garage"
+          }
+        }
+      }
+    },
+    "warning_list_back_to_dashboard" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Go back to dashboard"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Revenir à la vue d’ensemble"
+          }
+        }
+      }
+    },
+    "warning_list_empty_subtitle" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All your documents are complete"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tous vos documents sont complets"
+          }
+        }
+      }
+    },
+    "warning_list_empty_title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune alerte"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune alerte"
           }
         }
       }

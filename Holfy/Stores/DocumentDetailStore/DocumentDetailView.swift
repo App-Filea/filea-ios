@@ -20,25 +20,21 @@ struct DocumentDetailView: View {
             ZStack {
                 Color(.systemBackground)
                     .ignoresSafeArea()
-                
+
                 ScrollView {
-                    switch store.viewState {
-                    case .loading:
-                        VStack {
-                            Spacer()
-                            ProgressView()
-                            Spacer()
-                        }
-                        .frame(minWidth: geometry.size.width, minHeight: geometry.size.height)
-                    case .document(let document):
+                    if let document = store.document {
                         documentView(document)
                             .frame(minWidth: geometry.size.width, minHeight: geometry.size.height)
+                    } else {
+                        ContentUnavailableView(
+                            "Document introuvable",
+                            systemImage: "doc.questionmark",
+                            description: Text("Ce document n'existe plus.")
+                        )
+                        .frame(minWidth: geometry.size.width, minHeight: geometry.size.height)
                     }
                 }
                 .scrollBounceBehavior(.basedOnSize)
-            }
-            .onAppear {
-                store.send(.loadDocument)
             }
         }
         .quickLookPreview($selectedDocumentURL)
@@ -61,7 +57,7 @@ struct DocumentDetailView: View {
                     Text(document.name)
                         .largeTitle()
                         .lineLimit(1)
-                    
+
                     Text(document.type.displayName)
                         .subLargeTitle()
                 }
@@ -69,11 +65,7 @@ struct DocumentDetailView: View {
             }
             
             VStack(spacing: 12) {
-                DetailCard(
-                    icon: self.currency.iconName,
-                    label: "document_form_amount_label",
-                    value: document.amount?.asCurrencyStringNoDecimals(currency: currency) ?? String(localized: "all_not_specified")
-                )
+                amountCard(document)
 
                 DetailCard(
                     icon: "gauge.open.with.lines.needle.33percent",
@@ -112,28 +104,76 @@ struct DocumentDetailView: View {
         }
         .padding(.horizontal, Spacing.screenMargin)
     }
+
+    private func amountCard(_ document: Document) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(alignment: .center, spacing: 12) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color(.secondarySystemGroupedBackground))
+                        .frame(width: 36, height: 36)
+
+                    Image(systemName: currency.iconName)
+                        .font(.title3)
+                        .foregroundColor(Color.secondary)
+                }
+
+                Text("document_form_amount_label")
+                    .caption()
+
+                Spacer()
+            }
+
+            HStack(spacing: Spacing.sm) {
+                if let amount = document.amount {
+                    Text(amount.asCurrencyStringNoDecimals(currency: currency))
+                        .title()
+                } else {
+                    Text("all_not_specified")
+                        .title()
+
+                    HStack(spacing: Spacing.xxs) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                        Text("document_status_incomplete")
+                    }
+                    .foregroundStyle(Color.orange)
+                    .caption()
+                    .padding(.horizontal, Spacing.xs)
+                    .padding(.vertical, Spacing.xxs)
+                    .background(Color.orange.tertiary)
+                    .cornerRadius(Radius.badge)
+                }
+            }
+        }
+        .padding(16)
+        .background(Color(.systemGroupedBackground))
+        .cornerRadius(16)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color(.separator), lineWidth: 1)
+        )
+    }
 }
 
 #Preview("Document") {
-    
-    @Shared(.selectedCurrency) var currency = .euro
-    @Shared(.selectedDistanceUnit) var distanceUnit = .kilometers
-    
     let previewDocument = Document(
-        id: String(),
+        id: "preview-doc-id",
         fileURL: "/fake/path/receipt.jpg",
         name: "Révision complète",
         date: Date(),
         mileage: "1000000000000",
         type: .maintenance,
-        amount: 10000
+        amount: nil
     )
-    
-    NavigationView {
+
+    @Shared(.selectedVehicle) var selectedVehicle = Vehicle(
+        id: "preview-vehicle",
+        documents: [previewDocument]
+    )
+
+    return NavigationView {
         DocumentDetailView(store: Store(
             initialState: DocumentDetailStore.State(
-                viewState: .document(previewDocument),
-                vehicleId: String(),
                 documentId: previewDocument.id
             )
         ) {
@@ -142,13 +182,16 @@ struct DocumentDetailView: View {
     }
 }
 
-#Preview("Loading") {
-    NavigationView {
+#Preview("Document not found") {
+    @Shared(.selectedVehicle) var selectedVehicle = Vehicle(
+        id: "preview-vehicle",
+        documents: []
+    )
+
+    return NavigationView {
         DocumentDetailView(store: Store(
             initialState: DocumentDetailStore.State(
-                viewState: .loading,
-                vehicleId: String(),
-                documentId: String()
+                documentId: "non-existent"
             )
         ) {
             DocumentDetailStore()

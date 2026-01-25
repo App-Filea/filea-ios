@@ -20,13 +20,19 @@ extension AppStore {
         case .element(id: _, action: .main(.maintenanceStore(.documentTapped(let document)))),
                 .element(id: _, action: .main(.administrationStore(.documentTapped(let document)))),
                 .element(id: _, action: .main(.fuelStore(.documentTapped(let document)))):
-            if case .main(let mainState) = state.path.last {
-                state.path.append(.documentDetail(DocumentDetailStore.State(viewState: .loading, vehicleId: mainState.selectedVehicle.id, documentId: document.id)))
-            }
+            state.path.append(.documentDetail(DocumentDetailStore.State(documentId: document.id)))
             return .none
             
         case .element(id: _, action: .main(.showSettings)):
             state.path.append(.globalSettings(GlobalSettingsStore.State()))
+            return .none
+            
+        case .element(id: _, action: .main(.view(.warningVehicleTapped))):
+            state.path.append(.warningList(WarningListStore.State()))
+            return .none
+            
+        case .element(id: _, action: .warningList(.view(.incompleteDocumentTapped(let document)))):
+            state.path.append(.documentDetail(DocumentDetailStore.State(documentId: document.id)))
             return .none
             
         case .element(id: _, action: .globalSettings(.navigateToStorageSettings)):

@@ -13,22 +13,17 @@ struct VehicleStatisticsStore {
     @ObservableState
     struct State: Equatable {
         var totalCostVehicle: TotalCostVehicleStore.State = .init()
-        var warningVehicle: WarningVehicleStore.State = .init()
         var vehicleMonthlyExpenses: VehicleMonthlyExpensesStore.State = .init()
     }
 
     enum Action: Equatable {
         case totalCostVehicle(TotalCostVehicleStore.Action)
-        case warningVehicle(WarningVehicleStore.Action)
         case vehicleMonthlyExpenses(VehicleMonthlyExpensesStore.Action)
     }
 
     var body: some ReducerOf<Self> {
         Scope(state: \.totalCostVehicle, action: \.totalCostVehicle) {
             TotalCostVehicleStore()
-        }
-        Scope(state: \.warningVehicle, action: \.warningVehicle) {
-            WarningVehicleStore()
         }
         Scope(state: \.vehicleMonthlyExpenses, action: \.vehicleMonthlyExpenses) {
             VehicleMonthlyExpensesStore()

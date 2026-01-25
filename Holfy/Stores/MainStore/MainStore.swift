@@ -99,6 +99,7 @@ struct MainStore {
             case openCreateVehicleButtonTapped
             case deleteVehicleButtonTapped
             case settingsButtonTapped
+            case warningVehicleTapped
         }
         
         enum Alert: Equatable {
@@ -131,6 +132,7 @@ struct MainStore {
                 case .openCreateVehicleButtonTapped: return .send(.presentAddFirstVehicleView)
                 case .deleteVehicleButtonTapped: return .send(.deleteCurrentVehicle)
                 case .settingsButtonTapped: return .send(.showSettings)
+                default: return .none
                 }
                 
             case .onAppear:

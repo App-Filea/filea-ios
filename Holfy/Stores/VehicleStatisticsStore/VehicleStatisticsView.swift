@@ -22,13 +22,6 @@ struct VehicleStatisticsView: View {
                             action: \.totalCostVehicle
                         )
                     )
-
-                    WarningVehicleView(
-                        store: store.scope(
-                            state: \.warningVehicle,
-                            action: \.warningVehicle
-                        )
-                    )
                 }
 
                 VehicleMonthlyExpensesView(
@@ -39,14 +32,6 @@ struct VehicleStatisticsView: View {
                 )
 
                 Divider()
-
-                // Additional statistics can be added here
-                Text("Statistiques Détaillées")
-                    .title()
-
-                Text("Graphiques et analyses supplémentaires à venir")
-                    .secondaryBody()
-                    .padding(.top, Spacing.md)
             }
             .padding(.horizontal, Spacing.md)
         }

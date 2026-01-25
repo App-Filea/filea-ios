@@ -75,6 +75,9 @@ struct MainView: View {
                         TotalCostVehicleView(store: store.scope(state: \.totalCostVehicle, action: \.totalCostVehicle))
 
                         WarningVehicleView(store: store.scope(state: \.warningVehicle, action: \.warningVehicle))
+                            .onTapGesture {
+                                store.send(.view(.warningVehicleTapped))
+                            }
                     }
 
                     Divider()

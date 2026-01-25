@@ -43,6 +43,10 @@ struct AppView: View {
                 if let store = store.scope(state: \.editDocument, action: \.editDocument) {
                     EditDocumentView(store: store)
                 }
+            case .warningList:
+                if let store = store.scope(state: \.warningList, action: \.warningList) {
+                    WarningListView(store: store)
+                }
             case .globalSettings:
                 if let store = store.scope(state: \.globalSettings, action: \.globalSettings) {
                     GlobalSettingsView(store: store)

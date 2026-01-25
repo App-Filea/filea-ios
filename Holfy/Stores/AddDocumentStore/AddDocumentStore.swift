@@ -34,8 +34,8 @@ struct AddDocumentStore {
         @Shared(.vehicles) var vehicles: [Vehicle] = []
         @Shared(.selectedVehicle) var selectedVehicle: Vehicle
 
-        static func initialState(vehicleId: String, viewState: ViewState = .modeChoice) -> Self {
-            .init(vehicleId: vehicleId, viewState: viewState)
+        static func initialState(vehicleId: String, documentType: DocumentType = .maintenance, viewState: ViewState = .modeChoice) -> Self {
+            .init(vehicleId: vehicleId, viewState: viewState, documentType: documentType)
         }
 
         // Document metadata

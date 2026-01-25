@@ -30,10 +30,14 @@ struct VehicleAdministrationView: View {
             }
             .safeAreaInset(edge: .bottom) {
                 QuickActionButton(label: "vehicle_administrative_document_add_document") {
-                    store.send(.addDocumentTapped)
+                    store.send(.view(.addDocumentTapped))
                 }
                 .padding(Spacing.md)
             }
+        }
+        .fullScreenCover(item: $store.scope(state: \.addDocument, action: \.addDocument)) { store in
+            AddDocumentView(store: store)
+                .presentationDetents([.large])
         }
     }
 }

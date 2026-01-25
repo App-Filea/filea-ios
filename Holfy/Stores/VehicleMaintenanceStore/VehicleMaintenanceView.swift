@@ -13,6 +13,9 @@ struct VehicleMaintenanceView: View {
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
+            Color(.systemBackground)
+                .ignoresSafeArea()
+            
             ScrollView {
                 LazyVStack(spacing: 0) {
                     DocumentListView(
@@ -27,10 +30,14 @@ struct VehicleMaintenanceView: View {
             }
             .safeAreaInset(edge: .bottom) {
                 QuickActionButton(label: "vehicle_maintenance_document_add_document") {
-                    store.send(.addDocumentTapped)
+                    store.send(.view(.addDocumentTapped))
                 }
                 .padding(Spacing.md)
             }
+        }
+        .fullScreenCover(item: $store.scope(state: \.addDocument, action: \.addDocument)) { store in
+            AddDocumentView(store: store)
+                .presentationDetents([.large])
         }
     }
 }

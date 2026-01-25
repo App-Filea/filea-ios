@@ -15,7 +15,7 @@ struct MainStore {
         case statistics = "Statistiques"
         case maintenance = "Entretiens & Réparations"
         case administration = "Administration"
-        case fuel = "Carburant"
+//        case fuel = "Carburant"
 
         var icon: String {
             switch self {
@@ -23,7 +23,7 @@ struct MainStore {
             case .statistics: return "chart.bar"
             case .maintenance: return "wrench.and.screwdriver"
             case .administration: return "building.columns"
-            case .fuel: return "fuelpump"
+//            case .fuel: return "fuelpump"
             }
         }
     }
@@ -47,7 +47,7 @@ struct MainStore {
                 return nil
             case .maintenance:
                 return .maintenance
-            case .administration, .fuel:
+            case .administration/*, .fuel*/:
                 return nil
             }
         }
@@ -58,9 +58,10 @@ struct MainStore {
         var administrationStore: VehicleAdministrationStore.State = .init()
         var fuelStore: VehicleFuelStore.State = .init()
 
-        // Stats stores (used by both Overview and Statistics tabs)
+        // overview stores
         var warningVehicle: WarningVehicleStore.State = WarningVehicleStore.State()
         var totalCostVehicle: TotalCostVehicleStore.State = TotalCostVehicleStore.State()
+        var technicalInspection: TechnicalInspectionStore.State = TechnicalInspectionStore.State()
         var vehicleMonthlyExpenses: VehicleMonthlyExpensesStore.State = VehicleMonthlyExpensesStore.State()
 
         var showEmptyState: Bool = false
@@ -77,9 +78,10 @@ struct MainStore {
         case administrationStore(VehicleAdministrationStore.Action)
         case fuelStore(VehicleFuelStore.Action)
 
-        // Stats stores actions
+        // Overview stores actions
         case warningVehicle(WarningVehicleStore.Action)
         case totalCostVehicle(TotalCostVehicleStore.Action)
+        case technicalInspection(TechnicalInspectionStore.Action)
         case vehicleMonthlyExpenses(VehicleMonthlyExpensesStore.Action)
 
         case onAppear
@@ -117,23 +119,22 @@ struct MainStore {
         Scope(state: \.administrationStore, action: \.administrationStore) { VehicleAdministrationStore() }
         Scope(state: \.fuelStore, action: \.fuelStore) { VehicleFuelStore() }
 
-        // Stats stores
+        // Overview stores
         Scope(state: \.warningVehicle, action: \.warningVehicle) { WarningVehicleStore() }
         Scope(state: \.totalCostVehicle, action: \.totalCostVehicle) { TotalCostVehicleStore() }
+        Scope(state: \.technicalInspection, action: \.technicalInspection) { TechnicalInspectionStore() }
         Scope(state: \.vehicleMonthlyExpenses, action: \.vehicleMonthlyExpenses) { VehicleMonthlyExpensesStore() }
 
         Reduce { state, action in
             switch action {
 
-            // Handle delegated actions from DocumentTabStore
+//             Handle delegated actions from DocumentTabStore
             case .maintenanceStore(.documentTapped(let document)),
                  .administrationStore(.documentTapped(let document)),
                  .fuelStore(.documentTapped(let document)):
                 return .send(.showDocumentDetail(document))
 
-            case .maintenanceStore(.addDocumentTapped),
-                 .administrationStore(.addDocumentTapped),
-                 .fuelStore(.addDocumentTapped):
+            case .fuelStore(.addDocumentTapped):
                 return .send(.quickActionTapped)
 
             case .statisticsStore:

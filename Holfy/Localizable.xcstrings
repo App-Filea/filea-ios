@@ -7,9 +7,6 @@
     "%@" : {
 
     },
-    "08/06/2026" : {
-
-    },
     "add_document_mode_camera_subtitle" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -722,12 +719,6 @@
           }
         }
       }
-    },
-    "Contrôle technique" : {
-
-    },
-    "Dans 120 jours" : {
-
     },
     "document_form_additional_info" : {
       "extractionState" : "manual",

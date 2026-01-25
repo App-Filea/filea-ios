@@ -83,22 +83,7 @@ struct MainView: View {
 
                     Divider()
                     
-                    Button(action: {}) {
-                        VStack(alignment: .leading, spacing: Spacing.sm) {
-                            Text("Contrôle technique")
-                            Spacer()
-                            HStack {
-                                Text("Dans 120 jours")
-                                Text("08/06/2026")
-                            }
-                        }
-                        .padding(Spacing.cardPadding)
-                    }
-                    .buttonStyle(.plain)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .frame(height: 140)
-                    .background(Color(.tertiarySystemGroupedBackground))
-                    .cornerRadius(Radius.card)
+                    TechnicalInspectionView(store: store.scope(state: \.technicalInspection, action: \.technicalInspection))
                 }
                 .padding(.horizontal, Spacing.md)
             }
@@ -128,13 +113,13 @@ struct MainView: View {
                 )
             )
 
-        case .fuel:
-            VehicleFuelView(
-                store: store.scope(
-                    state: \.fuelStore,
-                    action: \.fuelStore
-                )
-            )
+//        case .fuel:
+//            VehicleFuelView(
+//                store: store.scope(
+//                    state: \.fuelStore,
+//                    action: \.fuelStore
+//                )
+//            )
         }
     }
 

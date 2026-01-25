@@ -17,11 +17,9 @@ struct VehicleMaintenanceStore {
 
         var filteredDocuments: [Document] {
             selectedVehicle.documents
-                .filter { $0.type == .maintenance || $0.type == .repair || $0.type == .technicalInspection }
+                .filter { $0.type == .maintenance || $0.type == .repair }
                 .sorted { $0.date > $1.date }
         }
-
-        var documentCount: Int { filteredDocuments.count }
     }
 
     enum Action: Equatable {

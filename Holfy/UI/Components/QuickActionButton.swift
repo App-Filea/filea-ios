@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct QuickActionButton: View {
-    let label: String
+    let label: LocalizedStringKey
     let action: () -> Void
     @State private var isTapped = false
 

@@ -17,7 +17,9 @@ extension AppStore {
             state.path.append(.vehicleDetails(VehicleDetailsStore.State()))
             return .none
             
-        case .element(id: _, action: .main(.showDocumentDetail(let document))):
+        case .element(id: _, action: .main(.maintenanceStore(.documentTapped(let document)))),
+                .element(id: _, action: .main(.administrationStore(.documentTapped(let document)))),
+                .element(id: _, action: .main(.fuelStore(.documentTapped(let document)))):
             if case .main(let mainState) = state.path.last {
                 state.path.append(.documentDetail(DocumentDetailStore.State(viewState: .loading, vehicleId: mainState.selectedVehicle.id, documentId: document.id)))
             }

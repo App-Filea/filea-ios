@@ -37,10 +37,6 @@ struct MainView: View {
             AddFirstVehicleView(store: store)
                 .presentationDetents([.large])
         }
-        .fullScreenCover(item: $store.scope(state: \.addDocument, action: \.addDocument)) { store in
-            AddDocumentView(store: store)
-                .presentationDetents([.large])
-        }
     }
 
     private var mainContentView: some View {

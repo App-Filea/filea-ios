@@ -22,7 +22,6 @@ struct VehicleAdministrationStore {
                 .filter { $0.type == .technicalInspection }
                 .sorted { $0.date > $1.date }
         }
-        var documentCount: Int { filteredDocuments.count }
     }
 
     enum Action: Equatable {

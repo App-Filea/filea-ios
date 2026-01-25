@@ -1852,6 +1852,70 @@
         }
       }
     },
+    "tab_administrative_label" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Administrative"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Administratif"
+          }
+        }
+      }
+    },
+    "tab_maintain_and_repair_label" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maintenance"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entretien"
+          }
+        }
+      }
+    },
+    "tab_overview_label" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Overview"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vue d’ensemble"
+          }
+        }
+      }
+    },
+    "tab_statistics_label" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Statistics"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Statistiques"
+          }
+        }
+      }
+    },
     "technical_inspection_expired" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1967,6 +2031,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aujourd'hui"
+          }
+        }
+      }
+    },
+    "vehicle_administrative_document_add_document" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add new administrative document"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter un nouveau document administratif"
           }
         }
       }
@@ -2460,6 +2540,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Type de véhicule"
+          }
+        }
+      }
+    },
+    "vehicle_maintenance_document_add_document" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add new maintenance"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Ajouter un nouvel entretien"
           }
         }
       }

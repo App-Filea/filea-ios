@@ -7,14 +7,15 @@
 
 import ComposableArchitecture
 import Foundation
+import SwiftUICore
 
 @Reducer
 struct MainStore {
-    enum Tab: String, CaseIterable, Sendable {
-        case overview = "Vue d'Ensemble"
-        case statistics = "Statistiques"
-        case maintenance = "Entretiens & Réparations"
-        case administration = "Administration"
+    enum Tab: LocalizedStringKey, CaseIterable, Sendable {
+        case overview = "tab_overview_label"
+        case statistics = "tab_statistics_label"
+        case maintenance = "tab_maintain_and_repair_label"
+        case administration = "tab_administrative_label"
 //        case fuel = "Carburant"
 
         var icon: String {
@@ -37,7 +38,6 @@ struct MainStore {
         @Presents var deleteAlert: AlertState<Action.Alert>?
         @Presents var vehiclesList: VehiclesListStore.State?
         @Presents var addFirstVehicle: AddFirstVehicleStore.State?
-        @Presents var addDocument: AddDocumentStore.State?
 
         var selectedTab: Tab = .overview
 
@@ -70,7 +70,6 @@ struct MainStore {
     enum Action: Equatable {
         case view(ActionView)
         case tabSelected(Tab)
-        case quickActionTapped
 
         // Child stores actions
         case statisticsStore(VehicleStatisticsStore.Action)
@@ -88,13 +87,10 @@ struct MainStore {
         case vehicleDetail(PresentationAction<VehicleDetailsStore.Action>)
         case vehiclesList(PresentationAction<VehiclesListStore.Action>)
         case addFirstVehicle(PresentationAction<AddFirstVehicleStore.Action>)
-        case addDocument(PresentationAction<AddDocumentStore.Action>)
         case presentAddFirstVehicleView
         case showVehicleDetail(Vehicle)
         case presentVehiclesListView
         case showSettings
-        case showAddDocument
-        case showDocumentDetail(Document)
         case deleteCurrentVehicle
         case deleteAlert(PresentationAction<Alert>)
         case updateAllVehicles([Vehicle])
@@ -127,16 +123,6 @@ struct MainStore {
 
         Reduce { state, action in
             switch action {
-
-//             Handle delegated actions from DocumentTabStore
-            case .maintenanceStore(.documentTapped(let document)),
-                 .administrationStore(.documentTapped(let document)),
-                 .fuelStore(.documentTapped(let document)):
-                return .send(.showDocumentDetail(document))
-
-            case .fuelStore(.addDocumentTapped):
-                return .send(.quickActionTapped)
-
             case .statisticsStore:
                 return .none  // Pure compositeur
 
@@ -182,13 +168,6 @@ struct MainStore {
 //                // Navigation handled by AppStore+Path (to be implemented)
 //                return .none
 //
-            case .showAddDocument:
-                state.addDocument = AddDocumentStore.State.initialState(vehicleId: state.selectedVehicle.id)
-                return .none
-
-            case .showDocumentDetail:
-                // Navigation handled by AppStore+Path
-                return .none
 
             case .deleteCurrentVehicle:
                 state.deleteAlert = AlertState.deleteCurrentVehicleAlert()
@@ -214,19 +193,6 @@ struct MainStore {
                 state.selectedTab = tab
                 return .none
 
-            case .quickActionTapped:
-                let preSelectedType = state.preSelectedDocumentType
-                let lastKnownMileage = state.selectedVehicle.mileage ?? ""
-
-                state.addDocument = AddDocumentStore.State(
-                    vehicleId: state.selectedVehicle.id,
-                    viewState: .modeChoice,
-                    documentMileage: lastKnownMileage,
-                    documentType: preSelectedType ?? .maintenance,
-                    preSelectedType: preSelectedType
-                )
-                return .none
-
             default: return .none
             }
         }
@@ -239,9 +205,6 @@ struct MainStore {
         }
         .ifLet(\.$addFirstVehicle, action: \.addFirstVehicle) {
             AddFirstVehicleStore()
-        }
-        .ifLet(\.$addDocument, action: \.addDocument) {
-            AddDocumentStore()
         }
     }
 }

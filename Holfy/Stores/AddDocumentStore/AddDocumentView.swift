@@ -236,7 +236,7 @@ struct AddDocumentView: View {
                                 get: { store.documentExpirationDate },
                                 set: { store.send(.view(.expirationDateChanged($0))) }
                             ),
-                            in: Date()...,
+                            in: store.documentDate...,
                             displayedComponents: .date
                         )
                         .labelsHidden()

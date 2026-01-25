@@ -7,7 +7,7 @@
     "%@" : {
 
     },
-    "•" : {
+    "08/06/2026" : {
 
     },
     "add_document_mode_camera_subtitle" : {
@@ -723,6 +723,12 @@
         }
       }
     },
+    "Contrôle technique" : {
+
+    },
+    "Dans 120 jours" : {
+
+    },
     "document_form_additional_info" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1117,6 +1123,9 @@
     "Graphiques et analyses supplémentaires à venir" : {
 
     },
+    "Les documents de cette catégorie apparaîtront ici" : {
+
+    },
     "main_documents_count" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1319,9 +1328,6 @@
           }
         }
       }
-    },
-    "Ouvrir le formulaire d'ajout de document avec le type pré-sélectionné" : {
-
     },
     "settings_currency_dollar" : {
       "extractionState" : "manual",
@@ -1803,6 +1809,18 @@
           }
         }
       }
+    },
+    "technical_inspection_next_date" : {
+
+    },
+    "technical_inspection_next_days" : {
+
+    },
+    "technical_inspection_next_title" : {
+
+    },
+    "technical_inspection_no_next" : {
+
     },
     "vehicle_age_months" : {
       "extractionState" : "manual",

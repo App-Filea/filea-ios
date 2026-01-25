@@ -10,6 +10,24 @@ import Foundation
 
 @Reducer
 struct MainStore {
+    enum Tab: String, CaseIterable, Sendable {
+        case overview = "Vue d'Ensemble"
+        case statistics = "Statistiques"
+        case maintenance = "Entretiens & Réparations"
+        case administration = "Administration"
+        case fuel = "Carburant"
+
+        var icon: String {
+            switch self {
+            case .overview: return "rectangle.stack"
+            case .statistics: return "chart.bar"
+            case .maintenance: return "wrench.and.screwdriver"
+            case .administration: return "building.columns"
+            case .fuel: return "fuelpump"
+            }
+        }
+    }
+
     @ObservableState
     struct State: Equatable {
         @Shared(.vehicles) var vehicles: [Vehicle] = []
@@ -21,13 +39,24 @@ struct MainStore {
         @Presents var addFirstVehicle: AddFirstVehicleStore.State?
         @Presents var addDocument: AddDocumentStore.State?
 
-        var tabStore: VehicleDetailTabStore.State = .init()
+        var selectedTab: Tab = .overview
+
+        var preSelectedDocumentType: DocumentType? {
+            switch selectedTab {
+            case .overview, .statistics:
+                return nil
+            case .maintenance:
+                return .maintenance
+            case .administration, .fuel:
+                return nil
+            }
+        }
 
         // Child stores for tabs
         var statisticsStore: VehicleStatisticsStore.State = .init()
-        var maintenanceStore: DocumentTabStore.State = .init(tab: .maintenance)
-        var administrationStore: DocumentTabStore.State = .init(tab: .administration)
-        var fuelStore: DocumentTabStore.State = .init(tab: .fuel)
+        var maintenanceStore: VehicleMaintenanceStore.State = .init()
+        var administrationStore: VehicleAdministrationStore.State = .init()
+        var fuelStore: VehicleFuelStore.State = .init()
 
         // Stats stores (used by both Overview and Statistics tabs)
         var warningVehicle: WarningVehicleStore.State = WarningVehicleStore.State()
@@ -39,13 +68,14 @@ struct MainStore {
 
     enum Action: Equatable {
         case view(ActionView)
-        case tabStore(VehicleDetailTabStore.Action)
+        case tabSelected(Tab)
+        case quickActionTapped
 
         // Child stores actions
         case statisticsStore(VehicleStatisticsStore.Action)
-        case maintenanceStore(DocumentTabStore.Action)
-        case administrationStore(DocumentTabStore.Action)
-        case fuelStore(DocumentTabStore.Action)
+        case maintenanceStore(VehicleMaintenanceStore.Action)
+        case administrationStore(VehicleAdministrationStore.Action)
+        case fuelStore(VehicleFuelStore.Action)
 
         // Stats stores actions
         case warningVehicle(WarningVehicleStore.Action)
@@ -81,13 +111,11 @@ struct MainStore {
     @Dependency(\.vehicleGRDBClient) var vehicleRepository
 
     var body: some ReducerOf<Self> {
-        Scope(state: \.tabStore, action: \.tabStore) { VehicleDetailTabStore() }
-
         // Child stores for tabs
         Scope(state: \.statisticsStore, action: \.statisticsStore) { VehicleStatisticsStore() }
-        Scope(state: \.maintenanceStore, action: \.maintenanceStore) { DocumentTabStore() }
-        Scope(state: \.administrationStore, action: \.administrationStore) { DocumentTabStore() }
-        Scope(state: \.fuelStore, action: \.fuelStore) { DocumentTabStore() }
+        Scope(state: \.maintenanceStore, action: \.maintenanceStore) { VehicleMaintenanceStore() }
+        Scope(state: \.administrationStore, action: \.administrationStore) { VehicleAdministrationStore() }
+        Scope(state: \.fuelStore, action: \.fuelStore) { VehicleFuelStore() }
 
         // Stats stores
         Scope(state: \.warningVehicle, action: \.warningVehicle) { WarningVehicleStore() }
@@ -106,7 +134,7 @@ struct MainStore {
             case .maintenanceStore(.addDocumentTapped),
                  .administrationStore(.addDocumentTapped),
                  .fuelStore(.addDocumentTapped):
-                return .send(.tabStore(.quickActionTapped))
+                return .send(.quickActionTapped)
 
             case .statisticsStore:
                 return .none  // Pure compositeur
@@ -181,9 +209,12 @@ struct MainStore {
                     state.$vehicles.withLock { $0 = newVehiclesList }
                 return .none
 
-            case .tabStore(.quickActionTapped):
-                // Open AddDocumentStore with pre-selected type from active tab
-                let preSelectedType = state.tabStore.preSelectedDocumentType
+            case let .tabSelected(tab):
+                state.selectedTab = tab
+                return .none
+
+            case .quickActionTapped:
+                let preSelectedType = state.preSelectedDocumentType
                 let lastKnownMileage = state.selectedVehicle.mileage ?? ""
 
                 state.addDocument = AddDocumentStore.State(
@@ -193,9 +224,6 @@ struct MainStore {
                     documentType: preSelectedType ?? .maintenance,
                     preSelectedType: preSelectedType
                 )
-                return .none
-
-            case .tabStore:
                 return .none
 
             default: return .none

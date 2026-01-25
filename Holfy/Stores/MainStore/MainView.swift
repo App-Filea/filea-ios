@@ -48,37 +48,61 @@ struct MainView: View {
             VStack(spacing: 0) {
                 headerView
                     .padding(.horizontal, Spacing.md)
-
-                // Custom Segmented Control
-                CustomSegmentedControl(
-                    store: store.scope(
-                        state: \.tabStore,
-                        action: \.tabStore
-                    )
-                )
-                .padding(.vertical, Spacing.sm)
-                .background(Color(.systemBackground))
-
-                // Content based on selected tab
-                tabContentView
-                Spacer()
-            }
-
-            // Quick Action Button (Floating Action Button)
-            if store.tabStore.showsQuickAction, let label = store.tabStore.quickActionLabel {
-                QuickActionButton(label: label) {
-                    store.send(.tabStore(.quickActionTapped))
+                
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: Spacing.sm) {
+                        ForEach(MainStore.Tab.allCases, id: \.self) { tab in
+                            TabButton(
+                                tab: tab,
+                                isSelected: store.selectedTab == tab,
+                                action: { store.send(.tabSelected(tab)) }
+                            )
+                        }
+                    }
+                    .padding(.horizontal, Spacing.md)
                 }
-                .padding(Spacing.md)
+                .padding(.vertical, Spacing.md)
+
+                tabContentView
             }
         }
     }
 
     @ViewBuilder
     private var tabContentView: some View {
-        switch store.tabStore.selectedTab {
+        switch store.selectedTab {
         case .overview:
-            VehicleOverviewView(store: store)
+            ScrollView {
+                VStack(alignment: .leading, spacing: Spacing.md) {
+                    // Stats cards
+                    HStack(spacing: Spacing.sm) {
+                        TotalCostVehicleView(store: store.scope(state: \.totalCostVehicle, action: \.totalCostVehicle))
+
+                        WarningVehicleView(store: store.scope(state: \.warningVehicle, action: \.warningVehicle))
+                    }
+
+                    Divider()
+                    
+                    Button(action: {}) {
+                        VStack(alignment: .leading, spacing: Spacing.sm) {
+                            Text("Contrôle technique")
+                            Spacer()
+                            HStack {
+                                Text("Dans 120 jours")
+                                Text("08/06/2026")
+                            }
+                        }
+                        .padding(Spacing.cardPadding)
+                    }
+                    .buttonStyle(.plain)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .frame(height: 140)
+                    .background(Color(.tertiarySystemGroupedBackground))
+                    .cornerRadius(Radius.card)
+                }
+                .padding(.horizontal, Spacing.md)
+            }
+            .scrollBounceBehavior(.basedOnSize)
 
         case .statistics:
             VehicleStatisticsView(
@@ -209,8 +233,7 @@ struct MainView: View {
                         documents: [
                             .init(fileURL: "", name: "Vidange", date: .now, mileage: "100000", type: .maintenance)
                         ]
-                    )),
-                    tabStore: VehicleDetailTabStore.State()
+                    ))
                 ),
                 reducer: { MainStore() }
             )
@@ -253,11 +276,37 @@ struct MainView: View {
                         documents: [
                             .init(fileURL: "", name: "Vidange", date: .now, mileage: "", type: .maintenance)
                         ]
-                    )),
-                    tabStore: VehicleDetailTabStore.State()
+                    ))
                 ),
                 reducer: { MainStore() }
             )
         )
+    }
+}
+
+private struct TabButton: View {
+    let tab: MainStore.Tab
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: Spacing.xs) {
+                Image(systemName: tab.icon)
+                    .font(.system(size: 16))
+                Text(tab.rawValue)
+                    .font(.system(size: 14, weight: isSelected ? .semibold : .regular))
+            }
+            .foregroundColor(isSelected ? .white : .primary)
+            .padding(.vertical, Spacing.sm)
+            .padding(.horizontal, Spacing.md)
+            .background(
+                RoundedRectangle(cornerRadius: Radius.lg)
+                    .fill(isSelected ? Color.accentColor : Color(.tertiarySystemGroupedBackground))
+            )
+        }
+        .sensoryFeedback(.selection, trigger: isSelected)
+        .accessibilityLabel(tab.rawValue)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }

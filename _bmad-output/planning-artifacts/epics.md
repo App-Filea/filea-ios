@@ -1,100 +1,103 @@
 ---
-stepsCompleted: [1, 2]
+stepsCompleted: [1, 2, 3]
 inputDocuments:
   - '_bmad-output/planning-artifacts/prd.md'
-  - 'docs/architecture.md'
+  - '_bmad-output/planning-artifacts/architecture.md'
   - '_bmad-output/planning-artifacts/ux-design-specification.md'
+  - '_bmad-output/analysis/brainstorming-session-2026-01-26.md'
 storiesExist: true
 storiesLocation: '_bmad-output/implementation-artifacts/'
+lastUpdated: '2026-01-26'
 ---
 
 # Holfy - Epic Breakdown
 
-## Overview
+## Vue d'Ensemble
 
-This document provides the complete epic and story breakdown for Holfy, decomposing the requirements from the PRD, UX Design, and Architecture requirements into implementable stories.
+Ce document fournit la décomposition complète des epics et stories pour Holfy, transformant les exigences du PRD, du Design UX et de l'Architecture en stories implémentables.
 
-**Note:** Les stories ont été créées précédemment et sont disponibles dans `implementation-artifacts/`.
+**Note :** Les stories sont disponibles dans `implementation-artifacts/`.
 
-## Requirements Inventory
+---
 
-### Functional Requirements
+## Inventaire des Exigences
+
+### Exigences Fonctionnelles
 
 **Navigation & Gestion des Onglets**
-- FR1: Users can view 5 themed tabs (Overview, Statistics, Maintenance & Repairs, Administration, Fuel) in main dashboard for current vehicle
-- FR2: Users can switch between tabs by tapping on tab labels
-- FR3: System displays currently active tab with distinct visual styling
-- FR4: System preserves scroll position independently for each tab when switching
-- FR5: Overview tab is displayed by default when opening main dashboard
+- FR1: L'utilisateur peut voir 5 onglets thématiques (Vue d'Ensemble, Statistiques, Entretiens & Réparations, Administration, Carburant) dans le dashboard principal pour le véhicule courant
+- FR2: L'utilisateur peut basculer entre les onglets en appuyant sur les labels
+- FR3: Le système affiche l'onglet actif avec un style visuel distinct
+- FR4: Le système préserve la position de scroll indépendamment pour chaque onglet
+- FR5: L'onglet Vue d'Ensemble est affiché par défaut à l'ouverture du dashboard
+
+**Vue d'Ensemble - Contenu (NOUVEAU)**
+- FR32: L'onglet Vue d'Ensemble affiche une section Mini-Stats avec 2 cartes (Coût cette année + Dernier entretien)
+- FR33: L'onglet Vue d'Ensemble affiche une section Alertes avec les échéances urgentes (max 3)
+- FR34: L'onglet Vue d'Ensemble affiche une section À Compléter avec le compteur de documents incomplets
+- FR35: L'onglet Vue d'Ensemble affiche une section Activités Récentes avec les 3 derniers documents
+- FR36: Les sections Alertes, À Compléter et Activités sont masquées si vides
+- FR37: Un message de bienvenue s'affiche pour les nouveaux véhicules sans documents
 
 **Filtrage & Affichage des Documents**
-- FR6: System automatically filters and displays only documents of current vehicle matching the active tab's type
-- FR7: Maintenance & Repairs tab displays documents of type `maintenance` and `repair` for current vehicle
-- FR8: Administration tab displays documents of type `administrative` for current vehicle
-- FR9: Fuel tab displays documents of type `fuel` for current vehicle
-- FR10: Overview tab displays recent documents of all types for current vehicle
-- FR11: Documents within each tab are displayed in chronological order (most recent first)
+- FR6: Le système filtre automatiquement et affiche uniquement les documents du véhicule courant correspondant au type de l'onglet actif
+- FR7: L'onglet Entretiens & Réparations affiche les documents de type `maintenance` et `repair`
+- FR8: L'onglet Administration affiche les documents de type `administrative`
+- FR9: L'onglet Carburant affiche les documents de type `fuel`
+- FR10: L'onglet Vue d'Ensemble affiche les documents récents de tous types
+- FR11: Les documents de chaque onglet sont affichés en ordre chronologique (plus récent en premier)
 
 **Actions Contextuelles**
-- FR12: Users can add a new maintenance document directly from Maintenance & Repairs tab with type pre-selected for current vehicle
-- FR13: Users can add a new administrative document directly from Administration tab with type pre-selected for current vehicle
-- FR14: Users can add a new fuel record directly from Fuel tab with type pre-selected for current vehicle
-- FR15: System does not display add actions in Overview and Statistics tabs (read-only tabs)
-
-**Empty States & Guidage (REPORTÉ)**
-- FR16: System displays welcoming message when a tab contains no documents for current vehicle
-- FR17: Empty state shows concrete examples of document types that belong in that tab
-- FR18: Empty state displays clear call-to-action button to add first document of that type
-- FR19: Empty state examples for Maintenance: "Oil change, Tire replacement, Service"
-- FR20: Empty state examples for Administration: "Registration, Insurance, Technical inspection"
-- FR21: Empty state examples for Fuel: "Gas fill-ups, Electric charges"
+- FR12: L'utilisateur peut ajouter un document d'entretien directement depuis l'onglet Entretiens avec le type pré-sélectionné
+- FR13: L'utilisateur peut ajouter un document administratif directement depuis l'onglet Administration avec le type pré-sélectionné
+- FR14: L'utilisateur peut ajouter un enregistrement carburant directement depuis l'onglet Carburant avec le type pré-sélectionné
+- FR15: Le système n'affiche pas d'actions d'ajout dans les onglets Vue d'Ensemble et Statistiques (onglets lecture seule)
 
 **Statistiques & Vue d'Ensemble**
-- FR22: Statistics tab displays 4-5 existing essential statistics cards for current vehicle
-- FR23: Overview tab displays current vehicle snapshot information (brand, model, mileage)
-- FR24: Overview tab displays recent document timeline across all types for current vehicle
-- FR25: System reuses existing statistics calculation logic for Statistics tab display
+- FR22: L'onglet Statistiques affiche 4-5 cartes statistiques essentielles pour le véhicule courant
+- FR23: L'onglet Vue d'Ensemble affiche les informations snapshot du véhicule (marque, modèle, kilométrage)
+- FR24: L'onglet Vue d'Ensemble affiche la timeline des documents récents tous types confondus
+- FR25: Le système réutilise la logique de calcul statistique existante pour l'affichage de l'onglet Statistiques
 
 **Intégrité des Données**
-- FR26: System ensures documents are stored once in database (GRDB) regardless of tab filtering
-- FR27: System maintains document type accuracy when adding via Quick Actions
-- FR28: Changes to documents (edit, delete) are reflected immediately across all relevant tabs
+- FR26: Le système s'assure que les documents sont stockés une seule fois en base (GRDB) indépendamment du filtrage par onglet
+- FR27: Le système maintient la précision du type de document lors de l'ajout via Quick Actions
+- FR28: Les modifications de documents (édition, suppression) sont reflétées immédiatement dans tous les onglets concernés
 
-**Gestion Contexte Véhicule**
-- FR29: Main dashboard displays Custom Segmented Control for currently selected vehicle
-- FR30: When user switches vehicles via VehiclesList, main dashboard updates to show new vehicle's data in all tabs
-- FR31: System maintains last active tab selection when switching between vehicles
+**Gestion du Contexte Véhicule**
+- FR29: Le dashboard principal affiche le Custom Segmented Control pour le véhicule actuellement sélectionné
+- FR30: Quand l'utilisateur change de véhicule via VehiclesList, le dashboard met à jour les données du nouveau véhicule dans tous les onglets
+- FR31: Le système conserve la sélection du dernier onglet actif lors du changement de véhicule
 
-### NonFunctional Requirements
+### Exigences Non-Fonctionnelles
 
 **Performance**
-- NFR1: Tab switching completes in under 100 milliseconds on target devices (iPhone running iOS 18.5+)
-- NFR2: Document list scrolling maintains 60 FPS (frames per second) with up to 100 documents per tab
-- NFR3: Initial tab load (when opening main dashboard) completes in under 200 milliseconds
-- NFR4: Memory usage remains stable during extended tab switching sessions (no memory leaks detected via Instruments)
+- NFR1: Le changement d'onglet s'effectue en moins de 100 millisecondes sur les appareils cibles (iPhone iOS 18.5+)
+- NFR2: Le scroll de la liste de documents maintient 60 FPS avec jusqu'à 100 documents par onglet
+- NFR3: Le chargement initial de l'onglet (à l'ouverture du dashboard) s'effectue en moins de 200 millisecondes
+- NFR4: L'utilisation mémoire reste stable pendant les sessions prolongées de changement d'onglet
 
 **Accessibilité**
-- NFR5: Custom Segmented Control supports VoiceOver with clear announcements of tab names and selection state
-- NFR6: Tab labels and controls support Dynamic Type for text size adjustments
-- NFR7: Tab switching is operable via iOS accessibility gestures (swipe navigation)
-- NFR8: Empty states maintain sufficient color contrast ratios (WCAG AA minimum: 4.5:1 for text)
-- NFR9: Quick Action buttons have minimum touch target size of 44×44 points per Apple HIG
+- NFR5: Le Custom Segmented Control supporte VoiceOver avec annonces claires des noms et états des onglets
+- NFR6: Les labels et contrôles d'onglet supportent Dynamic Type pour l'ajustement de la taille du texte
+- NFR7: Le changement d'onglet est opérable via les gestes d'accessibilité iOS
+- NFR8: Les empty states maintiennent des ratios de contraste suffisants (WCAG AA minimum: 4.5:1)
+- NFR9: Les boutons Quick Action ont une taille de zone tactile minimum de 44×44 points selon Apple HIG
 
 **Fiabilité**
-- NFR10: Zero crashes related to tab switching or filtering logic during normal operation
-- NFR11: Scroll position is preserved accurately when switching between tabs (within 5 points of original position)
-- NFR12: Document count accuracy maintained across all tabs (no duplicate or missing documents)
-- NFR13: Tab state survives app backgrounding and restoration without data loss
+- NFR10: Zéro crash lié au changement d'onglet ou à la logique de filtrage en fonctionnement normal
+- NFR11: La position de scroll est préservée précisément lors du changement d'onglet
+- NFR12: La précision du comptage de documents est maintenue dans tous les onglets
+- NFR13: L'état des onglets survit au backgrounding et à la restauration de l'app sans perte de données
 
 **Maintenabilité**
-- NFR14: All new TCA stores follow existing project patterns (composition of reducers, @Shared state usage)
-- NFR15: Code adheres to Swift 6 strict concurrency requirements (no data races, proper Sendable conformance)
-- NFR16: Unit test coverage of at least 80% for new tab-related stores and filtering logic
-- NFR17: All tests follow BDD pattern (Given-When-Then) as defined in CLAUDE.md conventions
-- NFR18: New SwiftUI components reuse existing Design System tokens (ColorTokens, SpacingTokens, TypographyTokens, RadiusTokens)
-- NFR19: Inline documentation provided for all new public APIs and complex logic
+- NFR14: Tous les nouveaux stores TCA suivent les patterns existants du projet
+- NFR15: Le code adhère aux exigences Swift 6 strict concurrency
+- NFR16: Couverture de tests unitaires d'au moins 80% pour les nouveaux stores et logique de filtrage
+- NFR17: Tous les tests suivent le pattern BDD (Given-When-Then)
+- NFR18: Les nouveaux composants SwiftUI réutilisent les tokens du Design System existant
 
-### Additional Requirements
+### Exigences Additionnelles
 
 **Architecture Technique**
 - Stack technique : SwiftUI + TCA 1.22.2+ + SQLite Data (GRDB) 1.4.3+
@@ -113,7 +116,9 @@ This document provides the complete epic and story breakdown for Holfy, decompos
 - Haptic Feedback : Confirmation tactile des actions critiques
 - Dark Mode : Support complet via ColorTokens
 
-### FR Coverage Map
+---
+
+## Carte de Couverture des Exigences
 
 | FR | Epic | Description |
 |----|------|-------------|
@@ -126,75 +131,175 @@ This document provides the complete epic and story breakdown for Holfy, decompos
 | FR7 | Epic 1 | Onglet Entretiens : maintenance + repair |
 | FR8 | Epic 1 | Onglet Admin : administrative |
 | FR9 | Epic 1 | Onglet Carburant : fuel |
-| FR10 | Epic 1 | Vue d'Ensemble : tous types récents |
+| FR10 | Epic 2 | Vue d'Ensemble : tous types récents |
 | FR11 | Epic 1 | Tri chronologique |
-| FR12 | Epic 2 | Quick Action Entretien |
-| FR13 | Epic 2 | Quick Action Admin |
-| FR14 | Epic 2 | Quick Action Carburant |
-| FR15 | Epic 2 | Pas d'actions dans Overview/Stats |
-| FR16-FR21 | 🔜 Future | Empty States (reporté) |
+| FR12 | Epic 3 | Quick Action Entretien |
+| FR13 | Epic 3 | Quick Action Admin |
+| FR14 | Epic 3 | Quick Action Carburant |
+| FR15 | Epic 3 | Pas d'actions dans Overview/Stats |
 | FR22 | Epic 3 | Cards statistiques |
-| FR23 | Epic 3 | Snapshot véhicule |
-| FR24 | Epic 3 | Timeline documents récents |
+| FR23 | Epic 2 | Snapshot véhicule (stats) |
+| FR24 | Epic 2 | Timeline documents récents |
 | FR25 | Epic 3 | Réutilisation logique stats |
 | FR26 | Epic 1 | Source unique GRDB |
-| FR27 | Epic 2 | Précision type Quick Actions |
+| FR27 | Epic 3 | Précision type Quick Actions |
 | FR28 | Epic 1 | Mise à jour cross-onglets |
 | FR29 | Epic 1 | Segmented Control véhicule actuel |
 | FR30 | Epic 1 | Mise à jour changement véhicule |
 | FR31 | Epic 1 | Conservation onglet actif |
-
-## Epic List
-
-### Epic 1 : Navigation par Onglets et Affichage des Documents
-
-L'utilisateur peut naviguer entre les 5 onglets thématiques et voir ses documents filtrés automatiquement par type. C'est le cœur du Custom Segmented Control - l'utilisateur passe d'une liste unique confuse à une navigation mentale claire.
-
-**FRs couverts:** FR1, FR2, FR3, FR4, FR5, FR6, FR7, FR8, FR9, FR10, FR11, FR26, FR28, FR29, FR30, FR31
-
-**Stories existantes:**
-- 1-1: Custom Segmented Control Component
-- 1-2: Document Filtering by Tab
-
-### Epic 2 : Actions Contextuelles d'Ajout Rapide (Quick Actions)
-
-L'utilisateur peut ajouter un document directement depuis l'onglet actif avec le type déjà pré-sélectionné. Élimine la friction cognitive du "quel type dois-je sélectionner ?".
-
-**FRs couverts:** FR12, FR13, FR14, FR15, FR27
-
-**Stories existantes:**
-- 1-3: Contextual Quick Actions
-
-### Epic 3 : Vue d'Ensemble et Statistiques
-
-L'utilisateur peut voir un snapshot de son véhicule et les statistiques clés dans des onglets dédiés.
-
-**FRs couverts:** FR22, FR23, FR24, FR25
-
-**Stories existantes:**
-- (À mapper avec les stories existantes ou à créer)
+| FR32 | Epic 2 | Section Mini-Stats |
+| FR33 | Epic 2 | Section Alertes |
+| FR34 | Epic 2 | Section À Compléter |
+| FR35 | Epic 2 | Section Activités Récentes |
+| FR36 | Epic 2 | Sections masquées si vides |
+| FR37 | Epic 2 | Empty State bienvenue |
 
 ---
 
-## Future Epics (Reportés)
+## Liste des Epics
 
-### 🔜 Epic Future : Guidage par Empty States
+### Epic 1 : Navigation par Onglets et Affichage des Documents
+
+L'utilisateur peut naviguer entre les 5 onglets thématiques et voir ses documents filtrés automatiquement par type. C'est le coeur du Custom Segmented Control - l'utilisateur passe d'une liste unique confuse à une navigation mentale claire.
+
+**FRs couverts:** FR1, FR2, FR3, FR4, FR5, FR6, FR7, FR8, FR9, FR11, FR26, FR28, FR29, FR30, FR31
+
+**Stories:**
+| ID | Titre | Statut |
+|----|-------|--------|
+| 1-1 | Custom Segmented Control Component | ready-for-dev |
+| 1-2 | Document Filtering by Tab | ready-for-dev |
+
+---
+
+### Epic 2 : Vue d'Ensemble du Dashboard Véhicule
+
+L'utilisateur peut voir un snapshot complet de son véhicule dans l'onglet Vue d'Ensemble : statistiques rapides, alertes importantes, documents incomplets et activités récentes. Cette vue offre une vision globale sans avoir à naviguer entre les onglets.
+
+**FRs couverts:** FR10, FR23, FR24, FR32, FR33, FR34, FR35, FR36, FR37
+
+**Source:** Session de brainstorming du 2026-01-26
+
+**Architecture validée :**
+- Section Mini-Stats : 2 cartes (Coût cette année + Dernier entretien)
+- Section Alertes : Échéances légales + révisions (max 3, masquée si vide)
+- Section À Compléter : Compteur documents incomplets (masquée si vide)
+- Section Activités Récentes : 3 derniers documents (masquée si vide)
+- Empty State : Message de bienvenue pour nouveaux véhicules
+
+**Stories:**
+| ID | Titre | Statut |
+|----|-------|--------|
+| 2-1 | Section Mini-Stats | ready-for-dev |
+| 2-2 | Section Alertes | ready-for-dev |
+| 2-3 | Section À Compléter | ready-for-dev |
+| 2-4 | Section Activités Récentes | ready-for-dev |
+| 2-5 | Empty State Vue d'Ensemble | ready-for-dev |
+
+---
+
+### Epic 3 : Actions Contextuelles et Statistiques
+
+L'utilisateur peut ajouter un document directement depuis l'onglet actif avec le type déjà pré-sélectionné, et consulter les statistiques détaillées de son véhicule. Élimine la friction cognitive du "quel type dois-je sélectionner ?".
+
+**FRs couverts:** FR12, FR13, FR14, FR15, FR22, FR25, FR27
+
+**Stories:**
+| ID | Titre | Statut |
+|----|-------|--------|
+| 1-3 | Contextual Quick Actions | ready-for-dev |
+
+---
+
+## Epics Futures (Reportées)
+
+### Epic Future : Guidage par Empty States
 
 L'utilisateur novice est guidé naturellement via des empty states explicatifs avec exemples concrets et CTA clairs. Pattern "Learn by Doing".
 
 **FRs couverts:** FR16, FR17, FR18, FR19, FR20, FR21
 
-**Stories existantes:**
-- 1-4: Empty States with Guidance (créée mais reportée)
+**Stories:**
+| ID | Titre | Statut |
+|----|-------|--------|
+| 1-4 | Empty States with Guidance | reportée |
 
 ---
 
-## Stories Existantes (Référence)
+## Référence des Stories
 
 | Fichier | Epic | Statut |
 |---------|------|--------|
-| `1-1-custom-segmented-control-component.md` | Epic 1 | ✅ Existante |
-| `1-2-document-filtering-by-tab.md` | Epic 1 | ✅ Existante |
-| `1-3-contextual-quick-actions.md` | Epic 2 | ✅ Existante |
-| `1-4-empty-states-with-guidance.md` | 🔜 Future | Reportée |
-| `1-5-ocr-smart-document-scan.md` | - | Hors scope actuel |
+| `1-1-custom-segmented-control-component.md` | Epic 1 | ready-for-dev |
+| `1-2-document-filtering-by-tab.md` | Epic 1 | ready-for-dev |
+| `1-3-contextual-quick-actions.md` | Epic 3 | ready-for-dev |
+| `1-4-empty-states-with-guidance.md` | Future | reportée |
+| `2-1-section-mini-stats.md` | Epic 2 | ready-for-dev |
+| `2-2-section-alertes.md` | Epic 2 | ready-for-dev |
+| `2-3-section-a-completer.md` | Epic 2 | ready-for-dev |
+| `2-4-section-activites-recentes.md` | Epic 2 | ready-for-dev |
+| `2-5-empty-state-vue-ensemble.md` | Epic 2 | ready-for-dev |
+
+---
+
+## Wireframe de Référence (Epic 2)
+
+### État Normal (avec données)
+
+```
+┌─────────────────────────────────────────┐
+│  Statistiques                [Voir tout]│
+├─────────────────────────────────────────┤
+│  ┌─────────────────┐ ┌─────────────────┐│
+│  │ Coût cette      │ │ Dernier         ││
+│  │ année           │ │ entretien       ││
+│  │                 │ │                 ││
+│  │    1 847 €      │ │     156 €       ││
+│  │                 │ │                 ││
+│  │ 8 opérations    │ │ 15 jan 2026     ││
+│  └─────────────────┘ └─────────────────┘│
+├─────────────────────────────────────────┤
+│ Alertes                              >  │
+│ 🔴 CT expire dans 12 jours              │
+│ 🟡 Vidange recommandée                  │
+│ 🟡 Assurance expire dans 45j            │
+├─────────────────────────────────────────┤
+│ À compléter                          >  │
+│ 2 documents incomplets                  │
+├─────────────────────────────────────────┤
+│ Activités récentes                   >  │
+│ Vidange           15 jan         156 €  │
+│ Plein essence     12 jan          52 €  │
+│ Assurance          3 jan         420 €  │
+└─────────────────────────────────────────┘
+```
+
+### État Nouveau Véhicule
+
+```
+┌─────────────────────────────────────────┐
+│  Statistiques                [Voir tout]│
+├─────────────────────────────────────────┤
+│  ┌─────────────────┐ ┌─────────────────┐│
+│  │ Coût cette      │ │ Dernier         ││
+│  │ année           │ │ entretien       ││
+│  │                 │ │                 ││
+│  │      0 €        │ │      -- €       ││
+│  │                 │ │                 ││
+│  │ 0 opération     │ │       --        ││
+│  └─────────────────┘ └─────────────────┘│
+├─────────────────────────────────────────┤
+│                                         │
+│   Bienvenue !                           │
+│                                         │
+│   Ajoutez votre premier document        │
+│   pour commencer à suivre               │
+│   votre véhicule.                       │
+│                                         │
+└─────────────────────────────────────────┘
+```
+
+---
+
+**Dernière mise à jour :** 2026-01-26
+**Version :** 2.0

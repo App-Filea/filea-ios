@@ -27,10 +27,12 @@ struct WarningListView: View {
                             }
                         }
                     }
-                    .padding(.horizontal, Spacing.md)
+                    .padding(Spacing.md)
                 }
             }
         }
+        .navigationTitle("stat_card_warnings_title")
+        .navigationBarTitleDisplayMode(.inline)
     }
 
     private var emptyStateView: some View {
@@ -68,9 +70,11 @@ struct WarningListView: View {
         .init(fileURL: "", name: "Document 3", date: .now, mileage: "", type: .repair),
     ])
 
-    return WarningListView(store: Store(initialState: WarningListStore.State()) {
-        WarningListStore()
-    })
+    return NavigationView {
+        WarningListView(store: Store(initialState: WarningListStore.State()) {
+            WarningListStore()
+        })
+    }
 }
 
 #Preview("Empty - All good") {

@@ -70,7 +70,9 @@ struct MainView: View {
         case .overview:
             ScrollView {
                 VStack(alignment: .leading, spacing: Spacing.md) {
-                    // Stats cards
+                    
+                    Text("Coût du véhicule")
+                        .font(.headline)
                     HStack(spacing: Spacing.sm) {
                         TotalCostVehicleView(store: store.scope(state: \.totalCostVehicle, action: \.totalCostVehicle))
 
@@ -80,8 +82,9 @@ struct MainView: View {
                             }
                     }
 
-                    Divider()
-                    
+
+                    Text("Prochain contrôle technique")
+                        .font(.headline)
                     TechnicalInspectionView(store: store.scope(state: \.technicalInspection, action: \.technicalInspection))
                 }
                 .padding(.horizontal, Spacing.md)

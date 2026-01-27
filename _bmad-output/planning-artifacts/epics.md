@@ -158,7 +158,7 @@ Ce document fournit la décomposition complète des epics et stories pour Holfy,
 
 ## Liste des Epics
 
-### Epic 1 : Navigation par Onglets et Affichage des Documents
+### Epic 1 : Navigation par Onglets et Affichage des Documents ✅ TERMINÉE
 
 L'utilisateur peut naviguer entre les 5 onglets thématiques et voir ses documents filtrés automatiquement par type. C'est le coeur du Custom Segmented Control - l'utilisateur passe d'une liste unique confuse à une navigation mentale claire.
 
@@ -167,12 +167,12 @@ L'utilisateur peut naviguer entre les 5 onglets thématiques et voir ses documen
 **Stories:**
 | ID | Titre | Statut |
 |----|-------|--------|
-| 1-1 | Custom Segmented Control Component | ready-for-dev |
-| 1-2 | Document Filtering by Tab | ready-for-dev |
+| 1-1 | Custom Segmented Control Component | ✅ completed |
+| 1-2 | Document Filtering by Tab | ✅ completed |
 
 ---
 
-### Epic 2 : Vue d'Ensemble du Dashboard Véhicule
+### Epic 2 : Vue d'Ensemble du Dashboard Véhicule 🚧 EN COURS
 
 L'utilisateur peut voir un snapshot complet de son véhicule dans l'onglet Vue d'Ensemble : statistiques rapides, alertes importantes, documents incomplets et activités récentes. Cette vue offre une vision globale sans avoir à naviguer entre les onglets.
 
@@ -190,9 +190,9 @@ L'utilisateur peut voir un snapshot complet de son véhicule dans l'onglet Vue d
 **Stories:**
 | ID | Titre | Statut |
 |----|-------|--------|
-| 2-1 | Section Mini-Stats | ready-for-dev |
-| 2-2 | Section Alertes | ready-for-dev |
-| 2-3 | Section À Compléter | ready-for-dev |
+| 2-1 | Section Mini-Stats | ✅ completed |
+| 2-2 | Section Alertes | ✅ completed |
+| 2-3 | Section À Compléter | ✅ completed |
 | 2-4 | Section Activités Récentes | ready-for-dev |
 | 2-5 | Empty State Vue d'Ensemble | ready-for-dev |
 
@@ -230,13 +230,13 @@ L'utilisateur novice est guidé naturellement via des empty states explicatifs a
 
 | Fichier | Epic | Statut |
 |---------|------|--------|
-| `1-1-custom-segmented-control-component.md` | Epic 1 | ready-for-dev |
-| `1-2-document-filtering-by-tab.md` | Epic 1 | ready-for-dev |
+| `1-1-custom-segmented-control-component.md` | Epic 1 | ✅ completed |
+| `1-2-document-filtering-by-tab.md` | Epic 1 | ✅ completed |
 | `1-3-contextual-quick-actions.md` | Epic 3 | ready-for-dev |
 | `1-4-empty-states-with-guidance.md` | Future | reportée |
-| `2-1-section-mini-stats.md` | Epic 2 | ready-for-dev |
-| `2-2-section-alertes.md` | Epic 2 | ready-for-dev |
-| `2-3-section-a-completer.md` | Epic 2 | ready-for-dev |
+| `2-1-section-mini-stats.md` | Epic 2 | ✅ completed |
+| `2-2-section-alertes.md` | Epic 2 | ✅ completed |
+| `2-3-section-a-completer.md` | Epic 2 | ✅ completed |
 | `2-4-section-activites-recentes.md` | Epic 2 | ready-for-dev |
 | `2-5-empty-state-vue-ensemble.md` | Epic 2 | ready-for-dev |
 

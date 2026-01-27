@@ -70,22 +70,44 @@ struct MainView: View {
         case .overview:
             ScrollView {
                 VStack(alignment: .leading, spacing: Spacing.md) {
-                    
-                    Text("Coût du véhicule")
-                        .font(.headline)
+                    // Section Mini-Stats
+                    HStack {
+                        Text("overview_section_statistics_title")
+                            .font(.headline)
+                        Spacer()
+                        Text("all_see_all")
+                            .font(.footnote)
+                            .foregroundStyle(Color.accentColor)
+                    }
                     HStack(spacing: Spacing.sm) {
                         TotalCostVehicleView(store: store.scope(state: \.totalCostVehicle, action: \.totalCostVehicle))
 
-                        WarningVehicleView(store: store.scope(state: \.warningVehicle, action: \.warningVehicle))
-                            .onTapGesture {
-                                store.send(.view(.warningVehicleTapped))
-                            }
+                        LastDocumentView(store: store.scope(state: \.lastDocument, action: \.lastDocument))
                     }
 
+                    // Section Alertes
+                    HStack {
+                        Text("stat_card_warnings_title")
+                            .font(.headline)
+                        Spacer()
+                        Text("all_see_details")
+                            .font(.footnote)
+                            .foregroundStyle(Color.accentColor)
+                    }
+                    WarningVehicleView(store: store.scope(state: \.warningVehicle, action: \.warningVehicle))
+                        .onTapGesture {
+                            store.send(.view(.warningVehicleTapped))
+                        }
 
-                    Text("Prochain contrôle technique")
-                        .font(.headline)
-                    TechnicalInspectionView(store: store.scope(state: \.technicalInspection, action: \.technicalInspection))
+                    HStack {
+                        Text("overview_section_recent_activities_title")
+                            .font(.headline)
+                        Spacer()
+                        Text("all_see_all")
+                            .font(.footnote)
+                            .foregroundStyle(Color.accentColor)
+                    }
+                    RecentActivitiesView(store: store.scope(state: \.recentActivities, action: \.recentActivities))
                 }
                 .padding(.horizontal, Spacing.md)
             }
@@ -249,7 +271,7 @@ struct MainView: View {
                                 .init(fileURL: "", name: "CT1", date: .now, mileage: "100000", type: .technicalInspection),
                                 .init(fileURL: "", name: "Réparation", date: .now, mileage: "100000", type: .repair),
                                 .init(fileURL: "", name: "J'sais plus", date: .now, mileage: "100000", type: .other),
-                                .init(fileURL: "", name: "CT2", date: .now, mileage: "100000", type: .technicalInspection)
+                                .init(fileURL: "", name: "CT2", date: .now.addingTimeInterval(60 * 60 * 24), mileage: "100000", type: .technicalInspection)
                             ]
                         )
                     ],
@@ -261,7 +283,11 @@ struct MainView: View {
                         registrationDate: Date(timeIntervalSince1970: 1322784000),
                         plate: "BZ-029-YV",
                         documents: [
-                            .init(fileURL: "", name: "Vidange", date: .now, mileage: "", type: .maintenance)
+                            .init(fileURL: "", name: "Vidange", date: .now, mileage: "100000", type: .maintenance, amount: 100),
+                            .init(fileURL: "", name: "CT1", date: .now, mileage: "100000", type: .technicalInspection),
+                            .init(fileURL: "", name: "Réparation", date: .now, mileage: "100000", type: .repair),
+                            .init(fileURL: "", name: "J'sais plus", date: .now, mileage: "100000", type: .other),
+                            .init(fileURL: "", name: "CT2", date: .now.addingTimeInterval(60 * 60 * 24), mileage: "100000", type: .technicalInspection)
                         ]
                     ))
                 ),

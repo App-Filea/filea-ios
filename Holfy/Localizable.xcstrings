@@ -4,6 +4,9 @@
     "" : {
 
     },
+    "--" : {
+
+    },
     "%@" : {
 
     },
@@ -251,13 +254,30 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Yes, i’ll replace it."
+            "value" : "Yes, i'll replace it."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Oui, je le remplace"
+          }
+        }
+      }
+    },
+    "alert_ct_expires_in_days" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Technical inspection expires in %d days"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CT expire dans %d jours"
           }
         }
       }
@@ -292,6 +312,47 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Supprimer le véhicule"
+          }
+        }
+      }
+    },
+    "alert_incomplete_documents %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld document to complete"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld documents to complete"
+                }
+              }
+            }
+          }
+        },
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld document à compléter"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld documents à compléter"
+                }
+              }
+            }
           }
         }
       }
@@ -512,6 +573,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Enregistrer"
+          }
+        }
+      }
+    },
+    "all_see_all" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "See all"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voir tout"
+          }
+        }
+      }
+    },
+    "all_see_details" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "See details"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voir détails"
           }
         }
       }
@@ -1374,6 +1469,40 @@
         }
       }
     },
+    "overview_section_recent_activities_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recent activities"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activités récentes"
+          }
+        }
+      }
+    },
+    "overview_section_statistics_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Statistics"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Statistiques"
+          }
+        }
+      }
+    },
     "settings_currency_dollar" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1648,6 +1777,9 @@
     "Start" : {
 
     },
+    "stat_card_last_document_title" : {
+
+    },
     "stat_card_total_cost_subtitle" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1716,19 +1848,36 @@
         }
       }
     },
+    "stat_card_warnings_no_alerts" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No reminders"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun rappel"
+          }
+        }
+      }
+    },
     "stat_card_warnings_title" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Warnings"
+            "value" : "Reminders"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Alertes"
+            "value" : "Rappels"
           }
         }
       }

@@ -61,8 +61,10 @@ struct MainStore {
         // overview stores
         var warningVehicle: WarningVehicleStore.State = WarningVehicleStore.State()
         var totalCostVehicle: TotalCostVehicleStore.State = TotalCostVehicleStore.State()
+        var lastDocument: LastDocumentStore.State = LastDocumentStore.State()
         var technicalInspection: TechnicalInspectionStore.State = TechnicalInspectionStore.State()
         var vehicleMonthlyExpenses: VehicleMonthlyExpensesStore.State = VehicleMonthlyExpensesStore.State()
+        var recentActivities: RecentActivitiesStore.State = RecentActivitiesStore.State()
 
         var showEmptyState: Bool = false
     }
@@ -80,8 +82,10 @@ struct MainStore {
         // Overview stores actions
         case warningVehicle(WarningVehicleStore.Action)
         case totalCostVehicle(TotalCostVehicleStore.Action)
+        case lastDocument(LastDocumentStore.Action)
         case technicalInspection(TechnicalInspectionStore.Action)
         case vehicleMonthlyExpenses(VehicleMonthlyExpensesStore.Action)
+        case recentActivities(RecentActivitiesStore.Action)
 
         case onAppear
         case vehicleDetail(PresentationAction<VehicleDetailsStore.Action>)
@@ -119,13 +123,18 @@ struct MainStore {
         // Overview stores
         Scope(state: \.warningVehicle, action: \.warningVehicle) { WarningVehicleStore() }
         Scope(state: \.totalCostVehicle, action: \.totalCostVehicle) { TotalCostVehicleStore() }
+        Scope(state: \.lastDocument, action: \.lastDocument) { LastDocumentStore() }
         Scope(state: \.technicalInspection, action: \.technicalInspection) { TechnicalInspectionStore() }
         Scope(state: \.vehicleMonthlyExpenses, action: \.vehicleMonthlyExpenses) { VehicleMonthlyExpensesStore() }
+        Scope(state: \.recentActivities, action: \.recentActivities) { RecentActivitiesStore() }
 
         Reduce { state, action in
             switch action {
             case .statisticsStore:
                 return .none  // Pure compositeur
+
+            case .recentActivities:
+                return .none
 
             case .view(let actionView):
                 switch actionView {

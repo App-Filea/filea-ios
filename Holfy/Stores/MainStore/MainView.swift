@@ -45,17 +45,22 @@ struct MainView: View {
                 headerView
                     .padding(.horizontal, Spacing.md)
                 
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: Spacing.sm) {
-                        ForEach(MainStore.Tab.allCases, id: \.self) { tab in
-                            TabButton(
-                                tab: tab,
-                                isSelected: store.selectedTab == tab,
-                                action: { store.send(.tabSelected(tab)) }
-                            )
+                VStack(spacing: 0) {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: Spacing.md) {
+                            ForEach(MainStore.Tab.allCases, id: \.self) { tab in
+                                TabButton(
+                                    tab: tab,
+                                    isSelected: store.selectedTab == tab,
+                                    action: { store.send(.tabSelected(tab)) }
+                                )
+                            }
                         }
+                        .padding(.horizontal, Spacing.md)
                     }
-                    .padding(.horizontal, Spacing.md)
+                    Rectangle()
+                        .fill(Color(.tertiarySystemGroupedBackground))
+                        .frame(height: 1)
                 }
                 .padding(.vertical, Spacing.md)
 
@@ -288,19 +293,16 @@ private struct TabButton: View {
 
     var body: some View {
         Button(action: action) {
-            HStack(spacing: Spacing.xs) {
-                Image(systemName: tab.icon)
-                    .font(.system(size: 16))
+            VStack(spacing: Spacing.xs) {
                 Text(tab.rawValue)
                     .font(.system(size: 14, weight: isSelected ? .semibold : .regular))
+                    .foregroundColor(isSelected ? .accent : .secondary)
+                Rectangle()
+                    .fill(isSelected ? .accent : .clear)
+                    .frame(height: 3)
+                    .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isSelected)
+
             }
-            .foregroundColor(isSelected ? .white : .primary)
-            .padding(.vertical, Spacing.sm)
-            .padding(.horizontal, Spacing.md)
-            .background(
-                RoundedRectangle(cornerRadius: Radius.lg)
-                    .fill(isSelected ? Color.accentColor : Color(.tertiarySystemGroupedBackground))
-            )
         }
         .sensoryFeedback(.selection, trigger: isSelected)
         .accessibilityLabel(tab.rawValue)

@@ -827,9 +827,6 @@
         }
       }
     },
-    "Controle technique" : {
-
-    },
     "Document introuvable" : {
 
     },
@@ -2014,6 +2011,7 @@
       }
     },
     "tab_administrative_label" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2197,6 +2195,7 @@
       }
     },
     "vehicle_administrative_document_add_document" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2755,13 +2754,11 @@
         }
       }
     },
-    "Votre controle technique arrive bientôt à échéance, prenez rendez-vous pour le repasser." : {
-
-    },
     "Votre contrôle technique arrive bientôt à échéance." : {
 
     },
     "warning_list_back_to_dashboard" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2778,6 +2775,7 @@
       }
     },
     "warning_list_empty_subtitle" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2794,6 +2792,7 @@
       }
     },
     "warning_list_empty_title" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

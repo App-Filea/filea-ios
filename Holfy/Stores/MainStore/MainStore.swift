@@ -15,7 +15,6 @@ struct MainStore {
         case overview = "tab_overview_label"
         case statistics = "tab_statistics_label"
         case maintenance = "tab_maintain_and_repair_label"
-        case administration = "tab_administrative_label"
 //        case fuel = "Carburant"
 
         var icon: String {
@@ -23,7 +22,6 @@ struct MainStore {
             case .overview: return "rectangle.stack"
             case .statistics: return "chart.bar"
             case .maintenance: return "wrench.and.screwdriver"
-            case .administration: return "building.columns"
 //            case .fuel: return "fuelpump"
             }
         }
@@ -47,15 +45,12 @@ struct MainStore {
                 return nil
             case .maintenance:
                 return .maintenance
-            case .administration/*, .fuel*/:
-                return nil
             }
         }
 
         // Child stores for tabs
         var statisticsStore: VehicleStatisticsStore.State = .init()
-        var maintenanceStore: VehicleMaintenanceStore.State = .init()
-        var administrationStore: VehicleAdministrationStore.State = .init()
+        var maintenanceStore: VehicleDocumentStore.State = .init()
         var fuelStore: VehicleFuelStore.State = .init()
 
         // overview stores
@@ -76,8 +71,7 @@ struct MainStore {
 
         // Child stores actions
         case statisticsStore(VehicleStatisticsStore.Action)
-        case maintenanceStore(VehicleMaintenanceStore.Action)
-        case administrationStore(VehicleAdministrationStore.Action)
+        case maintenanceStore(VehicleDocumentStore.Action)
         case fuelStore(VehicleFuelStore.Action)
 
         // Overview stores actions
@@ -119,8 +113,7 @@ struct MainStore {
 
         // Child stores for tabs
         Scope(state: \.statisticsStore, action: \.statisticsStore) { VehicleStatisticsStore() }
-        Scope(state: \.maintenanceStore, action: \.maintenanceStore) { VehicleMaintenanceStore() }
-        Scope(state: \.administrationStore, action: \.administrationStore) { VehicleAdministrationStore() }
+        Scope(state: \.maintenanceStore, action: \.maintenanceStore) { VehicleDocumentStore() }
         Scope(state: \.fuelStore, action: \.fuelStore) { VehicleFuelStore() }
 
         // Overview stores

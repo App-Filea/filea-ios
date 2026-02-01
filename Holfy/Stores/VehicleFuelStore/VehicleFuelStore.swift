@@ -25,7 +25,6 @@ struct VehicleFuelStore {
 
         case documentTapped(Document)
         case openAddDocument
-        case technicalInspection(TechnicalInspectionStore.Action)
         
         enum ActionView: Equatable {
             case addDocumentTapped

@@ -114,18 +114,10 @@ struct MainView: View {
             )
 
         case .maintenance:
-            VehicleMaintenanceView(
+            VehicleDocumentView(
                 store: store.scope(
                     state: \.maintenanceStore,
                     action: \.maintenanceStore
-                )
-            )
-
-        case .administration:
-            VehicleAdministrationView(
-                store: store.scope(
-                    state: \.administrationStore,
-                    action: \.administrationStore
                 )
             )
 

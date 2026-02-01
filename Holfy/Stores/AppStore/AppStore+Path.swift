@@ -18,7 +18,6 @@ extension AppStore {
             return .none
             
         case .element(id: _, action: .main(.maintenanceStore(.documentTapped(let document)))),
-                .element(id: _, action: .main(.administrationStore(.documentTapped(let document)))),
                 .element(id: _, action: .main(.fuelStore(.documentTapped(let document)))):
             state.path.append(.documentDetail(DocumentDetailStore.State(documentId: document.id)))
             return .none

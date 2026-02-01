@@ -1,5 +1,5 @@
 //
-//  VehicleMaintenanceView.swift
+//  VehicleDocumentView.swift
 //  Holfy
 //
 //  Created by Claude Code on 15/01/2026.
@@ -8,8 +8,8 @@
 import SwiftUI
 import ComposableArchitecture
 
-struct VehicleMaintenanceView: View {
-    @Bindable var store: StoreOf<VehicleMaintenanceStore>
+struct VehicleDocumentView: View {
+    @Bindable var store: StoreOf<VehicleDocumentStore>
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
@@ -44,5 +44,5 @@ struct VehicleMaintenanceView: View {
 
 #Preview {
     @Shared(.selectedVehicle) var selectedVehicle: Vehicle = .init(id: "1", documents: [.init(fileURL: "", name: "", date: .now, mileage: "", type: .technicalInspection)])
-    VehicleMaintenanceView(store: .init(initialState: VehicleMaintenanceStore.State(), reducer: { VehicleMaintenanceStore() }))
+    VehicleDocumentView(store: .init(initialState: VehicleDocumentStore.State(), reducer: { VehicleDocumentStore() }))
 }

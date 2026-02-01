@@ -18,6 +18,7 @@ struct StatisticsRepositoryClient: Sendable {
     var countIncompleteDocuments: @Sendable ([Document]) -> Int
     var groupDocumentsByCategory: @Sendable ([Document]) -> [StatisticsDocumentCategory: [Document]]
     var calculateCategoryTotals: @Sendable ([Document]) -> [StatisticsDocumentCategory: Double]
+    /// @deprecated Use AlertGRDBClient instead. Will be removed in Phase 2.
     var calculateAlerts: @Sendable (Vehicle) -> [VehicleAlert]
 }
 
@@ -39,6 +40,8 @@ extension StatisticsRepositoryClient: DependencyKey {
         }, calculateCategoryTotals: {
             statisticRepository.calculateCategoryTotals(for: $0)
         }, calculateAlerts: {
+            // DEPRECATED: Use AlertGRDBClient instead
+            // Keeping this for backward compatibility during transition
             statisticRepository.calculateAlerts(for: $0)
         })
     }
@@ -177,9 +180,12 @@ final class DefaultStatisticsRepository: @unchecked Sendable {
     }
     
     // MARK: - Vehicle Alerts
+    // DEPRECATED: Use AlertGRDBClient for persisted alerts.
+    // Kept for backward compatibility during transition to Phase 2.
 
     func calculateAlerts(for vehicle: Vehicle) -> [VehicleAlert] {
-        logger.info("🚨 Calcul des alertes pour \(vehicle.brand) \(vehicle.model)")
+        logger.info("🚨 [DEPRECATED] Calcul des alertes pour \(vehicle.brand) \(vehicle.model)")
+        logger.warning("⚠️ calculateAlerts is deprecated. Use AlertGRDBClient instead.")
 
         var alerts: [VehicleAlert] = []
         let now = Date()

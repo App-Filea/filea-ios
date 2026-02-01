@@ -68,6 +68,35 @@ enum DatabaseMigrator {
             }
         }
 
+        // MARK: - Migration v1.2: Table des alertes
+
+        migrator.registerMigration("v1.2_create_alerts_table") { db in
+            try db.create(table: "alertRecords") { table in
+                table.primaryKey("id", .blob).notNull()
+                table.column("title", .text).notNull()
+                table.column("message", .text).notNull()
+                table.column("date", .datetime).notNull()
+                table.column("isRead", .boolean).notNull().defaults(to: false)
+                table.column("isDismissed", .boolean).notNull().defaults(to: false)
+                table.column("vehicleId", .blob).notNull()
+                    .references("vehicleRecords", column: "id", onDelete: .cascade)
+                table.column("deadline", .datetime)
+                table.column("category", .text).notNull()
+                table.column("priority", .text).notNull()
+                table.column("isDismissable", .boolean).notNull().defaults(to: true)
+                table.column("relatedDocumentId", .blob)
+                    .references("fileMetadataRecords", column: "id", onDelete: .setNull)
+                table.column("createdAt", .datetime).notNull()
+                table.column("updatedAt", .datetime).notNull()
+            }
+
+            // Index pour performance
+            try db.create(index: "idx_alert_vehicleId", on: "alertRecords", columns: ["vehicleId"])
+            try db.create(index: "idx_alert_isRead", on: "alertRecords", columns: ["isRead"])
+            try db.create(index: "idx_alert_isDismissed", on: "alertRecords", columns: ["isDismissed"])
+            try db.create(index: "idx_alert_priority", on: "alertRecords", columns: ["priority"])
+        }
+
         // MARK: - Futures migrations
         // Ajouter ici les prochaines migrations avec des versions incrémentales
 

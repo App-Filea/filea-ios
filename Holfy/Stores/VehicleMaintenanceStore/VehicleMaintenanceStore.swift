@@ -1,5 +1,5 @@
 //
-//  VehicleMaintenanceStore.swift
+//  VehicleDocumentStore.swift
 //  Holfy
 //
 //  Created by Claude Code on 20/01/2026.
@@ -9,7 +9,7 @@ import ComposableArchitecture
 import Foundation
 
 @Reducer
-struct VehicleMaintenanceStore {
+struct VehicleDocumentStore {
     @ObservableState
     struct State: Equatable {
         @Shared(.selectedVehicle) var selectedVehicle: Vehicle
@@ -17,7 +17,6 @@ struct VehicleMaintenanceStore {
 
         var filteredDocuments: [Document] {
             selectedVehicle.documents
-                .filter { $0.type == .maintenance || $0.type == .repair }
                 .sorted { $0.date > $1.date }
         }
     }

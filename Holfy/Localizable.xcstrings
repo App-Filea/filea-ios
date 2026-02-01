@@ -10,6 +10,9 @@
     "%@" : {
 
     },
+    "•" : {
+
+    },
     "add_document_mode_camera_subtitle" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -162,6 +165,9 @@
           }
         }
       }
+    },
+    "Ajouter un document" : {
+
     },
     "alert_change_storage_confirm_button" : {
       "extractionState" : "manual",
@@ -827,6 +833,9 @@
         }
       }
     },
+    "Commencez par ajouter votre premier document pour suivre l'évolution de votre véhicule." : {
+
+    },
     "Document introuvable" : {
 
     },
@@ -1272,6 +1281,9 @@
         }
       }
     },
+    "Incomplet" : {
+
+    },
     "Les documents de cette catégorie apparaîtront ici" : {
 
     },
@@ -1511,6 +1523,9 @@
           }
         }
       }
+    },
+    "Pas encore de document" : {
+
     },
     "settings_currency_dollar" : {
       "extractionState" : "manual",
@@ -2194,23 +2209,6 @@
         }
       }
     },
-    "vehicle_administrative_document_add_document" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add new administrative document"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ajouter un nouveau document administratif"
-          }
-        }
-      }
-    },
     "vehicle_age_months" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2709,13 +2707,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Add new maintenance"
+            "value" : "Add new document"
           }
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Ajouter un nouvel entretien"
+            "state" : "translated",
+            "value" : "Ajouter un nouveau document"
           }
         }
       }

@@ -47,8 +47,14 @@ struct AddDocumentStore {
         var documentExpirationDate: Date = Calendar.current.date(byAdding: .year, value: 2, to: Date()) ?? Date()
         var preSelectedType: DocumentType? = nil  // Set when opened from Quick Action
 
+        // Stored metadata for back navigation from form
+        var storedMetadata: ExtractedDocumentMetadata?
+
         enum ViewState: Equatable {
             case modeChoice
+            case extractingMetadata                              // En cours d'extraction
+            case extractionSuccess(ExtractedDocumentMetadata)    // Extraction réussie
+            case extractionError(String)                         // Extraction échouée
             case metadataForm
         }
 
@@ -76,6 +82,13 @@ struct AddDocumentStore {
         case cancelCreation
         case transformToPdf([UIImage])
 
+        // OCR Extraction actions
+        case startMetadataExtraction
+        case metadataExtracted(ExtractedDocumentMetadata)
+        case metadataExtractionFailed(String)
+        case confirmDetectedType
+        case skipMetadataExtraction
+
         enum ActionView: Equatable {
             case openCameraViewButtonTapped
             case cancelCameraViewButtonTapped
@@ -85,6 +98,7 @@ struct AddDocumentStore {
             case cancelFileManagerButtonTapped
             case documentScanned([UIImage])
             case backFromMetadataFormButtonTapped
+            case backFromExtractionButtonTapped
             case closeButtonTapped
             case saveButtonTapped
             case expirationDateChanged(Date)
@@ -93,6 +107,8 @@ struct AddDocumentStore {
 
     @Dependency(\.documentRepository) var documentRepository
     @Dependency(\.vehicleGRDBClient) var vehicleRepository
+    @Dependency(\.ocrService) var ocrService
+    @Dependency(\.metadataExtractor) var metadataExtractor
     @Dependency(\.dismiss) var dismiss
 
     var body: some ReducerOf<Self> {
@@ -140,7 +156,16 @@ struct AddDocumentStore {
                 case .documentScanned(let images):
                     return .send(.transformToPdf(images))
                 case .backFromMetadataFormButtonTapped:
+                    // Retour vers extractionSuccess si on a des metadata stockées, sinon modeChoice
+                    if let metadata = state.storedMetadata {
+                        state.viewState = .extractionSuccess(metadata)
+                    } else {
+                        state.viewState = .modeChoice
+                    }
+                    return .none
+                case .backFromExtractionButtonTapped:
                     state.viewState = .modeChoice
+                    state.storedMetadata = nil
                     return .none
                 case .closeButtonTapped:
                     return .send(.cancelCreation)
@@ -193,8 +218,150 @@ struct AddDocumentStore {
                 if let url = url {
                     state.selectedFileURL = url
                     state.selectedFileName = url.lastPathComponent
-                    state.viewState = .metadataForm
+                    state.viewState = .extractingMetadata
+                    // Start extraction immediately
+                    return .send(.startMetadataExtraction)
                 }
+                return .none
+
+            case .startMetadataExtraction:
+                guard let fileURL = state.selectedFileURL else {
+                    return .send(.metadataExtractionFailed("Aucun fichier sélectionné"))
+                }
+
+                return .run { send in
+                    print("🔍 [AddDocumentStore] Starting OCR extraction")
+                    print("   └─ File: \(fileURL.lastPathComponent)")
+
+                    do {
+                        // Step 1: Get image from file
+                        let image: UIImage
+
+                        if fileURL.pathExtension.lowercased() == "pdf" {
+                            // Convert PDF first page to image
+                            guard let pdfDocument = PDFDocument(url: fileURL),
+                                  let pdfImage = pdfDocument.imageOfFirstPage() else {
+                                throw NSError(domain: "OCR", code: 1, userInfo: [NSLocalizedDescriptionKey: "Impossible de lire le PDF"])
+                            }
+                            image = pdfImage
+                        } else {
+                            // Load image directly
+                            guard let imageData = try? Data(contentsOf: fileURL),
+                                  let loadedImage = UIImage(data: imageData) else {
+                                throw NSError(domain: "OCR", code: 2, userInfo: [NSLocalizedDescriptionKey: "Impossible de charger l'image"])
+                            }
+                            image = loadedImage
+                        }
+
+                        // Step 2: Perform OCR
+                        let ocrText = try await ocrService.recognizeTextStatic(image)
+                        print("")
+                        print("╔══════════════════════════════════════════════════════════════╗")
+                        print("║           📝 TEXTE OCR EXTRAIT                               ║")
+                        print("╠══════════════════════════════════════════════════════════════╣")
+                        let lines = ocrText.components(separatedBy: "\n").prefix(20)
+                        for line in lines {
+                            let truncated = String(line.prefix(58))
+                            print("║ \(truncated.padding(toLength: 60, withPad: " ", startingAt: 0))║")
+                        }
+                        if ocrText.components(separatedBy: "\n").count > 20 {
+                            print("║ ... (\(ocrText.components(separatedBy: "\n").count - 20) lignes supplémentaires)                            ║")
+                        }
+                        print("╚══════════════════════════════════════════════════════════════╝")
+                        print("")
+
+                        // Step 3: Extract metadata from OCR text
+                        let metadata = await metadataExtractor.extract(ocrText)
+
+                        await send(.metadataExtracted(metadata))
+
+                    } catch {
+                        print("❌ [AddDocumentStore] OCR extraction failed: \(error.localizedDescription)")
+                        await send(.metadataExtractionFailed(error.localizedDescription))
+                    }
+                }
+
+            case .metadataExtracted(let metadata):
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateFormat = "dd/MM/yyyy"
+
+                print("")
+                print("╔══════════════════════════════════════════════════════════════╗")
+                print("║           📄 MÉTADONNÉES EXTRAITES                           ║")
+                print("╠══════════════════════════════════════════════════════════════╣")
+                print("║ Type détecté    : \(metadata.detectedType.displayName.padding(toLength: 42, withPad: " ", startingAt: 0))║")
+                print("║ Score           : \(String(metadata.typeScore).padding(toLength: 42, withPad: " ", startingAt: 0))║")
+                print("║ Confiance       : \(metadata.typeConfidence.displayName.padding(toLength: 42, withPad: " ", startingAt: 0))║")
+                print("╠══════════════════════════════════════════════════════════════╣")
+                if let name = metadata.suggestedName {
+                    print("║ Nom suggéré     : \(name.padding(toLength: 42, withPad: " ", startingAt: 0))║")
+                }
+                if let date = metadata.date {
+                    print("║ Date            : \(dateFormatter.string(from: date).padding(toLength: 42, withPad: " ", startingAt: 0))║")
+                }
+                if let amount = metadata.amount {
+                    let amountStr = String(format: "%.2f €", amount)
+                    print("║ Montant         : \(amountStr.padding(toLength: 42, withPad: " ", startingAt: 0))║")
+                }
+                if let mileage = metadata.mileage {
+                    let mileageStr = "\(mileage) km"
+                    print("║ Kilométrage     : \(mileageStr.padding(toLength: 42, withPad: " ", startingAt: 0))║")
+                }
+                if let expiration = metadata.expirationDate {
+                    print("║ Expiration      : \(dateFormatter.string(from: expiration).padding(toLength: 42, withPad: " ", startingAt: 0))║")
+                }
+                print("╚══════════════════════════════════════════════════════════════╝")
+                print("")
+
+                // Only consider extraction successful if confidence is high
+                guard metadata.typeConfidence == .high else {
+                    print("⚠️ [AddDocumentStore] Confidence too low, treating as extraction failure")
+                    state.viewState = .extractionError("Type de document non reconnu")
+                    return .none
+                }
+
+                state.viewState = .extractionSuccess(metadata)
+                state.storedMetadata = metadata
+                return .none
+
+            case .metadataExtractionFailed(let error):
+                state.viewState = .extractionError(error)
+                return .none
+
+            case .confirmDetectedType:
+                // Extract metadata from ViewState
+                guard case .extractionSuccess(let metadata) = state.viewState else {
+                    // No metadata, go to form with default type
+                    state.viewState = .metadataForm
+                    return .none
+                }
+
+                // Apply extracted metadata to form fields
+                state.documentType = metadata.detectedType
+
+                if let suggestedName = metadata.suggestedName {
+                    state.documentName = suggestedName
+                }
+                if let date = metadata.date {
+                    state.documentDate = date
+                }
+                if let amount = metadata.amount {
+                    state.documentAmount = String(format: "%.2f", amount)
+                        .replacingOccurrences(of: ".", with: ",")
+                }
+                if let mileage = metadata.mileage {
+                    state.documentMileage = mileage
+                }
+                if let expirationDate = metadata.expirationDate {
+                    state.documentExpirationDate = expirationDate
+                }
+
+                state.viewState = .metadataForm
+                return .none
+
+            case .skipMetadataExtraction:
+                // Go to form with empty fields
+                state.viewState = .metadataForm
                 return .none
 
             case .removeSource:
@@ -278,12 +445,13 @@ struct AddDocumentStore {
 
                     await send(.fileSelected(pdfURL))
                 }
-                
-            default: return .none
+
+            case .binding:
+                return .none
             }
         }
     }
-    
+
     private func validateFields(_ state: State) -> DocumentFieldsValidationErrors {
         var errors: DocumentFieldsValidationErrors = []
 

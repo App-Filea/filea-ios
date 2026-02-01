@@ -18,6 +18,7 @@ struct StatisticsRepositoryClient: Sendable {
     var countIncompleteDocuments: @Sendable ([Document]) -> Int
     var groupDocumentsByCategory: @Sendable ([Document]) -> [StatisticsDocumentCategory: [Document]]
     var calculateCategoryTotals: @Sendable ([Document]) -> [StatisticsDocumentCategory: Double]
+    var calculateAlerts: @Sendable (Vehicle) -> [VehicleAlert]
 }
 
 extension StatisticsRepositoryClient: DependencyKey {
@@ -37,17 +38,20 @@ extension StatisticsRepositoryClient: DependencyKey {
             statisticRepository.groupDocumentsByCategory(for: $0)
         }, calculateCategoryTotals: {
             statisticRepository.calculateCategoryTotals(for: $0)
+        }, calculateAlerts: {
+            statisticRepository.calculateAlerts(for: $0)
         })
     }
-    
+
     static var testValue: StatisticsRepositoryClient {
         return StatisticsRepositoryClient(calculateTotalCost: { _ in 0.0 },
                                           calculateMonthlyExpenses: { _, _ in [] },
                                           calculateYearlyTotal: { _, _ in 0.0 },
                                           calculateAverageMonthlyCost: { _, _ in 0.0 },
-                                          countIncompleteDocuments: { _ in 0},
+                                          countIncompleteDocuments: { _ in 0 },
                                           groupDocumentsByCategory: { _ in [:] },
-                                          calculateCategoryTotals: { _ in [:]})
+                                          calculateCategoryTotals: { _ in [:] },
+                                          calculateAlerts: { _ in [] })
     }
 }
 
@@ -86,7 +90,7 @@ enum StatisticsDocumentCategory: String, CaseIterable, Sendable {
 
 final class DefaultStatisticsRepository: @unchecked Sendable {
     private let logger = Logger(subsystem: AppConstants.bundleIdentifier, category: "StatisticsRepository")
-    
+
     @Dependency(\.vehicleCostCalculator) var costCalculator
     
     // MARK: - Cost Calculations
@@ -172,8 +176,77 @@ final class DefaultStatisticsRepository: @unchecked Sendable {
         return totals
     }
     
+    // MARK: - Vehicle Alerts
+
+    func calculateAlerts(for vehicle: Vehicle) -> [VehicleAlert] {
+        logger.info("🚨 Calcul des alertes pour \(vehicle.brand) \(vehicle.model)")
+
+        var alerts: [VehicleAlert] = []
+        let now = Date()
+        let calendar = Calendar.current
+
+        // 1. Alertes d'expiration (CT)
+        for document in vehicle.documents {
+            guard let expirationDate = document.expirationDate else { continue }
+
+            let daysRemaining = calendar.dateComponents([.day], from: now, to: expirationDate).day ?? 0
+
+            guard daysRemaining >= 0 && daysRemaining <= 60 else { continue }
+
+            switch document.type {
+            case .technicalInspection:
+                let message = String(
+                    format: NSLocalizedString("alert_ct_expires_in_days", comment: ""),
+                    daysRemaining
+                )
+                alerts.append(VehicleAlert(
+                    type: .technicalInspection,
+                    message: message,
+                    daysRemaining: daysRemaining,
+                    relatedDocument: document
+                ))
+
+            case .maintenance, .repair, .other:
+                break
+            }
+        }
+
+        // 2. Alertes documents incomplets (une par document)
+        let incompleteDocuments = getIncompleteDocuments(in: vehicle)
+        for document in incompleteDocuments {
+            let message = String(localized: "alert_incomplete_document \(document.name)")
+            alerts.append(VehicleAlert(
+                type: .incompleteDocument,
+                message: message,
+                relatedDocument: document
+            ))
+        }
+
+        // Trier par priorité (haute d'abord) puis par jours restants
+        let sortedAlerts = alerts.sorted { lhs, rhs in
+            if lhs.alertPriority != rhs.alertPriority {
+                return lhs.alertPriority > rhs.alertPriority
+            }
+            return (lhs.daysRemaining ?? Int.max) < (rhs.daysRemaining ?? Int.max)
+        }
+
+        logger.info("🚨 \(sortedAlerts.count) alertes calculées")
+        return sortedAlerts
+    }
+
+    private func getIncompleteDocuments(in vehicle: Vehicle) -> [Document] {
+        vehicle.documents.filter { document in
+            switch document.type {
+            case .maintenance, .repair, .technicalInspection:
+                return document.amount == nil
+            case .other:
+                return false
+            }
+        }
+    }
+
     // MARK: - Private Helpers
-    
+
     private func mapToStatisticsCategory(_ type: DocumentType) -> StatisticsDocumentCategory {
         switch type {
         case .technicalInspection:

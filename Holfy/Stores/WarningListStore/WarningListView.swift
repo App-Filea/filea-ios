@@ -16,16 +16,88 @@ struct WarningListView: View {
             Color(.systemBackground)
                 .ignoresSafeArea()
 
-            if store.incompleteDocuments.isEmpty {
+            if !store.hasAlerts {
                 emptyStateView
             } else {
                 ScrollView {
-                    LazyVStack(spacing: Spacing.sm) {
-                        ForEach(store.incompleteDocuments) { document in
-                            DocumentCard(document: document) {
-                                store.send(.view(.incompleteDocumentTapped(document)))
+                    VStack(alignment: .leading, spacing: Spacing.lg) {
+                        // Section Contrôle Technique
+                        VStack(alignment: .leading, spacing: Spacing.sm) {
+                            ForEach(store.technicalInspectionAlerts) { alert in
+                                VStack(alignment: .leading) {
+                                    HStack {
+                                        alert.alertPriority.color
+                                            .opacity(0.2)
+                                            .frame(width: 64, height: 64)
+                                            .cornerRadius(8)
+                                            .overlay {
+                                                Image(systemName: "exclamationmark.triangle.fill")
+                                                    .foregroundStyle(alert.alertPriority.color)
+                                                    .scaleEffect(1.5)
+                                            }
+
+                                        Spacer()
+                                    }
+                                    Text("Controle technique")
+                                        .font(.title2)
+                                        .fontWeight(.semibold)
+                                    Text("Votre controle technique arrive bientôt à échéance, prenez rendez-vous pour le repasser.")
+                                    
+//                                    AlertCard(alert: alert) {
+//                                        store.send(.view(.alertTapped(alert)))
+//                                    }
+                                    HStack(spacing: Spacing.sm) {
+                                        Circle()
+                                            .fill(Color.accentColor.opacity(0.2))
+                                            .frame(width: 32, height: 32)
+                                            .overlay {
+                                                Image(systemName: "calendar")
+                                                    .foregroundStyle(Color.accentColor)
+                                            }
+
+                                        VStack(alignment: .leading, spacing: Spacing.xxs) {
+//                                            Text(alert.message)
+//                                                .primaryBody()
+//                                                .fontWeight(.semibold)
+
+                                            if let daysRemaining = alert.daysRemaining {
+                                                HStack(spacing: Spacing.xxs) {
+                                                    Image(systemName: "1.calendar")
+                                                    Text("alert_days_remaining \(daysRemaining)")
+                                                }
+                                                .callout()
+                                                .foregroundStyle(alert.alertPriority.color)
+                                            }
+//
+//                                            Text(alert.relatedDocument.name)
+//                                                .callout()
+//                                                .foregroundStyle(.secondary)
+                                        }
+
+                                        Spacer()
+                                    }
+                                    .padding(Spacing.cardPadding)
+                                    .buttonStyle(.plain)
+                                    .background(Color(.tertiarySystemGroupedBackground))
+                                    .cornerRadius(Radius.card)
+                                }
                             }
                         }
+
+                        // Section Documents Incomplets
+//                        if !store.incompleteDocumentAlerts.isEmpty {
+//                            VStack(alignment: .leading, spacing: Spacing.sm) {
+//                                Text("warning_section_incomplete_documents")
+//                                    .font(.title2)
+//                                    .fontWeight(.semibold)
+//
+//                                ForEach(store.incompleteDocumentAlerts) { alert in
+//                                    DocumentCard(document: alert.relatedDocument) {
+//                                        store.send(.view(.alertTapped(alert)))
+//                                    }
+//                                }
+//                            }
+//                        }
                     }
                     .padding(Spacing.md)
                 }
@@ -33,6 +105,9 @@ struct WarningListView: View {
         }
         .navigationTitle("stat_card_warnings_title")
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+//            store.send(.view(.initiate))
+        }
     }
 
     private var emptyStateView: some View {
@@ -63,26 +138,24 @@ struct WarningListView: View {
     }
 }
 
-#Preview("With incomplete documents") {
-    @Shared(.selectedVehicle) var selectedVehicle: Vehicle = .init(id: "1", documents: [
-        .init(fileURL: "", name: "Document 1", date: .now, mileage: "", type: .technicalInspection),
-        .init(fileURL: "", name: "Document 2", date: .now, mileage: "", type: .maintenance),
-        .init(fileURL: "", name: "Document 3", date: .now, mileage: "", type: .repair),
-    ])
+#Preview("With alerts") {
+    let ctDocument = Document(fileURL: "", name: "CT 2024", date: .now, mileage: "", type: .technicalInspection)
+    let incompleteDoc = Document(fileURL: "", name: "Vidange", date: .now, mileage: "", type: .maintenance)
 
-    return NavigationView {
-        WarningListView(store: Store(initialState: WarningListStore.State()) {
+    let alerts: [VehicleAlert] = [
+        .init(type: .technicalInspection, message: "CT expire dans 15 jours", daysRemaining: 15, relatedDocument: ctDocument),
+        .init(type: .incompleteDocument, message: "Vidange - montant manquant", relatedDocument: incompleteDoc),
+    ]
+
+    NavigationView {
+        WarningListView(store: Store(initialState: WarningListStore.State(alerts: alerts)) {
             WarningListStore()
         })
     }
 }
 
 #Preview("Empty - All good") {
-    @Shared(.selectedVehicle) var selectedVehicle: Vehicle = .init(id: "1", documents: [
-        .init(fileURL: "", name: "Document complet", date: .now, mileage: "", type: .maintenance, amount: 150.0),
-    ])
-
-    return WarningListView(store: Store(initialState: WarningListStore.State()) {
+    WarningListView(store: Store(initialState: WarningListStore.State()) {
         WarningListStore()
     })
 }

@@ -62,14 +62,15 @@ struct MainStore {
         var warningVehicle: WarningVehicleStore.State = WarningVehicleStore.State()
         var totalCostVehicle: TotalCostVehicleStore.State = TotalCostVehicleStore.State()
         var lastDocument: LastDocumentStore.State = LastDocumentStore.State()
-        var technicalInspection: TechnicalInspectionStore.State = TechnicalInspectionStore.State()
+        var technicalInspectionSheet: TechnicalInspectionSheetStore.State = TechnicalInspectionSheetStore.State()
         var vehicleMonthlyExpenses: VehicleMonthlyExpensesStore.State = VehicleMonthlyExpensesStore.State()
         var recentActivities: RecentActivitiesStore.State = RecentActivitiesStore.State()
 
         var showEmptyState: Bool = false
     }
 
-    enum Action: Equatable {
+    enum Action: Equatable, BindableAction {
+        case binding(BindingAction<State>)
         case view(ActionView)
         case tabSelected(Tab)
 
@@ -83,7 +84,7 @@ struct MainStore {
         case warningVehicle(WarningVehicleStore.Action)
         case totalCostVehicle(TotalCostVehicleStore.Action)
         case lastDocument(LastDocumentStore.Action)
-        case technicalInspection(TechnicalInspectionStore.Action)
+        case technicalInspectionSheet(TechnicalInspectionSheetStore.Action)
         case vehicleMonthlyExpenses(VehicleMonthlyExpensesStore.Action)
         case recentActivities(RecentActivitiesStore.Action)
 
@@ -114,6 +115,8 @@ struct MainStore {
     @Dependency(\.vehicleGRDBClient) var vehicleRepository
 
     var body: some ReducerOf<Self> {
+        BindingReducer()
+
         // Child stores for tabs
         Scope(state: \.statisticsStore, action: \.statisticsStore) { VehicleStatisticsStore() }
         Scope(state: \.maintenanceStore, action: \.maintenanceStore) { VehicleMaintenanceStore() }
@@ -124,7 +127,7 @@ struct MainStore {
         Scope(state: \.warningVehicle, action: \.warningVehicle) { WarningVehicleStore() }
         Scope(state: \.totalCostVehicle, action: \.totalCostVehicle) { TotalCostVehicleStore() }
         Scope(state: \.lastDocument, action: \.lastDocument) { LastDocumentStore() }
-        Scope(state: \.technicalInspection, action: \.technicalInspection) { TechnicalInspectionStore() }
+        Scope(state: \.technicalInspectionSheet, action: \.technicalInspectionSheet) { TechnicalInspectionSheetStore() }
         Scope(state: \.vehicleMonthlyExpenses, action: \.vehicleMonthlyExpenses) { VehicleMonthlyExpensesStore() }
         Scope(state: \.recentActivities, action: \.recentActivities) { RecentActivitiesStore() }
 
@@ -151,7 +154,7 @@ struct MainStore {
                 } else if state.selectedVehicle.isNull {
                     return .send(.presentVehiclesListView)
                 }
-                return .none
+                return .send(.technicalInspectionSheet(.checkExpirationStatus))
                 
             case \.showVehicleDetail:
                 state.vehicleDetail = VehicleDetailsStore.State()

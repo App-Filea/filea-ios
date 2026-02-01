@@ -68,50 +68,42 @@ struct MainView: View {
     private var tabContentView: some View {
         switch store.selectedTab {
         case .overview:
-            ScrollView {
-                VStack(alignment: .leading, spacing: Spacing.md) {
-                    // Section Mini-Stats
-                    HStack {
-                        Text("overview_section_statistics_title")
-                            .font(.headline)
-                        Spacer()
-                        Text("all_see_all")
-                            .font(.footnote)
-                            .foregroundStyle(Color.accentColor)
-                    }
-                    HStack(spacing: Spacing.sm) {
-                        TotalCostVehicleView(store: store.scope(state: \.totalCostVehicle, action: \.totalCostVehicle))
+            VStack(spacing: 0) {
+                if store.technicalInspectionSheet.isTechnicalInspectionShow {
+                    TechnicalInspectionSheetView(store: store.scope(state: \.technicalInspectionSheet, action: \.technicalInspectionSheet))
+                        .transition(.move(edge: .top))
+                }
+                ScrollView {
+                    VStack(alignment: .leading, spacing: Spacing.md) {
+                        // Section Mini-Stats
+                        HStack {
+                            Text("overview_section_statistics_title")
+                                .font(.headline)
+                            Spacer()
+                            Text("all_see_all")
+                                .font(.footnote)
+                                .foregroundStyle(Color.accentColor)
+                        }
+                        HStack(spacing: Spacing.sm) {
+                            TotalCostVehicleView(store: store.scope(state: \.totalCostVehicle, action: \.totalCostVehicle))
 
-                        LastDocumentView(store: store.scope(state: \.lastDocument, action: \.lastDocument))
-                    }
-
-                    // Section Alertes
-                    HStack {
-                        Text("stat_card_warnings_title")
-                            .font(.headline)
-                        Spacer()
-                        Text("all_see_details")
-                            .font(.footnote)
-                            .foregroundStyle(Color.accentColor)
-                    }
-                    WarningVehicleView(store: store.scope(state: \.warningVehicle, action: \.warningVehicle))
-                        .onTapGesture {
-                            store.send(.view(.warningVehicleTapped))
+                            LastDocumentView(store: store.scope(state: \.lastDocument, action: \.lastDocument))
                         }
 
-                    HStack {
-                        Text("overview_section_recent_activities_title")
-                            .font(.headline)
-                        Spacer()
-                        Text("all_see_all")
-                            .font(.footnote)
-                            .foregroundStyle(Color.accentColor)
+                        HStack {
+                            Text("overview_section_recent_activities_title")
+                                .font(.headline)
+                            Spacer()
+                            Text("all_see_all")
+                                .font(.footnote)
+                                .foregroundStyle(Color.accentColor)
+                        }
+                        RecentActivitiesView(store: store.scope(state: \.recentActivities, action: \.recentActivities))
                     }
-                    RecentActivitiesView(store: store.scope(state: \.recentActivities, action: \.recentActivities))
+                    .padding([.horizontal, .top], Spacing.md)
                 }
-                .padding(.horizontal, Spacing.md)
+                .scrollBounceBehavior(.basedOnSize)
             }
-            .scrollBounceBehavior(.basedOnSize)
 
         case .statistics:
             VehicleStatisticsView(

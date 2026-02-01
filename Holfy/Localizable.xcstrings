@@ -282,6 +282,9 @@
         }
       }
     },
+    "alert_days_remaining %lld" : {
+
+    },
     "alert_delete_vehicle_message" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -315,6 +318,9 @@
           }
         }
       }
+    },
+    "alert_incomplete_document %@" : {
+
     },
     "alert_incomplete_documents %lld" : {
       "extractionState" : "manual",
@@ -713,6 +719,9 @@
         }
       }
     },
+    "Attention" : {
+
+    },
     "Ce document n'existe plus." : {
 
     },
@@ -817,6 +826,9 @@
           }
         }
       }
+    },
+    "Controle technique" : {
+
     },
     "Document introuvable" : {
 
@@ -1475,13 +1487,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Recent activities"
+            "value" : "Recent documents"
           }
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "translated",
-            "value" : "Activités récentes"
+            "state" : "needs_review",
+            "value" : "Documents récents"
           }
         }
       }
@@ -2742,6 +2754,12 @@
           }
         }
       }
+    },
+    "Votre controle technique arrive bientôt à échéance, prenez rendez-vous pour le repasser." : {
+
+    },
+    "Votre contrôle technique arrive bientôt à échéance." : {
+
     },
     "warning_list_back_to_dashboard" : {
       "localizations" : {

@@ -14,32 +14,35 @@ struct VehicleAlert: Equatable, Identifiable {
         id: String = UUID().uuidString,
         type: AlertType,
         message: String,
-        daysRemaining: Int? = nil
+        daysRemaining: Int? = nil,
+        relatedDocument: Document
     ) {
         self.id = id
         self.type = type
         self.message = message
         self.daysRemaining = daysRemaining
+        self.relatedDocument = relatedDocument
     }
 
     let id: String
     let type: AlertType
     let message: String
     let daysRemaining: Int?
+    let relatedDocument: Document
 
     var alertPriority: AlertPriority {
         switch type {
         case .technicalInspection:
             guard let days = daysRemaining else { return .medium }
             return days < 30 ? .high : .medium
-        case .incompleteDocuments:
+        case .incompleteDocument:
             return .low
         }
     }
 
     enum AlertType: String, Equatable, Sendable {
         case technicalInspection
-        case incompleteDocuments
+        case incompleteDocument
     }
 
     enum AlertPriority: Int, Equatable, Comparable, Sendable {

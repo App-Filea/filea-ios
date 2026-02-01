@@ -84,6 +84,8 @@ struct WarningVehicleView: View {
 }
 
 #Preview("With alerts") {
+    let ctDocument = Document(fileURL: "", name: "CT 2024", date: .now, mileage: "", type: .technicalInspection)
+
     WarningVehicleView(
         store: .init(
             initialState: WarningVehicleStore.State(
@@ -91,12 +93,14 @@ struct WarningVehicleView: View {
                     VehicleAlert(
                         type: .technicalInspection,
                         message: "CT expire dans 10 jours",
-                        daysRemaining: 10
+                        daysRemaining: 10,
+                        relatedDocument: ctDocument
                     ),
                     VehicleAlert(
                         type: .technicalInspection,
                         message: "Entretien dans 45 jours",
-                        daysRemaining: 45
+                        daysRemaining: 45,
+                        relatedDocument: ctDocument
                     )
                 ]
             ),

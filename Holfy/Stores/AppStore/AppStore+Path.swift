@@ -31,8 +31,8 @@ extension AppStore {
             state.path.append(.warningList(WarningListStore.State()))
             return .none
             
-        case .element(id: _, action: .warningList(.view(.incompleteDocumentTapped(let document)))):
-            state.path.append(.documentDetail(DocumentDetailStore.State(documentId: document.id)))
+        case .element(id: _, action: .warningList(.view(.alertTapped(let alert)))):
+            state.path.append(.documentDetail(DocumentDetailStore.State(documentId: alert.relatedDocument.id)))
             return .none
             
         case .element(id: _, action: .globalSettings(.navigateToStorageSettings)):

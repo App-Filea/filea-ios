@@ -19,13 +19,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "For a paper document"
+            "value" : "Scan your paper documents"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pour un document papier"
+            "value" : "Numérisez vos documents papier"
           }
         }
       }
@@ -36,13 +36,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Scan with camera"
+            "value" : "Scan"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Scanner avec la caméra"
+            "value" : "Scanner"
           }
         }
       }
@@ -70,13 +70,47 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Import a file"
+            "value" : "Files"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Importer un fichier"
+            "value" : "Fichiers"
+          }
+        }
+      }
+    },
+    "add_document_mode_header_subtitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose the method that suits you"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisissez la méthode qui vous convient"
+          }
+        }
+      }
+    },
+    "add_document_mode_header_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How to add your document?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comment ajouter votre document ?"
           }
         }
       }
@@ -104,13 +138,30 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Import a photo"
+            "value" : "Library"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Importer une photo"
+            "value" : "Bibliothèque"
+          }
+        }
+      }
+    },
+    "add_document_mode_recommended_badge" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recommended"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recommandé"
           }
         }
       }

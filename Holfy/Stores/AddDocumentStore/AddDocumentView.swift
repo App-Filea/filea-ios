@@ -22,7 +22,6 @@ struct AddDocumentView: View {
     }
 
     var body: some View {
-        NavigationView {
             ZStack {
                 Color(.systemBackground)
                     .ignoresSafeArea()
@@ -71,8 +70,6 @@ struct AddDocumentView: View {
                     }
                 }
             }
-            .navigationTitle("add_document_title")
-            .navigationBarTitleDisplayMode(.inline)
             .quickLookPreview($previewURL)
             .fullScreenCover(isPresented: $store.showDocumentScanView) {
                 DocumentScannerView(
@@ -104,73 +101,131 @@ struct AddDocumentView: View {
                     onCancel: { store.send(.view(.cancelFileManagerButtonTapped)) }
                 )
             }
-        }
     }
     
     
-    private var modeChoiceView: some View {
-        VStack {
-            VStack(spacing: Spacing.md) {
-                modeOptionCard(
-                    icon: "camera.viewfinder",
-                    title: "add_document_mode_camera_title",
-                    subtitle: "add_document_mode_camera_subtitle",
-                    action: { store.send(.view(.openCameraViewButtonTapped)) }
-                )
+    // MARK: - Mode Choice View
 
-                modeOptionCard(
+    private var modeChoiceView: some View {
+        VStack(spacing: Spacing.lg) {
+            VStack(spacing: Spacing.xs) {
+                Text("add_document_mode_header_title")
+                    .font(.title2)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(Color.primary)
+
+                Text("add_document_mode_header_subtitle")
+                    .font(.subheadline)
+                    .foregroundStyle(Color.secondary)
+                    .multilineTextAlignment(.center)
+            }
+            .padding(.bottom, Spacing.sm)
+
+            Button {
+                store.send(.view(.openCameraViewButtonTapped))
+            } label: {
+                VStack(spacing: Spacing.md) {
+                    ZStack {
+                        Circle()
+                            .fill(Color.accentColor.opacity(0.15))
+                            .frame(width: 72, height: 72)
+
+                        Image(systemName: "camera.viewfinder")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 32, height: 32)
+                            .foregroundStyle(Color.accentColor)
+                    }
+
+                    VStack(spacing: Spacing.xxs) {
+                        HStack(spacing: Spacing.xs) {
+                            Text("add_document_mode_camera_title")
+                                .font(.headline)
+                                .foregroundStyle(Color.primary)
+
+                            Text("add_document_mode_recommended_badge")
+                                .font(.caption2)
+                                .fontWeight(.medium)
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Color.accentColor)
+                                .clipShape(Capsule())
+                        }
+
+                        Text("add_document_mode_camera_subtitle")
+                            .font(.subheadline)
+                            .foregroundStyle(Color.secondary)
+                            .multilineTextAlignment(.center)
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 24)
+                .padding(.horizontal, 16)
+                .background(Color.accentColor.opacity(0.08))
+                .cornerRadius(16)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(Color.accentColor.opacity(0.3), lineWidth: 1)
+                )
+            }
+            .buttonStyle(ScaleButtonStyle())
+
+            HStack(spacing: Spacing.md) {
+                secondaryOptionCard(
                     icon: "photo.on.rectangle.angled",
                     title: "add_document_mode_photo_title",
-                    subtitle: "add_document_mode_photo_subtitle",
                     action: { store.send(.view(.openPhotoPickerButtonTapped)) }
                 )
 
-                modeOptionCard(
+                secondaryOptionCard(
                     icon: "folder",
                     title: "add_document_mode_file_title",
-                    subtitle: "add_document_mode_file_subtitle",
                     action: { store.send(.view(.openFileManagerButtonTapped)) }
                 )
-                
             }
         }
         .padding(Spacing.screenMargin)
     }
-    
-    private func modeOptionCard(
+
+    private func secondaryOptionCard(
         icon: String,
         title: LocalizedStringKey,
-        subtitle: LocalizedStringKey,
         action: @escaping () -> Void
     ) -> some View {
         Button(action: action) {
-            HStack(alignment: .center, spacing: Spacing.md) {
-                Image(systemName: icon)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 32, height: 32)
-                    .foregroundStyle(Color.primary)
-                
-                VStack(alignment: .leading, spacing: Spacing.xxs) {
-                    Text(title)
-                        .font(.title3)
-                        .foregroundStyle(Color.primary)
-                        .multilineTextAlignment(.leading)
-                    
-                    Text(subtitle)
-                        .caption()
+            VStack(spacing: Spacing.sm) {
+                ZStack {
+                    Circle()
+                        .fill(Color(.tertiarySystemFill))
+                        .frame(width: 56, height: 56)
 
+                    Image(systemName: icon)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 24, height: 24)
+                        .foregroundStyle(Color.primary)
                 }
-                
-                Spacer()
+
+                Text(title)
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                    .foregroundStyle(Color.primary)
+                    .multilineTextAlignment(.center)
             }
             .frame(maxWidth: .infinity)
-            .padding(16)
+            .padding(.vertical, 20)
+            .padding(.horizontal, 12)
             .background(Color(.tertiarySystemGroupedBackground))
             .cornerRadius(14)
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(Color(.separator), lineWidth: 0.5)
+            )
         }
+        .buttonStyle(ScaleButtonStyle())
     }
-    
+
     private var metadataFormView: some View {
         VStack(spacing: 24) {
             FormField(titleLabel: "document_form_type_title") {
@@ -285,12 +340,31 @@ struct AddDocumentView: View {
     }
 }
 
+// MARK: - Button Style
+
+struct ScaleButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
+            .opacity(configuration.isPressed ? 0.9 : 1.0)
+            .animation(.easeInOut(duration: 0.15), value: configuration.isPressed)
+    }
+}
+
+// MARK: - Previews
+
 #Preview("ModeChoice") {
-    AddDocumentView(store: Store(initialState: AddDocumentStore.State.initialState(vehicleId: String())) {
-        AddDocumentStore()
-    })
+    NavigationView {
+        AddDocumentView(store: Store(initialState: AddDocumentStore.State.initialState(vehicleId: String())) {
+            AddDocumentStore()
+        })
+    }
 }
 
 #Preview("Metadata") {
-    AddDocumentView(store: Store(initialState: AddDocumentStore.State.initialState(vehicleId: String(), viewState: .metadataForm), reducer: { AddDocumentStore() }))
+    NavigationView {
+        AddDocumentView(store: Store(initialState: AddDocumentStore.State.initialState(vehicleId: String(), viewState: .metadataForm)) {
+            AddDocumentStore()
+        })
+    }
 }

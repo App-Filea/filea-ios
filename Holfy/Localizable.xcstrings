@@ -13,6 +13,57 @@
     "•" : {
 
     },
+    "add_document_confirm_type_button" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continue"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuer"
+          }
+        }
+      }
+    },
+    "add_document_detected_type_label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Document type"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Type de document"
+          }
+        }
+      }
+    },
+    "add_document_extracted_info_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extracted information"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Informations extraites"
+          }
+        }
+      }
+    },
     "add_document_extracting_metadata" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -43,6 +94,91 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nous extrayons les informations de votre document"
+          }
+        }
+      }
+    },
+    "add_document_extraction_error_subtitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We couldn't analyze this document. You can fill in the information manually."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nous n'avons pas pu analyser ce document. Vous pouvez remplir les informations manuellement."
+          }
+        }
+      }
+    },
+    "add_document_extraction_error_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analysis failed"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analyse impossible"
+          }
+        }
+      }
+    },
+    "add_document_extraction_success_subtitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We detected the document type. Please verify."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nous avons détecté le type de document. Veuillez vérifier."
+          }
+        }
+      }
+    },
+    "add_document_extraction_success_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analysis complete"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analyse terminée"
+          }
+        }
+      }
+    },
+    "add_document_fill_manually_button" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fill manually"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remplir manuellement"
           }
         }
       }
@@ -230,6 +366,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ajouter un document"
+          }
+        }
+      }
+    },
+    "add_document_wrong_type_button" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not the right type? Fill manually"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce n'est pas ça ? Remplir manuellement"
           }
         }
       }
@@ -1367,6 +1520,9 @@
       }
     },
     "Incomplet" : {
+
+    },
+    "keyboard_next_button" : {
 
     },
     "Les documents de cette catégorie apparaîtront ici" : {
@@ -2887,159 +3043,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aucune alerte"
-          }
-        }
-      }
-    },
-    "add_document_extraction_success_title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Analysis complete"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Analyse terminée"
-          }
-        }
-      }
-    },
-    "add_document_extraction_success_subtitle" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "We detected the document type. Please verify."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nous avons détecté le type de document. Veuillez vérifier."
-          }
-        }
-      }
-    },
-    "add_document_detected_type_label" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Document type"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Type de document"
-          }
-        }
-      }
-    },
-    "add_document_confirm_type_button" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Continue"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Continuer"
-          }
-        }
-      }
-    },
-    "add_document_wrong_type_button" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Not the right type? Fill manually"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ce n'est pas ça ? Remplir manuellement"
-          }
-        }
-      }
-    },
-    "add_document_extracted_info_title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Extracted information"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Informations extraites"
-          }
-        }
-      }
-    },
-    "add_document_extraction_error_title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Analysis failed"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Analyse impossible"
-          }
-        }
-      }
-    },
-    "add_document_extraction_error_subtitle" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "We couldn't analyze this document. You can fill in the information manually."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nous n'avons pas pu analyser ce document. Vous pouvez remplir les informations manuellement."
-          }
-        }
-      }
-    },
-    "add_document_fill_manually_button" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fill manually"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Remplir manuellement"
           }
         }
       }

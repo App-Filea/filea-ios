@@ -11,21 +11,27 @@ import PhotosUI
 import QuickLook
 
 struct AddDocumentView: View {
+    enum FocusedField {
+        case mileage, amount, name
+    }
+    
     @Bindable var store: StoreOf<AddDocumentStore>
     @State private var previewURL: URL?
-
+    @FocusState private var focusedField: FocusedField?
+    
     @Shared(.selectedCurrency) var currency: Currency
     @Shared(.selectedDistanceUnit) var distanceUnit: DistanceUnit
-
+    
     private var isFormValid: Bool {
         !store.documentName.isEmpty
     }
-
+    
     var body: some View {
+        NavigationView {
             ZStack {
                 Color(.systemBackground)
                     .ignoresSafeArea()
-
+                
                 switch store.viewState {
                 case .modeChoice:
                     modeChoiceView
@@ -37,6 +43,20 @@ struct AddDocumentView: View {
                     extractionErrorView(error: error)
                 case .metadataForm:
                     metadataFormView
+                }
+            }
+            .toolbar {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    if focusedField == .mileage || focusedField == .amount {
+                        Button("keyboard_next_button") {
+                            switch focusedField {
+                            case .mileage: focusedField = .amount
+                            case .amount: focusedField = .name
+                            default: break
+                            }
+                        }
+                    }
                 }
             }
             .quickLookPreview($previewURL)
@@ -70,9 +90,10 @@ struct AddDocumentView: View {
                     onCancel: { store.send(.view(.cancelFileManagerButtonTapped)) }
                 )
             }
+        }
     }
-
-
+    
+    
     private var modeChoiceView: some View {
         ScrollView {
             VStack(spacing: Spacing.lg) {
@@ -81,14 +102,14 @@ struct AddDocumentView: View {
                         .font(.title2)
                         .fontWeight(.semibold)
                         .foregroundStyle(Color.primary)
-
+                    
                     Text("add_document_mode_header_subtitle")
                         .font(.subheadline)
                         .foregroundStyle(Color.secondary)
                         .multilineTextAlignment(.center)
                 }
                 .padding(.bottom, Spacing.sm)
-
+                
                 Button {
                     store.send(.view(.openCameraViewButtonTapped))
                 } label: {
@@ -97,20 +118,20 @@ struct AddDocumentView: View {
                             Circle()
                                 .fill(Color.accentColor.opacity(0.15))
                                 .frame(width: 72, height: 72)
-
+                            
                             Image(systemName: "camera.viewfinder")
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
                                 .frame(width: 32, height: 32)
                                 .foregroundStyle(Color.accentColor)
                         }
-
+                        
                         VStack(spacing: Spacing.xxs) {
                             HStack(spacing: Spacing.xs) {
                                 Text("add_document_mode_camera_title")
                                     .font(.headline)
                                     .foregroundStyle(Color.primary)
-
+                                
                                 Text("add_document_mode_recommended_badge")
                                     .font(.caption2)
                                     .fontWeight(.medium)
@@ -120,7 +141,7 @@ struct AddDocumentView: View {
                                     .background(Color.accentColor)
                                     .clipShape(Capsule())
                             }
-
+                            
                             Text("add_document_mode_camera_subtitle")
                                 .font(.subheadline)
                                 .foregroundStyle(Color.secondary)
@@ -137,14 +158,14 @@ struct AddDocumentView: View {
                             .stroke(Color.accentColor.opacity(0.3), lineWidth: 1)
                     )
                 }
-
+                
                 HStack(spacing: Spacing.md) {
                     secondaryOptionCard(
                         icon: "photo.on.rectangle.angled",
                         title: "add_document_mode_photo_title",
                         action: { store.send(.view(.openPhotoPickerButtonTapped)) }
                     )
-
+                    
                     secondaryOptionCard(
                         icon: "folder",
                         title: "add_document_mode_file_title",
@@ -158,7 +179,7 @@ struct AddDocumentView: View {
         .safeAreaInset(edge: .bottom, spacing: 80) {
             VStack(spacing: 0) {
                 Divider()
-
+                
                 VStack(spacing: Spacing.md) {
                     TertiaryButton("all_cancel", action: {
                         store.send(.view(.closeButtonTapped))
@@ -167,10 +188,10 @@ struct AddDocumentView: View {
                 .padding(16)
             }
             .background(Color(.tertiarySystemBackground))
-
+            
         }
     }
-
+    
     private func secondaryOptionCard(
         icon: String,
         title: LocalizedStringKey,
@@ -182,14 +203,14 @@ struct AddDocumentView: View {
                     Circle()
                         .fill(Color(.tertiarySystemFill))
                         .frame(width: 56, height: 56)
-
+                    
                     Image(systemName: icon)
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .frame(width: 24, height: 24)
                         .foregroundStyle(Color.primary)
                 }
-
+                
                 Text(title)
                     .font(.subheadline)
                     .fontWeight(.medium)
@@ -207,28 +228,28 @@ struct AddDocumentView: View {
             )
         }
     }
-
+    
     private var extractingStateView: some View {
         VStack(spacing: Spacing.lg) {
             Spacer()
-
+            
             ProgressView()
                 .scaleEffect(1.5)
-
+            
             Text("add_document_extracting_metadata")
                 .font(.headline)
                 .foregroundStyle(Color.primary)
-
+            
             Text("add_document_extracting_metadata_subtitle")
                 .font(.subheadline)
                 .foregroundStyle(Color.secondary)
                 .multilineTextAlignment(.center)
-
+            
             Spacer()
         }
         .padding(Spacing.screenMargin)
     }
-
+    
     private func extractionConfirmationView(metadata: ExtractedDocumentMetadata) -> some View {
         ScrollView {
             VStack(spacing: Spacing.lg) {
@@ -238,21 +259,20 @@ struct AddDocumentView: View {
                         .font(.title2)
                         .fontWeight(.semibold)
                         .foregroundStyle(Color.primary)
-
+                    
                     Text("add_document_extraction_success_subtitle")
                         .font(.subheadline)
                         .foregroundStyle(Color.secondary)
                         .multilineTextAlignment(.center)
                 }
                 .padding(.top, Spacing.md)
-
+                
                 // Detected type card
                 detectedTypeCard(type: metadata.detectedType)
-
+                
                 // Extracted metadata preview
                 extractedMetadataPreview(metadata: metadata)
-
-                Spacer(minLength: 100)
+                
             }
             .padding(Spacing.screenMargin)
         }
@@ -260,16 +280,16 @@ struct AddDocumentView: View {
         .safeAreaInset(edge: .bottom, spacing: 80) {
             VStack(spacing: 0) {
                 Divider()
-
+                
                 VStack(spacing: Spacing.md) {
                     PrimaryButton("add_document_confirm_type_button", action: {
                         store.send(.confirmDetectedType)
                     })
-
-                    TertiaryButton("add_document_wrong_type_button", action: {
+                    
+                    SecondaryButton("add_document_wrong_type_button", action: {
                         store.send(.skipMetadataExtraction)
                     })
-
+                    
                     TertiaryButton("all_back", action: {
                         store.send(.view(.backFromExtractionButtonTapped))
                     })
@@ -279,21 +299,21 @@ struct AddDocumentView: View {
             .background(Color(.tertiarySystemBackground))
         }
     }
-
+    
     private func detectedTypeCard(type: DocumentType) -> some View {
         VStack(spacing: Spacing.md) {
             ZStack {
                 Circle()
                     .fill(Color.accentColor.opacity(0.15))
                     .frame(width: 72, height: 72)
-
+                
                 Image(systemName: type.imageName)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 32, height: 32)
                     .foregroundStyle(Color.accentColor)
             }
-
+            
             Text(type.displayName)
                 .font(.title3)
                 .fontWeight(.semibold)
@@ -308,14 +328,14 @@ struct AddDocumentView: View {
                 .stroke(Color.accentColor.opacity(0.3), lineWidth: 1)
         )
     }
-
+    
     private func extractedMetadataPreview(metadata: ExtractedDocumentMetadata) -> some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
             Text("add_document_extracted_info_title")
                 .font(.subheadline)
                 .fontWeight(.medium)
                 .foregroundStyle(Color.secondary)
-
+            
             VStack(spacing: 0) {
                 if let date = metadata.date {
                     extractedInfoRow(
@@ -326,7 +346,7 @@ struct AddDocumentView: View {
                     Divider()
                         .padding(.leading, 44)
                 }
-
+                
                 if let amount = metadata.amount {
                     extractedInfoRow(
                         icon: "eurosign.circle",
@@ -336,7 +356,7 @@ struct AddDocumentView: View {
                     Divider()
                         .padding(.leading, 44)
                 }
-
+                
                 if let mileage = metadata.mileage {
                     extractedInfoRow(
                         icon: "gauge.with.needle",
@@ -349,20 +369,20 @@ struct AddDocumentView: View {
             .cornerRadius(12)
         }
     }
-
+    
     private func extractedInfoRow(icon: String, label: LocalizedStringKey, value: String) -> some View {
         HStack(spacing: Spacing.md) {
             Image(systemName: icon)
                 .font(.system(size: 18))
                 .foregroundStyle(Color.accentColor)
                 .frame(width: 28)
-
+            
             Text(label)
                 .font(.subheadline)
                 .foregroundStyle(Color.secondary)
-
+            
             Spacer()
-
+            
             Text(value)
                 .font(.subheadline)
                 .fontWeight(.medium)
@@ -371,44 +391,44 @@ struct AddDocumentView: View {
         .padding(.horizontal, Spacing.md)
         .padding(.vertical, Spacing.sm)
     }
-
+    
     private func extractionErrorView(error: String) -> some View {
         VStack(spacing: Spacing.lg) {
             Spacer()
-
+            
             ZStack {
                 Circle()
                     .fill(Color.orange.opacity(0.15))
                     .frame(width: 72, height: 72)
-
+                
                 Image(systemName: "exclamationmark.triangle.fill")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 36, height: 36)
                     .foregroundStyle(Color.orange)
             }
-
+            
             Text("add_document_extraction_error_title")
                 .font(.headline)
                 .foregroundStyle(Color.primary)
-
+            
             Text("add_document_extraction_error_subtitle")
                 .font(.subheadline)
                 .foregroundStyle(Color.secondary)
                 .multilineTextAlignment(.center)
-
+            
             Spacer()
         }
         .padding(Spacing.screenMargin)
         .safeAreaInset(edge: .bottom, spacing: 80) {
             VStack(spacing: 0) {
                 Divider()
-
+                
                 VStack(spacing: Spacing.md) {
                     PrimaryButton("add_document_fill_manually_button", action: {
                         store.send(.skipMetadataExtraction)
                     })
-
+                    
                     TertiaryButton("all_back", action: {
                         store.send(.view(.backFromExtractionButtonTapped))
                     })
@@ -418,136 +438,143 @@ struct AddDocumentView: View {
             .background(Color(.tertiarySystemBackground))
         }
     }
-
+    
     private var metadataFormView: some View {
-        ScrollView {
-            VStack(spacing: 24) {
-                FormField(titleLabel: "document_form_type_title") {
-                    HStack {
-                        Text("document_form_type_label")
-                            .formFieldLeadingTitle()
-
-                        Spacer()
-
-                        if store.isTypePickerDisabled {
-                            Text(store.documentType.displayName)
-                                .formFieldLeadingTitle()
-                                .foregroundStyle(Color.secondary)
-                        } else {
-                            Picker("document_form_type_label", selection: $store.documentType) {
-                                ForEach(DocumentType.allCases) { type in
-                                    Text(type.displayName)
-                                        .tag(type)
+        VStack(spacing: 0) {
+            ScrollViewReader { proxy in
+                ScrollView {
+                    VStack(spacing: 0) {
+                        FormField(titleLabel: "document_form_type_title") {
+                            HStack {
+                                Text("document_form_type_label")
+                                    .formFieldLeadingTitle()
+                                
+                                Spacer()
+                                
+                                if store.isTypePickerDisabled {
+                                    Text(store.documentType.displayName)
+                                        .formFieldLeadingTitle()
+                                        .foregroundStyle(Color.secondary)
+                                } else {
+                                    Picker("document_form_type_label", selection: $store.documentType) {
+                                        ForEach(DocumentType.allCases) { type in
+                                            Text(type.displayName)
+                                                .tag(type)
+                                        }
+                                    }
+                                    .pickerStyle(.menu)
+                                    .labelsHidden()
                                 }
                             }
-                            .pickerStyle(.menu)
-                            .labelsHidden()
                         }
-                    }
-                }
-
-                FormField(titleLabel: "document_form_name_title",
-                          infoLabel: "document_form_name_info",
-                          isError: store.validationErrors.contains(.nameEmpty)) {
-                    TextField("document_form_name_placeholder", text: $store.documentName)
-                        .formFieldLeadingTitle()
-                        .submitLabel(.done)
-                        .multilineTextAlignment(.leading)
-                }
-
-                FormField(titleLabel: "document_form_date_title",
-                          infoLabel: "document_form_date_info") {
-                    HStack {
-                        Text("document_form_date_label")
-                            .formFieldLeadingTitle()
-
-                        Spacer()
-
-                        DatePicker("", selection: $store.documentDate, in: Date.distantPast...Date(), displayedComponents: .date)
-                            .labelsHidden()
-                            .datePickerStyle(.compact)
-                    }
-                }
-
-                if store.documentType == .technicalInspection {
-                    FormField(titleLabel: "document_form_expiration_date_title",
-                              infoLabel: "document_form_expiration_date_info") {
-                        HStack {
-                            Text("document_form_expiration_date_label")
+                        .padding(.bottom, Spacing.lg)
+                        
+                        FormField(titleLabel: "document_form_date_title",
+                                  infoLabel: "document_form_date_info") {
+                            HStack {
+                                Text("document_form_date_label")
+                                    .formFieldLeadingTitle()
+                                
+                                Spacer()
+                                
+                                DatePicker("", selection: $store.documentDate, in: Date.distantPast...Date(), displayedComponents: .date)
+                                    .labelsHidden()
+                                    .datePickerStyle(.compact)
+                            }
+                        }
+                                  .padding(.bottom, Spacing.lg)
+                        
+                        if store.documentType == .technicalInspection {
+                            FormField(titleLabel: "document_form_expiration_date_title",
+                                      infoLabel: "document_form_expiration_date_info") {
+                                HStack {
+                                    Text("document_form_expiration_date_label")
+                                        .formFieldLeadingTitle()
+                                    
+                                    Spacer()
+                                    
+                                    DatePicker(
+                                        "",
+                                        selection: Binding(
+                                            get: { store.documentExpirationDate },
+                                            set: { store.send(.view(.expirationDateChanged($0))) }
+                                        ),
+                                        in: store.documentDate...,
+                                        displayedComponents: .date
+                                    )
+                                    .labelsHidden()
+                                    .datePickerStyle(.compact)
+                                }
+                            }
+                                      .padding(.bottom, Spacing.lg)
+                        }
+                        
+                        FormField(titleLabel: "document_form_mileage_title",
+                                  infoLabel: "document_form_mileage_info") {
+                            HStack(spacing: 12) {
+                                TextField("document_form_mileage_placeholder", text: $store.documentMileage)
+                                    .formFieldLeadingTitle()
+                                    .keyboardType(.numberPad)
+                                    .multilineTextAlignment(.leading)
+                                    .focused($focusedField, equals: .mileage)
+                                
+                                Text(distanceUnit.symbol)
+                                    .formFieldLeadingTitle()
+                            }
+                        }
+                                  .id(FocusedField.mileage)
+                                  .padding(.bottom, Spacing.lg)
+                        
+                        FormField(titleLabel: "document_form_amount_title",
+                                  infoLabel: "document_form_amount_info") {
+                            HStack(spacing: 12) {
+                                TextField("document_form_amount_placeholder", text: $store.documentAmount)
+                                    .formFieldLeadingTitle()
+                                    .keyboardType(.numberPad)
+                                    .multilineTextAlignment(.leading)
+                                    .focused($focusedField, equals: .amount)
+                                
+                                Text(currency.symbol)
+                                    .formFieldLeadingTitle()
+                            }
+                        }
+                                  .id(FocusedField.amount)
+                                  .padding(.bottom, Spacing.lg)
+                        
+                        FormField(titleLabel: "document_form_name_title",
+                                  infoLabel: "document_form_name_info",
+                                  isError: store.validationErrors.contains(.nameEmpty)) {
+                            TextField("document_form_name_placeholder", text: $store.documentName)
                                 .formFieldLeadingTitle()
-
-                            Spacer()
-
-                            DatePicker(
-                                "",
-                                selection: Binding(
-                                    get: { store.documentExpirationDate },
-                                    set: { store.send(.view(.expirationDateChanged($0))) }
-                                ),
-                                in: store.documentDate...,
-                                displayedComponents: .date
-                            )
-                            .labelsHidden()
-                            .datePickerStyle(.compact)
+                                .focused($focusedField, equals: .name)
+                                .submitLabel(.done)
+                                .multilineTextAlignment(.leading)
+                                .onSubmit { focusedField = nil }
                         }
+                                  .id(FocusedField.name)
+                    }
+                    .padding(Spacing.screenMargin)
+                    VStack(spacing: 0) {
+                        VStack(spacing: Spacing.md) {
+                            PrimaryButton("all_save", action: {
+                                store.send(.view(.saveButtonTapped))
+                            })
+                            
+                            TertiaryButton("all_back", action: {
+                                store.send(.view(.backFromMetadataFormButtonTapped))
+                            })
+                        }
+                        .padding(Spacing.screenMargin)
                     }
                 }
-
-                FormField(titleLabel: "document_form_mileage_title",
-                          infoLabel: "document_form_mileage_info") {
-                    HStack(spacing: 12) {
-                        Text("document_form_mileage_label")
-                            .formFieldLeadingTitle()
-
-                        Spacer()
-
-                        TextField("document_form_mileage_placeholder", text: $store.documentMileage)
-                            .formFieldLeadingTitle()
-                            .keyboardType(.numberPad)
-                            .multilineTextAlignment(.trailing)
-
-                        Text(distanceUnit.symbol)
-                            .formFieldLeadingTitle()
-                    }
-                }
-
-                FormField(titleLabel: "document_form_amount_title",
-                          infoLabel: "document_form_amount_info") {
-                    HStack(spacing: 12) {
-                        Text("document_form_amount_label")
-                            .formFieldLeadingTitle()
-
-                        Spacer()
-
-                        TextField("document_form_amount_placeholder", text: $store.documentAmount)
-                            .formFieldLeadingTitle()
-                            .keyboardType(.numberPad)
-                            .multilineTextAlignment(.trailing)
-
-                        Text(currency.symbol)
-                            .formFieldLeadingTitle()
+                .scrollBounceBehavior(.basedOnSize)
+                .onChange(of: focusedField) { _, newValue in
+                    guard let field = newValue else { return }
+                    withAnimation {
+                        proxy.scrollTo(field, anchor: .bottom)
                     }
                 }
             }
-            .padding(Spacing.screenMargin)
-        }
-        .scrollBounceBehavior(.basedOnSize)
-        .safeAreaInset(edge: .bottom, spacing: 80) {
-            VStack(spacing: 0) {
-                Divider()
-
-                VStack(spacing: Spacing.md) {
-                    PrimaryButton("all_save", action: {
-                        store.send(.view(.saveButtonTapped))
-                    })
-
-                    TertiaryButton("all_back", action: {
-                        store.send(.view(.backFromMetadataFormButtonTapped))
-                    })
-                }
-                .padding(16)
-            }
-            .background(Color(.tertiarySystemBackground))
         }
     }
 }

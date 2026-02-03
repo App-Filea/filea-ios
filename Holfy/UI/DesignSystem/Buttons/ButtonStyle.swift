@@ -73,8 +73,10 @@ struct SecondaryButton: View {
             Group {
                 if let systemImage {
                     Label(title, systemImage: systemImage)
+                        .foregroundStyle(Color.primary)
                 } else {
                     Text(title)
+                        .foregroundStyle(Color.primary)
                 }
             }
             .font(.system(size: 17, weight: .semibold))

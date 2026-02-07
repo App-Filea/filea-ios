@@ -45,6 +45,7 @@ struct AppStore {
     @Dependency(\.vehicleGRDBClient) var vehicleRepository
     @Dependency(\.storageManager) var storageManager
     @Dependency(\.legacyMigrator) var legacyMigrator
+    @Dependency(\.syncManagerClient) var syncManager
 
     var body: some ReducerOf<Self> {
         Reduce { state, action in
@@ -108,7 +109,26 @@ struct AppStore {
                     print("   └─ Error: \(errorDescription)")
                 }
 
-                return .send(.getAllVehicles)
+                // Scanner pour réparer les fichiers orphelins après migration
+                guard let storageRoot = state.storageRootURL else {
+                    return .send(.getAllVehicles)
+                }
+
+                return .run { send in
+                    let holfyDir = storageRoot.appendingPathComponent(AppConstants.vehiclesDirectoryName)
+                    if FileManager.default.fileExists(atPath: holfyDir.path) {
+                        do {
+                            print("🔧 [AppStore] Scanning for orphaned files...")
+                            let repairedVehicles = try await syncManager.scanAndRebuildDatabase(holfyDir.path)
+                            if !repairedVehicles.isEmpty {
+                                print("✅ [AppStore] Scanned \(repairedVehicles.count) vehicle(s) for orphaned files")
+                            }
+                        } catch {
+                            print("⚠️ [AppStore] Error scanning for orphaned files: \(error.localizedDescription)")
+                        }
+                    }
+                    await send(.getAllVehicles)
+                }
 
             case .getAllVehicles:
                 return .run { send in

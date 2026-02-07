@@ -13,7 +13,7 @@ extension AppStore {
         case .element(id: _, action: .storageOnboarding(.folderSaved)):
             return .send(.getAllVehicles)
             
-        case .element(id: _, action: .main(.showVehicleDetail(let vehicle))):
+        case .element(id: _, action: .main(.showVehicleDetail)):
             state.path.append(.vehicleDetails(VehicleDetailsStore.State()))
             return .none
             

@@ -219,17 +219,28 @@ struct StorageOnboardingStore {
                         @Dependency(\.legacyMigrator) var migrator
                         let migrationResult = await migrator.migrateIfNeeded(url)
 
+                        // Déterminer le dossier Holfy
+                        let holfyDir = url.appendingPathComponent(AppConstants.vehiclesDirectoryName)
+
                         switch migrationResult {
                         case .success(let vehicles, let documents):
                             print("✅ [StorageOnboardingStore] Migration réussie: \(vehicles) véhicules, \(documents) documents")
+                            // Scanner pour réparer les fichiers orphelins après migration
+                            if FileManager.default.fileExists(atPath: holfyDir.path) {
+                                _ = try await syncManager.scanAndRebuildDatabase(holfyDir.path)
+                            }
+
                         case .partialSuccess(let vehicles, let documents, let errors):
                             print("⚠️ [StorageOnboardingStore] Migration partielle: \(vehicles) véhicules, \(documents) documents")
                             print("   Erreurs: \(errors)")
+                            // Scanner pour réparer les fichiers orphelins après migration partielle
+                            if FileManager.default.fileExists(atPath: holfyDir.path) {
+                                _ = try await syncManager.scanAndRebuildDatabase(holfyDir.path)
+                            }
+
                         case .noLegacyData:
                             print("ℹ️ [StorageOnboardingStore] Pas de données legacy à migrer")
-
                             // Vérifier s'il y a des .vehicle_metadata.json existants
-                            let holfyDir = url.appendingPathComponent(AppConstants.vehiclesDirectoryName)
                             if FileManager.default.fileExists(atPath: holfyDir.path) {
                                 print("📦 [StorageOnboardingStore] Scanning for existing .vehicle_metadata.json files...")
                                 let importedVehicles = try await syncManager.scanAndRebuildDatabase(holfyDir.path)
@@ -237,8 +248,14 @@ struct StorageOnboardingStore {
                                     print("✅ [StorageOnboardingStore] \(importedVehicles.count) véhicule(s) importé(s)")
                                 }
                             }
+
                         case .alreadyMigrated:
                             print("ℹ️ [StorageOnboardingStore] Migration déjà effectuée")
+                            // Scanner quand même pour réparer les fichiers orphelins
+                            if FileManager.default.fileExists(atPath: holfyDir.path) {
+                                _ = try await syncManager.scanAndRebuildDatabase(holfyDir.path)
+                            }
+
                         case .failed(let errorDescription):
                             print("❌ [StorageOnboardingStore] Migration failed: \(errorDescription)")
                         }

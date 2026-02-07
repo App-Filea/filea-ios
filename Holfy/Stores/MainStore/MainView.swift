@@ -148,7 +148,7 @@ struct MainView: View {
                               systemImage: "arrow.triangle.2.circlepath")
                     }
                     Button(action: {
-                        store.send(.showVehicleDetail(store.selectedVehicle))
+                        store.send(.showVehicleDetail)
                     }) {
                         Label("main_menu_view_details",
                               systemImage: "eye")

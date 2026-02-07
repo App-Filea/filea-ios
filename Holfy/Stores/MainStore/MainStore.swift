@@ -87,7 +87,7 @@ struct MainStore {
         case vehiclesList(PresentationAction<VehiclesListStore.Action>)
         case addFirstVehicle(PresentationAction<AddFirstVehicleStore.Action>)
         case presentAddFirstVehicleView
-        case showVehicleDetail(Vehicle)
+        case showVehicleDetail
         case presentVehiclesListView
         case showSettings
         case deleteCurrentVehicle

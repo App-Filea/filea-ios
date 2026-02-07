@@ -7,7 +7,7 @@
 
 import ComposableArchitecture
 import Foundation
-import SwiftUICore
+import SwiftUI
 
 @Reducer
 struct MainStore {

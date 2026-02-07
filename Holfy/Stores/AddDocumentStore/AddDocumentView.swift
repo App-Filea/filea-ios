@@ -552,6 +552,7 @@ struct AddDocumentView: View {
                                 .onSubmit { focusedField = nil }
                         }
                                   .id(FocusedField.name)
+                                  .padding(.bottom, Spacing.lg)
                     }
                     .padding(Spacing.screenMargin)
                     VStack(spacing: 0) {
@@ -564,7 +565,7 @@ struct AddDocumentView: View {
                                 store.send(.view(.backFromMetadataFormButtonTapped))
                             })
                         }
-                        .padding(Spacing.screenMargin)
+                        .padding([.horizontal, .top], Spacing.screenMargin)
                     }
                 }
                 .scrollBounceBehavior(.basedOnSize)

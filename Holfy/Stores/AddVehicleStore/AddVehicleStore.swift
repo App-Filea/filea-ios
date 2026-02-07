@@ -9,14 +9,6 @@ import ComposableArchitecture
 import Foundation
 import UIKit
 
-struct VehicleFieldsValidationErrors: OptionSet, Sendable, Equatable {
-    let rawValue: Int
-
-    static let brandEmpty = VehicleFieldsValidationErrors(rawValue: 1 << 0)
-    static let modelEmpty = VehicleFieldsValidationErrors(rawValue: 1 << 1)
-    static let plateEmpty = VehicleFieldsValidationErrors(rawValue: 1 << 2)
-}
-
 @Reducer
 struct AddVehicleStore {
 
@@ -29,9 +21,6 @@ struct AddVehicleStore {
         var registrationDate: Date
         var mileage: String
         var isPrimary: Bool
-        
-        var validationErrors: VehicleFieldsValidationErrors = []
-        
         @Shared(.vehicles) var vehicles: [Vehicle] = []
 //        @Presents var scanStore: VehicleCardDocumentScanStore.State?
         @Presents var alert: AlertState<Action.Alert>?
@@ -97,10 +86,10 @@ struct AddVehicleStore {
                 switch actionView {
                 case .cancelButtonTapped: return .send(.dismiss)
                 case .saveButtonTapped:
-                    state.validationErrors = validateFields(state)
-                    guard state.validationErrors.isEmpty else {
-                        return .none
-                    }
+//                    state.validationErrors = validateFields(state)
+//                    guard state.validationErrors.isEmpty else {
+//                        return .none
+//                    }
                     return .send(.verifyPrimaryVehicleExistance)
                     
 ////                case .scanButtonTapped:
@@ -198,21 +187,5 @@ struct AddVehicleStore {
 //        .ifLet(\.$scanStore, action: \.scanStore) {
 //            VehicleCardDocumentScanStore()
 //        }
-    }
-    
-    private func validateFields(_ state: State) -> VehicleFieldsValidationErrors {
-        var errors: VehicleFieldsValidationErrors = []
-
-        if state.brand.trimmingCharacters(in: .whitespaces).isEmpty {
-            errors.insert(.brandEmpty)
-        }
-        if state.model.trimmingCharacters(in: .whitespaces).isEmpty {
-            errors.insert(.modelEmpty)
-        }
-        if state.plate.trimmingCharacters(in: .whitespaces).isEmpty {
-            errors.insert(.plateEmpty)
-        }
-
-        return errors
     }
 }

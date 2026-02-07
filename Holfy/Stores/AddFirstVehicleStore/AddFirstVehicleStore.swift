@@ -21,9 +21,7 @@ struct AddFirstVehicleStore {
         var registrationDate: Date
         var mileage: String
         var isPrimary: Bool
-        
-        var validationErrors: VehicleFieldsValidationErrors = []
-        
+                
         @Shared(.vehicles) var vehicles: [Vehicle] = []
 //        @Presents var scanStore: VehicleCardDocumentScanStore.State?
 
@@ -83,12 +81,7 @@ struct AddFirstVehicleStore {
             case .view(let actionView):
                 switch actionView {
                 case .cancelButtonTapped: return .send(.dismiss)
-                case .saveButtonTapped:
-                    state.validationErrors = validateFields(state)
-                    guard state.validationErrors.isEmpty else {
-                        return .none
-                    }
-                    return .send(.saveVehicle)
+                case .saveButtonTapped: return .send(.saveVehicle)
                     
 ////                case .scanButtonTapped:
 ////                    return .send(.openScanStore)
@@ -164,21 +157,5 @@ struct AddFirstVehicleStore {
 //        .ifLet(\.$scanStore, action: \.scanStore) {
 //            VehicleCardDocumentScanStore()
 //        }
-    }
-    
-    private func validateFields(_ state: State) -> VehicleFieldsValidationErrors {
-        var errors: VehicleFieldsValidationErrors = []
-
-        if state.brand.trimmingCharacters(in: .whitespaces).isEmpty {
-            errors.insert(.brandEmpty)
-        }
-        if state.model.trimmingCharacters(in: .whitespaces).isEmpty {
-            errors.insert(.modelEmpty)
-        }
-        if state.plate.trimmingCharacters(in: .whitespaces).isEmpty {
-            errors.insert(.plateEmpty)
-        }
-
-        return errors
     }
 }

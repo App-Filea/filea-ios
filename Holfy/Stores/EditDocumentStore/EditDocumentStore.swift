@@ -26,7 +26,7 @@ struct EditDocumentStore {
         var mileage: String
         var type: DocumentType
         var amount: String
-        var expirationDate: Date?
+        var expirationDate: Date
 
         init(vehicleId: String, document: Document) {
             self.vehicleId = vehicleId
@@ -39,7 +39,7 @@ struct EditDocumentStore {
             self.mileage = document.mileage
             self.type = document.type
             self.amount = document.amount.map { String($0) } ?? ""
-            self.expirationDate = document.expirationDate
+            self.expirationDate = document.expirationDate ?? .now
         }
     }
     

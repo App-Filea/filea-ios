@@ -440,143 +440,17 @@ struct AddDocumentView: View {
     }
     
     private var metadataFormView: some View {
-        VStack(spacing: 0) {
-            ScrollViewReader { proxy in
-                ScrollView {
-                    VStack(spacing: 0) {
-                        FormField(titleLabel: "document_form_type_title") {
-                            HStack {
-                                Text("document_form_type_label")
-                                    .formFieldLeadingTitle()
-                                
-                                Spacer()
-                                
-                                if store.isTypePickerDisabled {
-                                    Text(store.documentType.displayName)
-                                        .formFieldLeadingTitle()
-                                        .foregroundStyle(Color.secondary)
-                                } else {
-                                    Picker("document_form_type_label", selection: $store.documentType) {
-                                        ForEach(DocumentType.allCases) { type in
-                                            Text(type.displayName)
-                                                .tag(type)
-                                        }
-                                    }
-                                    .pickerStyle(.menu)
-                                    .labelsHidden()
-                                }
-                            }
-                        }
-                        .padding(.bottom, Spacing.lg)
-                        
-                        FormField(titleLabel: "document_form_date_title",
-                                  infoLabel: "document_form_date_info") {
-                            HStack {
-                                Text("document_form_date_label")
-                                    .formFieldLeadingTitle()
-                                
-                                Spacer()
-                                
-                                DatePicker("", selection: $store.documentDate, in: Date.distantPast...Date(), displayedComponents: .date)
-                                    .labelsHidden()
-                                    .datePickerStyle(.compact)
-                            }
-                        }
-                                  .padding(.bottom, Spacing.lg)
-                        
-                        if store.documentType == .technicalInspection {
-                            FormField(titleLabel: "document_form_expiration_date_title",
-                                      infoLabel: "document_form_expiration_date_info") {
-                                HStack {
-                                    Text("document_form_expiration_date_label")
-                                        .formFieldLeadingTitle()
-                                    
-                                    Spacer()
-                                    
-                                    DatePicker(
-                                        "",
-                                        selection: Binding(
-                                            get: { store.documentExpirationDate },
-                                            set: { store.send(.view(.expirationDateChanged($0))) }
-                                        ),
-                                        in: store.documentDate...,
-                                        displayedComponents: .date
-                                    )
-                                    .labelsHidden()
-                                    .datePickerStyle(.compact)
-                                }
-                            }
-                                      .padding(.bottom, Spacing.lg)
-                        }
-                        
-                        FormField(titleLabel: "document_form_mileage_title",
-                                  infoLabel: "document_form_mileage_info") {
-                            HStack(spacing: 12) {
-                                TextField("document_form_mileage_placeholder", text: $store.documentMileage)
-                                    .formFieldLeadingTitle()
-                                    .keyboardType(.numberPad)
-                                    .multilineTextAlignment(.leading)
-                                    .focused($focusedField, equals: .mileage)
-                                
-                                Text(distanceUnit.symbol)
-                                    .formFieldLeadingTitle()
-                            }
-                        }
-                                  .id(FocusedField.mileage)
-                                  .padding(.bottom, Spacing.lg)
-                        
-                        FormField(titleLabel: "document_form_amount_title",
-                                  infoLabel: "document_form_amount_info") {
-                            HStack(spacing: 12) {
-                                TextField("document_form_amount_placeholder", text: $store.documentAmount)
-                                    .formFieldLeadingTitle()
-                                    .keyboardType(.numberPad)
-                                    .multilineTextAlignment(.leading)
-                                    .focused($focusedField, equals: .amount)
-                                
-                                Text(currency.symbol)
-                                    .formFieldLeadingTitle()
-                            }
-                        }
-                                  .id(FocusedField.amount)
-                                  .padding(.bottom, Spacing.lg)
-                        
-                        FormField(titleLabel: "document_form_name_title",
-                                  infoLabel: "document_form_name_info",
-                                  isError: store.validationErrors.contains(.nameEmpty)) {
-                            TextField("document_form_name_placeholder", text: $store.documentName)
-                                .formFieldLeadingTitle()
-                                .focused($focusedField, equals: .name)
-                                .submitLabel(.done)
-                                .multilineTextAlignment(.leading)
-                                .onSubmit { focusedField = nil }
-                        }
-                                  .id(FocusedField.name)
-                                  .padding(.bottom, Spacing.lg)
-                    }
-                    .padding(Spacing.screenMargin)
-                    VStack(spacing: 0) {
-                        VStack(spacing: Spacing.md) {
-                            PrimaryButton("all_save", action: {
-                                store.send(.view(.saveButtonTapped))
-                            })
-                            
-                            TertiaryButton("all_back", action: {
-                                store.send(.view(.backFromMetadataFormButtonTapped))
-                            })
-                        }
-                        .padding([.horizontal, .top], Spacing.screenMargin)
-                    }
-                }
-                .scrollBounceBehavior(.basedOnSize)
-                .onChange(of: focusedField) { _, newValue in
-                    guard let field = newValue else { return }
-                    withAnimation {
-                        proxy.scrollTo(field, anchor: .bottom)
-                    }
-                }
-            }
-        }
+        DocumentFormView(
+            type: $store.documentType,
+            isExpirationDateEnabled: store.documentType == .technicalInspection,
+            date: $store.documentDate,
+            expirationDate: $store.documentExpirationDate,
+            mileage: $store.documentMileage,
+            amount: $store.documentAmount,
+            name: $store.documentName,
+            primaryAction: { store.send(.view(.saveButtonTapped)) },
+            secondaryAction: { store.send(.view(.backFromMetadataFormButtonTapped)) }
+        )
     }
 }
 

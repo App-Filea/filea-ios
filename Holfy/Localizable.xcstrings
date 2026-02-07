@@ -1,9 +1,6 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "" : {
-
-    },
     "--" : {
 
     },
@@ -1094,6 +1091,23 @@
         }
       }
     },
+    "document_form_amount_hint" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Total amount including tax"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Montant TTC du document"
+          }
+        }
+      }
+    },
     "document_form_amount_info" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1162,6 +1176,23 @@
         }
       }
     },
+    "document_form_date_hint" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Date on which the document was issued"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Date à laquelle le document a été émis"
+          }
+        }
+      }
+    },
     "document_form_date_info" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1213,6 +1244,40 @@
         }
       }
     },
+    "document_form_details_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Details"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Détails"
+          }
+        }
+      }
+    },
+    "document_form_expiration_date_hint" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Date until which the document is valid"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Date jusqu'à laquelle le document est valide"
+          }
+        }
+      }
+    },
     "document_form_expiration_date_info" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1260,6 +1325,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Date d'expiration"
+          }
+        }
+      }
+    },
+    "document_form_mileage_hint" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vehicle mileage at document time"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kilométrage du véhicule au moment du document"
           }
         }
       }
@@ -1328,6 +1410,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kilométrage (optionnel)"
+          }
+        }
+      }
+    },
+    "document_form_name_error" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Name cannot be empty"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le nom ne peut pas être vide"
+          }
+        }
+      }
+    },
+    "document_form_name_hint" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Give a descriptive name to easily find this document"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Donnez un nom descriptif pour retrouver facilement ce document"
           }
         }
       }

@@ -11,12 +11,6 @@ import SwiftUI
 import PhotosUI
 import PDFKit
 
-struct DocumentFieldsValidationErrors: OptionSet, Sendable, Equatable {
-    let rawValue: Int
-
-    static let nameEmpty = DocumentFieldsValidationErrors(rawValue: 1 << 0)
-}
-
 @Reducer
 struct AddDocumentStore {
     @ObservableState
@@ -29,7 +23,6 @@ struct AddDocumentStore {
         var showFileManagerView = false
         var selectedFileURL: URL?
         var selectedFileName: String?
-        var validationErrors: DocumentFieldsValidationErrors = []
 
         @Shared(.vehicles) var vehicles: [Vehicle] = []
         @Shared(.selectedVehicle) var selectedVehicle: Vehicle
@@ -101,7 +94,6 @@ struct AddDocumentStore {
             case backFromExtractionButtonTapped
             case closeButtonTapped
             case saveButtonTapped
-            case expirationDateChanged(Date)
         }
     }
 
@@ -167,18 +159,8 @@ struct AddDocumentStore {
                     state.viewState = .modeChoice
                     state.storedMetadata = nil
                     return .none
-                case .closeButtonTapped:
-                    return .send(.cancelCreation)
-                case .saveButtonTapped:
-                    state.validationErrors = validateFields(state)
-                    guard state.validationErrors.isEmpty else {
-                        return .none
-                    }
-                    return .send(.saveDocument)
-
-                case .expirationDateChanged(let date):
-                    state.documentExpirationDate = date
-                    return .none
+                case .closeButtonTapped: return .send(.cancelCreation)
+                case .saveButtonTapped: return .send(.saveDocument)
                 }
 
             case .openCameraScan:
@@ -450,16 +432,6 @@ struct AddDocumentStore {
                 return .none
             }
         }
-    }
-
-    private func validateFields(_ state: State) -> DocumentFieldsValidationErrors {
-        var errors: DocumentFieldsValidationErrors = []
-
-        if state.documentName.trimmingCharacters(in: .whitespaces).isEmpty {
-            errors.insert(.nameEmpty)
-        }
-
-        return errors
     }
 }
 

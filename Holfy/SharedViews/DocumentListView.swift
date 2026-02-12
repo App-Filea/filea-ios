@@ -32,7 +32,7 @@ struct DocumentListView: View {
                 .font(.headline)
                 .foregroundStyle(Color.primary)
 
-            Text("Les documents de cette catégorie apparaîtront ici")
+            Text("document_list_empty_category_message")
                 .font(.subheadline)
                 .foregroundStyle(Color.secondary)
                 .multilineTextAlignment(.center)

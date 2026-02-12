@@ -69,7 +69,7 @@ struct DocumentCard: View {
                         
                         HStack(spacing: Spacing.xxs) {
                             Image(systemName: "exclamationmark.circle.fill")
-                            Text("Incomplet")
+                            Text("document_status_incomplete")
                         }
                         .font(.caption)
                         .foregroundStyle(.orange)

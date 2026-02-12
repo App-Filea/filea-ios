@@ -128,13 +128,13 @@ struct VehicleFormView: View {
                 if hasValidationErrors {
                     VStack(alignment: .leading, spacing: Spacing.xxs) {
                         if validationErrors.contains(.brandEmpty) && brand.trimmingCharacters(in: .whitespaces).isEmpty {
-                            Text("La marque ne peut pas être vide.")
+                            Text("vehicle_form_brand_error")
                         }
                         if validationErrors.contains(.modelEmpty) && model.trimmingCharacters(in: .whitespaces).isEmpty {
-                            Text("Le modèle ne peut pas être vide.")
+                            Text("vehicle_form_model_error")
                         }
                         if validationErrors.contains(.plateEmpty) && plate.trimmingCharacters(in: .whitespaces).isEmpty {
-                            Text("L'immatriculation ne peut pas être vide.")
+                            Text("vehicle_form_plate_error")
                         }
                     }
                     .foregroundStyle(.red)

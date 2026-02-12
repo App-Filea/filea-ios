@@ -27,11 +27,11 @@ struct TechnicalInspectionSheetView: View {
                         .foregroundStyle(Color.yellow)
                         .font(.title2)
                     VStack(alignment: .leading) {
-                        Text("Attention")
+                        Text("technical_inspection_alert_title")
                             .font(.subheadline)
                             .fontWeight(.semibold)
                             .foregroundStyle(Color.primary)
-                        Text("Votre contrôle technique arrive bientôt à échéance.")
+                        Text("technical_inspection_alert_message")
                             .font(.footnote)
                             .fontWeight(.medium)
                             .foregroundStyle(Color.secondary)

@@ -22,16 +22,16 @@ struct VehicleDocumentView: View {
                         if store.filteredDocuments.isEmpty {
                             VStack(spacing: Spacing.md) {
                                 Spacer()
-                                Text("Pas encore de document")
+                                Text("vehicle_maintenance_empty_title")
                                     .font(.title3)
                                     .fontWeight(.semibold)
                                     .foregroundStyle(.primary)
-                                Text("Commencez par ajouter votre premier document pour suivre l'évolution de votre véhicule.")
+                                Text("vehicle_maintenance_empty_subtitle")
                                     .font(.footnote)
                                     .foregroundStyle(.secondary)
                                     .multilineTextAlignment(.center)
-                                
-                                QuickActionButton(label: "Ajouter un document") {
+
+                                QuickActionButton(label: "all_add_document") {
                                     store.send(.view(.addDocumentTapped))
                                 }
                                 Spacer()

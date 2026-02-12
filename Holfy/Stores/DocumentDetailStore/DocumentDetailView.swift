@@ -27,9 +27,9 @@ struct DocumentDetailView: View {
                             .frame(minWidth: geometry.size.width, minHeight: geometry.size.height)
                     } else {
                         ContentUnavailableView(
-                            "Document introuvable",
+                            "document_detail_not_found_title",
                             systemImage: "doc.questionmark",
-                            description: Text("Ce document n'existe plus.")
+                            description: Text("document_detail_not_found_message")
                         )
                         .frame(minWidth: geometry.size.width, minHeight: geometry.size.height)
                     }
